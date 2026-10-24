@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1c1e24">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Musiktheorie</title>
+<script src="shared.js"></script>
+<style>
+:root{--bg:#f6f4ee;--card:#fff;--ink:#1d1f24;--muted:#656a75;--line:#dcd8cd;--acc:#2848d2;--on:#fff;--ok:#1f8a4c;--bad:#c4452c;--star:#f2a93b;--paper:#fffdf8}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#14161a;--card:#1d2026;--ink:#ecebe6;--muted:#a1a5ae;--line:#2e323a;--acc:#7b94ff;--on:#10131f;--ok:#4cc27e;--bad:#ff7a5c;--paper:#23262d;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#14161a;--card:#1d2026;--ink:#ecebe6;--muted:#a1a5ae;--line:#2e323a;--acc:#7b94ff;--on:#10131f;--ok:#4cc27e;--bad:#ff7a5c;--paper:#23262d;color-scheme:dark}
+:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:820px;margin:0 auto;padding:16px 16px 80px;display:grid;gap:14px}
+h1{font-size:1.6rem;margin:4px 0 0}h2{font-size:1.15rem;margin:0}h3{margin:0;font-size:1rem}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;cursor:pointer;min-height:42px}
+.btn.primary{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+.btn:disabled{opacity:.5;cursor:default}
+.stats{display:flex;gap:18px;flex-wrap:wrap}.stats b{font-size:1.5rem;display:block;line-height:1.1}.stats span{font-size:.8rem;color:var(--muted)}
+.bar{height:10px;border-radius:5px;background:var(--bg);border:1px solid var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .4s}
+#tabs{display:flex;gap:8px;flex-wrap:wrap}
+#tabs button{flex:1;min-width:140px;text-align:left;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+#tabs button b{display:block}#tabs button span{font-size:.8rem;color:var(--muted)}
+#tabs button[aria-selected=true]{border-color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.xbars{display:flex;gap:6px;align-items:flex-start;justify-content:center;padding:6px 0 4px}
+.xbars button{border:0;border-radius:12px;color:#fff;font:700 1.2rem system-ui,sans-serif;cursor:pointer;flex:1;max-width:72px;min-width:0;display:flex;align-items:flex-end;justify-content:center;padding:0 0 10px;box-shadow:0 3px 0 rgba(0,0,0,.25);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.xbars button:active,.xbars button.hit{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.25);filter:brightness(1.15)}
+.xbars button.next{outline:4px solid var(--ink);outline-offset:2px;animation:xp .9s ease-in-out infinite}
+.xbars button.no{animation:xs .25s}
+@keyframes xp{50%{outline-offset:5px}}@keyframes xs{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media (prefers-reduced-motion:reduce){.xbars button.next{animation:none}.xbars button.no{animation:none}}
+.les{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px;display:grid;gap:6px;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.les .e{font-size:2rem;line-height:1}.les .t{font-weight:600}.les .d{font-size:.86rem;color:var(--muted)}
+.stars{letter-spacing:2px;color:var(--star);font-size:1.1rem}.stars .off{color:var(--line)}
+.kid .les .e{font-size:2.6rem}.kid .les .t{font-size:1.15rem}
+.th p{margin:0 0 .6em}.th ul{margin:0 0 .6em;padding-left:1.2em}
+.tip{border-left:4px solid var(--star);padding:8px 12px;background:var(--bg);border-radius:0 10px 10px 0}
+.qopts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.qopts .btn{white-space:normal;text-align:center;padding:12px}
+.kid .qopts .btn{font-size:1.5rem;padding:18px 10px}
+.qopts .btn.right{background:var(--ok);border-color:var(--ok);color:#fff}.qopts .btn.wrong{border-color:var(--bad);color:var(--bad)}
+.qstaff{background:var(--paper);border-radius:10px;padding:8px 12px;overflow-x:auto;color:var(--ink)}
+.qstaff svg{max-width:100%;height:auto}
+.fb{padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.fb.good{border-color:var(--ok)}.fb.bad{border-color:var(--bad)}
+.pad{height:150px;border-radius:20px;border:3px dashed var(--acc);background:var(--bg);color:var(--acc);font:inherit;font-size:1.4rem;font-weight:700;cursor:pointer;touch-action:manipulation;user-select:none}
+.pad:active,.pad.hit{background:var(--acc);color:var(--on)}
+.blocks{display:flex;gap:6px;align-items:stretch;min-height:44px}.blocks span{display:grid;place-items:center;background:var(--acc);color:var(--on);border-radius:8px;font-weight:600;padding:0 6px;min-width:34px}
+.big-emo{font-size:3rem;line-height:1;text-align:center}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<main id="app">
+  <h1>Musiktheorie</h1>
+  <div class="card" id="prog">
+    <div class="row" style="justify-content:space-between"><strong id="who"></strong><span class="muted small" id="xp-t"></span></div>
+    <div class="bar"><i id="xp-fill"></i></div>
+    <div class="stats"><div><b id="st-stars">0</b><span>Sterne</span></div><div><b id="st-done">0</b><span>Lektionen</span></div><div><b id="st-streak">0</b><span>Tage in Folge</span></div></div>
+  </div>
+  <div id="tabs" role="tablist" aria-label="Stufe"></div>
+  <section id="list" class="grid"></section>
+
+  <section class="card" id="xylo" hidden>
+    <div class="row" style="justify-content:space-between"><h2>🎹 Xylophon</h2><button class="btn" id="x-close" type="button">Zurück</button></div>
+    <div class="row"><label for="x-song" class="small muted">Lied</label><select id="x-song" aria-label="Lied wählen"></select><button class="btn" id="x-again" type="button">Von vorn</button></div>
+    <p id="x-hint" style="margin:0;font-weight:600"></p>
+    <div class="xbars" id="x-bars" role="group" aria-label="Xylophon-Klangstäbe"></div>
+    <p class="small muted" id="x-tip" style="margin:0"></p>
+  </section>
+
+  <section class="card" id="lesson" hidden>
+    <div class="row" style="justify-content:space-between"><h2 id="l-title"></h2><button class="btn" id="l-close" type="button">Zurück</button></div>
+    <div class="th" id="l-th"></div>
+    <div class="tip" id="l-tip" hidden></div>
+    <div class="row"><button class="btn primary" id="l-go" type="button">Los geht’s</button><button class="btn" id="l-say" type="button" hidden>🔊 Vorlesen</button></div>
+  </section>
+
+  <section class="card" id="quiz" hidden>
+    <div class="row" style="justify-content:space-between"><strong id="q-head"></strong><button class="btn" id="q-close" type="button">Abbrechen</button></div>
+    <div class="bar"><i id="q-bar"></i></div>
+    <div class="big-emo" id="q-emo" hidden></div>
+    <p id="q-text" style="font-weight:600;margin:0;font-size:1.1rem"></p>
+    <div class="row"><button class="btn" id="q-play" type="button" hidden>▶ Anhören</button><button class="btn" id="q-say" type="button" hidden>🔊 Vorlesen</button></div>
+    <div class="qstaff" id="q-staff" hidden></div>
+    <div id="q-tap" hidden><div class="blocks" id="q-blocks"></div><button class="pad" id="q-pad" type="button" aria-label="Hier tippen oder klatschen">👏 Tippe hier</button><p class="small muted" id="q-tapst"></p></div>
+    <div class="qopts" id="q-opts"></div>
+    <div class="fb" id="q-fb" hidden></div>
+    <div class="row"><button class="btn primary" id="q-next" type="button" hidden>Weiter</button><button class="btn" id="q-retry" type="button" hidden>Nochmal versuchen</button></div>
+  </section>
+  <section class="card" id="result" hidden>
+    <h2 id="r-title"></h2><div class="stars" id="r-stars" style="font-size:2.4rem"></div><p id="r-text" style="margin:0"></p>
+    <div class="row"><button class="btn primary" id="r-again" type="button">Nochmal</button><button class="btn" id="r-back" type="button">Zur Übersicht</button></div>
+  </section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+
+/*GEN-START*/
+/* ───────── Übungs- und Fragengenerator (rein, ohne Seitenbezug) ───────── */
+var LET=['C','D','E','F','G','A','B'],LETSEM=[0,2,4,5,7,9,11];
+var KEYS={
+  'C':{l:0,a:0,f:0,minor:false,name:'C-Dur'},'G':{l:4,a:0,f:1,minor:false,name:'G-Dur'},'D':{l:1,a:0,f:2,minor:false,name:'D-Dur'},
+  'A':{l:5,a:0,f:3,minor:false,name:'A-Dur'},'E':{l:2,a:0,f:4,minor:false,name:'E-Dur'},'F':{l:3,a:0,f:-1,minor:false,name:'F-Dur'},
+  'Bb':{l:6,a:-1,f:-2,minor:false,name:'B-Dur'},'Eb':{l:2,a:-1,f:-3,minor:false,name:'Es-Dur'},
+  'a':{l:5,a:0,f:0,minor:true,name:'a-Moll'},'e':{l:2,a:0,f:1,minor:true,name:'e-Moll'},'h':{l:6,a:0,f:2,minor:true,name:'h-Moll'},
+  'fis':{l:3,a:1,f:3,minor:true,name:'fis-Moll'},'d':{l:1,a:0,f:-1,minor:true,name:'d-Moll'},'g':{l:4,a:0,f:-2,minor:true,name:'g-Moll'},'c':{l:0,a:0,f:-3,minor:true,name:'c-Moll'}
+};
+var PAT={major:[0,2,4,5,7,9,11],natural:[0,2,3,5,7,8,10],harmonic:[0,2,3,5,7,8,11],melodic:[0,2,3,5,7,9,11],
+  dor:[0,2,3,5,7,9,10],mix:[0,2,4,5,7,9,10],phr:[0,1,3,5,7,8,10],lyd:[0,2,4,6,7,9,11]};
+/* Kirchentonarten: gleiche Töne wie eine Dur-Tonleiter, nur mit anderem Grundton. f = Vorzeichen der Tonart. */
+[['Ddor',1,0,0,'D-dorisch','dor'],['Edor',2,0,2,'E-dorisch','dor'],['Gdor',4,0,-2,'G-dorisch','dor'],['Ador',5,0,1,'A-dorisch','dor'],
+ ['Gmix',4,0,0,'G-mixolydisch','mix'],['Dmix',1,0,1,'D-mixolydisch','mix'],['Amix',5,0,2,'A-mixolydisch','mix'],
+ ['Ephr',2,0,0,'E-phrygisch','phr'],['Aphr',5,0,-1,'A-phrygisch','phr'],['Dphr',1,0,-2,'D-phrygisch','phr']].forEach(function(m){
+  KEYS[m[0]]={l:m[1],a:m[2],f:m[3],minor:false,name:m[4],pat:m[5]};
+});
+var RHYTHMS={
+  viertel:{name:'Viertel und Halbe',bars:[[1,1,1,1],[2,1,1],[1,1,2],[2,2],[1,1,1,1],[2,1,1],[1,2,1],[4]]},
+  achtel:{name:'Achtel',bars:[[.5,.5,.5,.5,1,1],[1,.5,.5,1,1],[.5,.5,1,.5,.5,1],[.5,.5,.5,.5,.5,.5,.5,.5],[1,1,.5,.5,1],[.5,.5,.5,.5,2],[1,.5,.5,.5,.5,1],[4]]},
+  punktiert:{name:'Punktierte Noten',bars:[[1.5,.5,1,1],[1.5,.5,1.5,.5],[2,1.5,.5],[1.5,.5,2],[1,1.5,.5,1],[3,1],[1.5,.5,1.5,.5],[4]]}
+};
+function tonicOct(k){var o=2;while(12*(o+1)+LETSEM[k.l]+k.a<55)o++;return o}
+/* Stufe d (0 = Grundton, 7 = Oktave) einer Tonleiter mit Muster pat, richtig geschrieben. */
+function degNote(k,pat,d,o0){
+  var oct=Math.floor(d/7),idx=d%7,tm=12*(o0+1)+LETSEM[k.l]+k.a,m=tm+pat[idx]+12*oct;
+  var li=k.l+d,o=o0+Math.floor(li/7),nat=12*(o+1)+LETSEM[li%7];
+  return {s:LET[li%7],a:m-nat,o:o,m:m};
+}
+function patOf(k,form,down){
+  if(k.pat)return PAT[k.pat];
+  if(!k.minor)return PAT.major;
+  if(form==='melodic')return down?PAT.natural:PAT.melodic;
+  return PAT[form]||PAT.natural;
+}
+function typeOf(d){
+  var T={4:['whole',0],2:['half',0],1:['quarter',0],.5:['eighth',0],.25:['16th',0],3:['half',1],1.5:['quarter',1],.75:['eighth',1]};
+  return T[d]||null;
+}
+/* notes: [{s,a,o,d}] oder [{r:1,d}]; 4/4, divisions 4. Wirft, wenn ein Takt überläuft. */
+function buildXml(title,fifths,bpm,notes,opt){
+  opt=opt||{};var BL=opt.bar||4,BEATS=opt.beats||4,BT=opt.beatType||4,PICK=opt.pick||0;
+  var bars=[],cur=[],t=0,i,n,lim=PICK||BL;
+  function push(){bars.push(cur);cur=[];t=0;lim=BL}
+  for(i=0;i<notes.length;i++){
+    n=notes[i];
+    if(t+n.d>lim+1e-9)throw new Error('Takt läuft über bei Note '+i);
+    cur.push(n);t+=n.d;if(Math.abs(t-lim)<1e-9)push();
+  }
+  if(cur.length){var rest=lim-t;while(rest>1e-9){var r=rest>=4?4:rest>=3?3:rest>=2?2:rest>=1.5?1.5:rest>=1?1:rest>=.5?.5:.25;cur.push({r:1,d:r});rest-=r}push()}
+  var body=bars.map(function(b,bi){
+    var h=bi===0?'<attributes><divisions>4</divisions><key><fifths>'+fifths+'</fifths></key><time><beats>'+BEATS+'</beats><beat-type>'+BT+'</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes><direction placement="above"><direction-type><words>'+title.replace(/[&<>]/g,'')+'</words></direction-type><sound tempo="'+bpm+'"/></direction>':'';
+    var x=b.map(function(n){
+      var ty=typeOf(n.d);if(!ty)throw new Error('Notenwert '+n.d);
+      var core=n.r?'<rest/>':'<pitch><step>'+n.s+'</step>'+(n.a?'<alter>'+n.a+'</alter>':'')+'<octave>'+n.o+'</octave></pitch>';
+      return '<note>'+core+'<duration>'+Math.round(n.d*4)+'</duration><type>'+ty[0]+'</type>'+(ty[1]?'<dot/>':'')+'</note>';
+    }).join('');
+    var end=bi===bars.length-1?'<barline location="right"><bar-style>light-heavy</bar-style></barline>':'';
+    return '<measure number="'+(PICK?bi:bi+1)+'"'+(PICK&&bi===0?' implicit="yes"':'')+'>'+h+x+end+'</measure>';
+  }).join('');
+  return '<?xml version="1.0" encoding="UTF-8"?><score-partwise version="3.1"><work><work-title>'+title.replace(/[&<>]/g,'')+'</work-title></work><part-list><score-part id="P1"><part-name>Violine</part-name></score-part></part-list><part id="P1">'+body+'</part></score-partwise>';
+}
+/* Folge aus Noten, die letzte Note füllt den Takt auf. */
+function seqWithTail(notes,base){
+  var sum=0;notes.forEach(function(n){n.d=base;sum+=base});
+  var last=notes[notes.length-1];sum-=base;
+  var mod=sum%4,tail=mod===0?4:4-mod;
+  last.d=tail;
+  return notes;
+}
+function scaleDegrees(oct){
+  var up=[],down=[],i;
+  for(i=0;i<=7*oct;i++)up.push(i);
+  for(i=7*oct-1;i>=0;i--)down.push(i);
+  return {up:up,down:down};
+}
+function genScale(id,o){
+  o=o||{};var k=KEYS[id],o0=o.o0||tonicOct(k),oct=o.octaves||1,form=o.form||'natural',base=o.rhythm==='e'?.5:1,ds=scaleDegrees(oct),notes=[];
+  ds.up.forEach(function(d){var n=degNote(k,patOf(k,form,false),d,o0);notes.push({s:n.s,a:n.a,o:n.o,d:base,m:n.m})});
+  ds.down.forEach(function(d){var n=degNote(k,patOf(k,form,true),d,o0);notes.push({s:n.s,a:n.a,o:n.o,d:base,m:n.m})});
+  seqWithTail(notes,base);
+  var formName=k.minor?(form==='harmonic'?' (harmonisch)':form==='melodic'?' (melodisch)':' (natürlich)'):'';
+  var title=k.name+(k.pat?'':'-Tonleiter')+formName+', '+oct+' Oktave'+(oct>1?'n':'');
+  return {title:title,xml:buildXml(title,k.f,o.bpm||60,notes),bpm:o.bpm||60,notes:notes};
+}
+function genArpeggio(id,o){
+  o=o||{};var k=KEYS[id],o0=tonicOct(k),oct=o.octaves||1,pat=patOf(k,'natural',false),degs=[],i,tri=[0,2,4];
+  for(var r=0;r<oct;r++)tri.forEach(function(d){degs.push(d+7*r)});
+  degs.push(7*oct);
+  var up=degs.slice(),down=degs.slice(0,-1).reverse();
+  var seq=up.concat(down),notes=seq.map(function(d){var n=degNote(k,pat,d,o0);return {s:n.s,a:n.a,o:n.o,d:1,m:n.m}});
+  seqWithTail(notes,1);
+  var title=k.name+'-Dreiklang, '+oct+' Oktave'+(oct>1?'n':'');
+  return {title:title,xml:buildXml(title,k.f,o.bpm||60,notes),bpm:o.bpm||60,notes:notes};
+}
+var IVN={2:'Sekunde',3:'Terz',4:'Quarte',5:'Quinte',6:'Sexte',7:'Septime',8:'Oktave'};
+function genIntervals(id,n,o){
+  o=o||{};var k=KEYS[id],o0=tonicOct(k),pat=patOf(k,'natural',false),notes=[],t;
+  for(t=0;t<5;t++){
+    [t,t+n-1].forEach(function(d){var x=degNote(k,pat,d,o0);notes.push({s:x.s,a:x.a,o:x.o,d:1,m:x.m})});
+  }
+  seqWithTail(notes,1);
+  var title=IVN[n]+'n in '+k.name;
+  return {title:title,xml:buildXml(title,k.f,o.bpm||60,notes),bpm:o.bpm||60,notes:notes};
+}
+function genRhythm(pid,o){
+  o=o||{};var p=RHYTHMS[pid],notes=[];
+  p.bars.forEach(function(b){b.forEach(function(d){notes.push({s:'A',a:0,o:4,d:d,m:69})})});
+  var title='Rhythmus: '+p.name+' auf der A-Saite';
+  return {title:title,xml:buildXml(title,0,o.bpm||70,notes),bpm:o.bpm||70,notes:notes};
+}
+var STR=[{s:'G',o:3,m:55},{s:'D',o:4,m:62},{s:'A',o:4,m:69},{s:'E',o:5,m:76}];
+function genOpen(kind,o){
+  o=o||{};var notes=[],S4=function(i,d){var x=STR[i];notes.push({s:x.s,a:0,o:x.o,d:d,m:x.m})};
+  if(kind==='slow'){[0,1,2,3].forEach(function(i){S4(i,4)})}
+  else if(kind==='q'){[0,1,2,3].forEach(function(i){for(var j=0;j<4;j++)S4(i,1)})}
+  else{
+    [[0,1],[2,3],[3,2],[1,0],[0,2],[1,3]].forEach(function(p){p.forEach(function(i){S4(i,2)})});
+    [0,1,2,3,3,2,1,0].forEach(function(i){S4(i,1)});S4(0,4);
+  }
+  var title=kind==='slow'?'Die vier Leersaiten (ganze Noten)':kind==='q'?'Leersaiten in Vierteln':'Leersaiten: Notennamen lesen';
+  return {title:title,xml:buildXml(title,0,o.bpm||60,notes),bpm:o.bpm||60,notes:notes};
+}
+/* Übung im Stil einer schwedischen Polska: 3/4, langer erster Schlag, moll oder modal. Kein echtes Volkslied. */
+var POLSKA=[[[0,1.5],[2,.5],[4,1]],[[3,1.5],[2,.5],[1,1]],[[2,1.5],[4,.5],[5,1]],[[4,1.5],[2,.5],[0,1]],
+  [[4,1.5],[5,.5],[6,1]],[[7,1.5],[6,.5],[5,1]],[[4,1.5],[3,.5],[2,1]],[[1,1],[0,2]]];
+function genPolska(id,o){
+  o=o||{};var k=KEYS[id],o0=o.o0||tonicOct(k),pat=patOf(k,'natural',false),notes=[];
+  POLSKA.forEach(function(b){b.forEach(function(x){var n=degNote(k,pat,x[0],o0);notes.push({s:n.s,a:n.a,o:n.o,d:x[1],m:n.m})})});
+  var title='Polska-Übung in '+k.name+' (im Stil, kein echtes Volkslied)',bpm=o.bpm||80;
+  return {title:title,xml:buildXml(title,k.f,bpm,notes,{bar:3,beats:3,beatType:4}),bpm:bpm,notes:notes};
+}
+/* Metal-Riffs auf der Geige: Galopp auf leeren Saiten und ein Tritonus-Riff. Eigene Bausteine, keine Zitate. */
+function genRiff(kind,o){
+  o=o||{};var N=function(s,a,oc,d){return {s:s,a:a,o:oc,d:d,m:12*(oc+1)+LETSEM[LET.indexOf(s)]+a}},notes=[],title,bpm=o.bpm||70;
+  function gal(s,a,oc,n){for(var i=0;i<n;i++){notes.push(N(s,a,oc,.5),N(s,a,oc,.25),N(s,a,oc,.25))}}
+  if(kind==='tri'){
+    title='Riff mit Tritonus (D und As)';
+    [0,1].forEach(function(r){
+      notes.push(N('D',0,4,1),N('A',-1,4,1),N('D',0,4,1),N('A',0,4,1));
+      notes.push(N('D',0,4,1),N('A',-1,4,1),N('D',0,4,2));
+    });
+    notes.push(N('D',0,4,4));
+  }else{
+    title='Galopp-Riff auf D und A';
+    gal('D',0,4,4);gal('D',0,4,2);gal('E',-1,4,2);gal('D',0,4,4);
+    gal('A',0,4,4);gal('A',0,4,2);gal('B',-1,4,2);gal('A',0,4,3);notes.push(N('A',0,4,1));
+  }
+  return {title:title,xml:buildXml(title,0,bpm,notes),bpm:bpm,notes:notes};
+}
+/* spec: {gen:'scale'|'arpeggio'|'intervals'|'rhythm'|'open', key, form, octaves, rhythm, interval, preset, kind, bpm} */
+function makeExercise(sp){
+  var g=sp.gen;
+  if(g==='scale')return genScale(sp.key,sp);
+  if(g==='arpeggio')return genArpeggio(sp.key,sp);
+  if(g==='intervals')return genIntervals(sp.key,sp.interval||3,sp);
+  if(g==='polska')return genPolska(sp.key,sp);
+  if(g==='riff')return genRiff(sp.kind==='tri'?'tri':'galopp',sp);
+  if(g==='rhythm')return genRhythm(sp.preset||'viertel',sp);
+  return genOpen(sp.kind||'slow',sp);
+}
+/* ───── Namen und Fragen ───── */
+function nameOf(s,a){
+  var base={C:'C',D:'D',E:'E',F:'F',G:'G',A:'A',B:'H'}[s];
+  if(!a)return base;
+  if(a>0)return base+'is';
+  if(s==='B')return 'B';
+  if(s==='E'||s==='A')return base+'s';
+  return base+'es';
+}
+function mkRng(seed){var x=seed>>>0||1;return function(){x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296}}
+function pick(r,a){return a[Math.floor(r()*a.length)]}
+function shuffle(r,a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+/* Notenlese-Frage: Note auf dem System, vier Antworten. lo/hi als MIDI-Grenzen für Naturtöne. */
+function qNote(r,o){
+  o=o||{};var lo=o.lo||55,hi=o.hi||81,cand=[];
+  for(var oc=3;oc<=6;oc++)for(var i=0;i<7;i++){var m=12*(oc+1)+LETSEM[i];if(m>=lo&&m<=hi)cand.push({s:LET[i],a:0,o:oc,m:m})}
+  var n=pick(r,cand);
+  if(o.acc&&r()<.5){var al=r()<.5?1:-1;if(!((n.s==='E'||n.s==='B')&&al===1)&&!((n.s==='F'||n.s==='C')&&al===-1))n={s:n.s,a:al,o:n.o,m:n.m+al}}
+  var right=nameOf(n.s,n.a),opts=[right],tries=0;
+  while(opts.length<4&&tries++<50){
+    var d=pick(r,cand),nm=nameOf(d.s,0);
+    if(opts.indexOf(nm)<0)opts.push(nm);
+  }
+  opts=shuffle(r,opts);
+  return {topic:'noten',q:'Welcher Ton ist das?',note:n,opts:opts,a:opts.indexOf(right),why:'Es ist ein '+right+(n.a?'':'')+'.'};
+}
+function qInterval(r){
+  var s0=Math.floor(r()*5),diff=1+Math.floor(r()*7),from=LET[s0],to=LET[(s0+diff)%7];
+  var nm=IVN[diff+1],opts=[nm],keys=Object.keys(IVN).map(function(k){return IVN[k]});
+  shuffle(r,keys).forEach(function(x){if(opts.length<4&&opts.indexOf(x)<0)opts.push(x)});
+  opts=shuffle(r,opts);
+  return {topic:'intervalle',q:'Von '+nameOf(from,0)+' aufwärts bis '+nameOf(to,0)+': Welches Intervall ist das?',opts:opts,a:opts.indexOf(nm),why:'Zähle die Töne mit: '+nameOf(from,0)+' ist 1'+', '+nameOf(to,0)+' ist '+(diff+1)+', also eine '+nm+'.'};
+}
+function qSig(r){
+  var ids=Object.keys(KEYS).filter(function(k){return !KEYS[k].minor}),id=pick(r,ids),f=KEYS[id].f;
+  var lab=function(f){return f===0?'keine Vorzeichen':Math.abs(f)+(f>0?' ♯':' ♭')};
+  var opts=[lab(f)];
+  shuffle(r,[-3,-2,-1,0,1,2,3,4]).forEach(function(x){if(opts.length<4&&opts.indexOf(lab(x))<0)opts.push(lab(x))});
+  opts=shuffle(r,opts);
+  return {topic:'tonarten',q:'Wie viele Vorzeichen hat '+KEYS[id].name+'?',opts:opts,a:opts.indexOf(lab(f)),why:KEYS[id].name+' hat '+lab(f)+'.'};
+}
+function qDur(r){
+  var T=[['eine ganze Note',4],['eine halbe Note',2],['eine Viertelnote',1],['eine Achtelnote',.5],['eine punktierte halbe Note',3],['eine punktierte Viertelnote',1.5]];
+  var t=pick(r,T),right=String(t[1]).replace('.',',');
+  var vals=['4','3','2','1,5','1','0,5'],opts=[right];
+  shuffle(r,vals).forEach(function(v){if(opts.length<4&&opts.indexOf(v)<0)opts.push(v)});
+  opts=shuffle(r,opts);
+  return {topic:'werte',q:'Wie viele Zählzeiten (Viertel) dauert '+t[0]+'?',opts:opts,a:opts.indexOf(right),why:t[0].charAt(0).toUpperCase()+t[0].slice(1)+' dauert '+right+' Viertel.'};
+}
+function qEarDir(r){
+  var a=57+Math.floor(r()*24),dir=r()<.5?1:-1,step=1+Math.floor(r()*7),b=a+dir*step;
+  var opts=['höher','tiefer'],right=dir>0?'höher':'tiefer';
+  return {topic:'hören',q:'Hör zu: Ist der zweite Ton höher oder tiefer als der erste?',ear:{tones:[a,b]},opts:opts,a:opts.indexOf(right),why:'Der zweite Ton ist '+right+'.'};
+}
+function qEarTriad(r){
+  var root=55+Math.floor(r()*12),minor=r()<.5,ch=[root,root+(minor?3:4),root+7];
+  var opts=['Dur','Moll'],right=minor?'Moll':'Dur';
+  return {topic:'hören',q:'Hör zu: Klingt der Dreiklang nach Dur oder nach Moll?',ear:{chord:ch},opts:opts,a:opts.indexOf(right),why:'Dur klingt heller (große Terz), Moll dunkler (kleine Terz). Das war '+right+'.'};
+}
+/* Hörfragen zu Tonarten, Abstand und Taktart (für Stilwelten: Metal, Irisch, Schwedisch) */
+var MODEHELP={'Dur':'hell, die dritte Stufe ist groß','Moll':'dunkel, die dritte Stufe ist klein','Dorisch':'Moll, aber mit großer Sexte: klingt offen und ein wenig keltisch','Mixolydisch':'Dur mit kleiner Septime: klingt rockig und volkstümlich','Phrygisch':'Moll mit kleiner Sekunde direkt über dem Grundton: dunkel, spanisch angehaucht und im Metal beliebt'};
+var MODEPAT={'Dur':PAT.major,'Moll':PAT.natural,'Dorisch':PAT.dor,'Mixolydisch':PAT.mix,'Phrygisch':PAT.phr};
+function qMode(r,pair){
+  var sets=pair?[pair]:[['Dur','Moll'],['Moll','Dorisch'],['Dur','Mixolydisch'],['Moll','Phrygisch']],set=pick(r,sets),right=pick(r,set),root=55+Math.floor(r()*10),p=MODEPAT[right],tones=[];
+  for(var i=0;i<8;i++)tones.push(root+(i<7?p[i]:12));
+  var opts=shuffle(r,set);
+  return {topic:'tonarten',q:'Hör die Tonleiter. Welche Art ist das?',ear:{tones:tones,dur:.33,gap:.4},opts:opts,a:opts.indexOf(right),why:right+': '+MODEHELP[right]+'.'};
+}
+function qTri(r){
+  var m=55+Math.floor(r()*12),tri=r()<.5,opts=['Quinte (rein, offen)','Tritonus (schräg, gespannt)'];
+  return {topic:'intervalle',q:'Hör zu: Welcher Abstand klingt hier zusammen?',ear:{chord:[m,m+(tri?6:7)]},opts:opts,a:tri?1:0,why:tri?'Der Tritonus hat sechs Halbtöne. Er klingt gespannt und wurde früher „Teufel in der Musik“ genannt.':'Die reine Quinte hat sieben Halbtöne und klingt offen und stabil. Metal-Gitarristen nutzen sie als Powerchord.'};
+}
+function qPulse(r){
+  var T=[{n:'Jig (6/8)',per:6,grp:3},{n:'Polska oder Walzer (3/4)',per:6,grp:2},{n:'Reel oder Marsch (4/4)',per:8,grp:2}],t=pick(r,T),opts=T.map(function(x){return x.n});
+  return {topic:'takt',q:'Hör den Puls. Zu welcher Taktart passt er?',ear:{pulse:{per:t.per,grp:t.grp,bpm:150,bars:3}},opts:opts,a:opts.indexOf(t.n),why:t.n+': '+(t.per===6&&t.grp===3?'sechs Achtel, immer drei zusammen, zwei Schwerpunkte pro Takt.':t.per===6?'drei Schläge pro Takt, jeder aus zwei Achteln.':'vier Schläge pro Takt, jeder aus zwei Achteln.')};
+}
+/* Notensystem als SVG: Töne nacheinander von links nach rechts. Unterste Linie = E4. */
+function staffSvg(ns){
+  var W=60+ns.length*54,H=120,y0=80,svg='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Notensystem">';
+  for(var i=0;i<5;i++)svg+='<line x1="8" x2="'+(W-8)+'" y1="'+(y0-i*10)+'" y2="'+(y0-i*10)+'" stroke="currentColor" stroke-width="1.2"/>';
+  svg+='<text x="12" y="106" font-size="11" fill="currentColor" opacity=".7">Violinschlüssel</text>';
+  ns.forEach(function(n,j){
+    var li=LET.indexOf(n.s),steps=(li+7*n.o)-(2+7*4),y=y0-5*steps,x=70+j*54;
+    for(var s=-2;s>=steps;s-=2)svg+='<line x1="'+(x-12)+'" x2="'+(x+12)+'" y1="'+(y0-5*s)+'" y2="'+(y0-5*s)+'" stroke="currentColor" stroke-width="1.2"/>';
+    for(var s2=10;s2<=steps;s2+=2)svg+='<line x1="'+(x-12)+'" x2="'+(x+12)+'" y1="'+(y0-5*s2)+'" y2="'+(y0-5*s2)+'" stroke="currentColor" stroke-width="1.2"/>';
+    svg+='<ellipse cx="'+x+'" cy="'+y+'" rx="7" ry="5" fill="currentColor" transform="rotate(-18 '+x+' '+y+')"/>';
+    svg+=steps>=4?'<line x1="'+(x-6.5)+'" y1="'+y+'" x2="'+(x-6.5)+'" y2="'+(y+30)+'" stroke="currentColor" stroke-width="1.4"/>':'<line x1="'+(x+6.5)+'" y1="'+y+'" x2="'+(x+6.5)+'" y2="'+(y-30)+'" stroke="currentColor" stroke-width="1.4"/>';
+    if(n.a)svg+='<text x="'+(x-22)+'" y="'+(y+5)+'" font-size="17" fill="currentColor">'+(n.a>0?'♯':'♭')+'</text>';
+  });
+  return svg+'</svg>';
+}
+/*GEN-END*/
+
+</script>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function toast(t){var el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){el.classList.remove('on')},2800)}
+
+/* ── Klang (WebAudio, ohne Bibliothek aus dem Netz) ── */
+var AC=null;
+function ac(){if(!AC){var C=window.AudioContext||window.webkitAudioContext;AC=new C()}if(AC.state==='suspended')AC.resume();return AC}
+function tone(m,t,dur,vol){
+  var c=ac(),o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=440*Math.pow(2,(m-69)/12);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.03);g.gain.setValueAtTime(vol,t+Math.max(.04,dur-.12));g.gain.linearRampToValueAtTime(0,t+dur);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+.05);
+}
+function tick(t,vol){
+  var c=ac(),o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.value=1100;
+  g.gain.setValueAtTime(vol||.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.06);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.08);
+}
+function thump(t){
+  var c=ac(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(110,t+.12);
+  g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.2);
+}
+var playing=[];
+function playEar(ear){
+  var c=ac(),t=c.currentTime+.08,i;
+  if(ear.tones){var d=ear.dur||.6,gap=ear.gap||d+.15;ear.tones.forEach(function(m,k){tone(m,t+k*gap,d,(ear.vols?ear.vols[k]:.4))})}
+  else if(ear.chord){ear.chord.forEach(function(m){tone(m,t,1.6,.28)})}
+  else if(ear.clicks){var off=0;ear.clicks.forEach(function(b){var s=60/b;for(i=0;i<4;i++)tick(t+off+i*s,.3);off+=4*s+.9})}
+  else if(ear.pulse){var pu=ear.pulse,st=60/pu.bpm;for(i=0;i<pu.per*pu.bars;i++){var pos=i%pu.per;tick(t+i*st,pos===0?.45:(pos%pu.grp===0?.3:.1))}}
+  else if(ear.rhythm){var s2=60/ear.bpm,x=0;ear.rhythm.forEach(function(d2){thump(t+x*s2);x+=d2})}
+}
+function speak(text){
+  try{var u=new SpeechSynthesisUtterance(text);u.lang='de-DE';u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}
+}
+var CAN_SPEAK=!!window.speechSynthesis;
+
+/* ── Fragengeneratoren für Kinder ── */
+function opt2(r,list,right){var o=list.slice();return {opts:o,a:o.indexOf(right)}}
+var KG={
+  hl:function(r){
+    var a=58+Math.floor(r()*14),st=7+Math.floor(r()*8),up=r()<.5,b=a+(up?st:-st),right=up?'⬆ höher':'⬇ tiefer';
+    return {emo:'🎵',q:'Hör zu: Ist der zweite Ton höher oder tiefer als der erste?',ear:{tones:[a,b],dur:.7},opts:['⬆ höher','⬇ tiefer'],a:up?0:1,why:'Der zweite Ton war '+(up?'höher':'tiefer')+'.'};
+  },
+  bird:function(r){
+    var hi=r()<.5,m=hi?84+Math.floor(r()*5):45+Math.floor(r()*6);
+    return {emo:hi?'🐦':'🐻',q:'Wer singt da? Hör gut zu.',ear:{tones:[m],dur:1.3},opts:['🐦 Vogel','🐻 Bär'],a:hi?0:1,why:hi?'Hohe Töne klingen wie ein kleiner Vogel.':'Tiefe Töne klingen wie ein großer Bär.'};
+  },
+  loud:function(r){
+    var first=r()<.5,m=64+Math.floor(r()*6);
+    return {emo:'🔔',q:'Welcher Ton war leiser?',ear:{tones:[m,m],vols:first?[.08,.6]:[.6,.08],dur:.8,gap:1.2},opts:['1. Ton','2. Ton'],a:first?0:1,why:'Der '+(first?'erste':'zweite')+' Ton war leiser.'};
+  },
+  tempo:function(r){
+    var fast1=r()<.5,s=70,f=140;
+    return {emo:'🐢🐇',q:'Welche Klickreihe ist schneller?',ear:{clicks:fast1?[f,s]:[s,f]},opts:['1. Reihe','2. Reihe'],a:fast1?0:1,why:'Die '+(fast1?'erste':'zweite')+' Reihe war schneller, die Klicks kamen dichter.'};
+  },
+  lng:function(r){
+    var long=r()<.5,m=60+Math.floor(r()*10);
+    return {emo:'⏱',q:'War der Ton kurz oder lang?',ear:{tones:[m],dur:long?2:.25},opts:['kurz','lang'],a:long?1:0,why:'Der Ton war '+(long?'lang':'kurz')+'.'};
+  },
+  steps:function(r){
+    var up=r()<.5,s0=[0,2,4,5,7,9,11,12],st=Math.floor(r()*3),base=60+Math.floor(r()*6),seq=[];
+    for(var i=0;i<4;i++)seq.push(base+s0[st+i]);if(!up)seq.reverse();
+    return {emo:'🪜',q:'Geht die Treppe hinauf oder hinunter?',ear:{tones:seq,dur:.45,gap:.55},opts:['⬆ hinauf','⬇ hinunter'],a:up?0:1,why:'Die Töne gingen '+(up?'nach oben, wie Stufen hinauf':'nach unten, wie Stufen hinunter')+'.'};
+  },
+  count:function(r){
+    var n=2+Math.floor(r()*3),seq=[];for(var i=0;i<n;i++)seq.push(60+Math.floor(r()*12));
+    return {emo:'🔢',q:'Wie viele Töne hörst du?',ear:{tones:seq,dur:.4,gap:.7},opts:['2','3','4'],a:n-2,why:'Es waren '+n+' Töne.'};
+  },
+  mood:function(r){
+    var root=55+Math.floor(r()*12),minor=r()<.5;
+    return {emo:'🎭',q:'Klingt das fröhlich oder traurig?',ear:{chord:[root,root+(minor?3:4),root+7]},opts:['😀 fröhlich','😢 traurig'],a:minor?1:0,why:minor?'Moll klingt oft traurig oder ernst.':'Dur klingt oft fröhlich und hell.'};
+  },
+  tapEasy:function(r){var P=[[1,1,1,1],[1,1,2],[2,1,1],[1,1,1,1],[1,.5,.5,1]];return {emo:'👏',q:'Hör das Muster und klatsche es nach.',tap:{pat:P[Math.floor(r()*P.length)],bpm:80}}},
+  tapMid:function(r){var P=[[1,.5,.5,1,1],[.5,.5,1,1,1],[1,1,.5,.5,1],[1.5,.5,1,1],[1,1,2],[.5,.5,.5,.5,1,1]];return {emo:'👏',q:'Hör das Muster und klatsche es nach.',tap:{pat:P[Math.floor(r()*P.length)],bpm:84}}},
+  mode:function(r){return qMode(r)},modeD:function(r){return qMode(r,['Moll','Dorisch'])},modeM:function(r){return qMode(r,['Dur','Mixolydisch'])},modeP:function(r){return qMode(r,['Moll','Phrygisch'])},
+  tri:qTri,pulse:qPulse,
+  gallop:function(r){return {emo:'🤘',q:'Hör den Galopp und klatsche ihn nach.',tap:{pat:[.5,.25,.25,.5,.25,.25,1],bpm:84}}},
+  tapIrish:function(r){var P=[[.5,.5,.5,.5,.5,.5],[1,.5,.5,1,.5,.5],[1.5,.5,1.5,.5]];return {emo:'☘️',q:'Hör den Jig-Rhythmus und tippe ihn nach.',tap:{pat:P[Math.floor(r()*P.length)],bpm:104}}},
+  mm:function(r){var q=qEarTriad(r);q.emo='🎭';return q},
+  dirS:function(r){var q=qEarDir(r);q.emo='🎵';return q},
+  noteK:function(r){var q=qNote(r,{lo:60,hi:72});q.q='Wie heißt diese Note?';return q},
+  noteA:function(r){return qNote(r,{acc:true})},
+  note:function(r){return qNote(r,{})},
+  dur:qDur,iv:qInterval,sig:qSig,triad:qEarTriad
+};
+function st(q,right,wrongs,why,emo){return function(r){var o=shuffle(r,[right].concat(wrongs));return {emo:emo||'',q:q,opts:o,a:o.indexOf(right),why:why}}}
+var STG={kita:{n:'Entdecker',e:'🐣',sub:'ab ca. 4 Jahren, gemeinsam mit einem Erwachsenen'},schule:{n:'Schulkind',e:'🎒',sub:'ca. 6 bis 10 Jahre'},erw:{n:'Anfänger',e:'🎓',sub:'Jugendliche und Erwachsene'},stil:{n:'Stilwelten',e:'🤘',sub:'Metal, Irisch, Schwedisch: Tonarten, Takt, Rhythmus'}};
+var LES=[
+ /* ── Entdecker ── */
+ {id:'k1',s:'kita',e:'🐦',t:'Hoch und tief',d:'Vogel oder Bär?',th:'<p>Tiefe Töne sind groß und dunkel wie ein <b>Bär</b>. Hohe Töne sind klein und hell wie ein <b>Vogel</b>. Gleich hörst du Töne und sagst, ob sie hoch oder tief sind.</p>',tip:'Singt zusammen: erst ganz hoch wie ein Vögelchen, dann ganz tief wie ein Bär. Die Hände gehen dabei nach oben und unten.',g:['bird','hl','bird','hl','bird']},
+ {id:'k2',s:'kita',e:'🔔',t:'Laut und leise',d:'Wie eine Maus oder ein Elefant',th:'<p>Manche Töne sind <b>laut</b>, andere <b>leise</b>. Hör gut hin, welcher Ton leiser ist.</p>',tip:'Klatscht erst leise wie eine Maus, dann laut wie ein Elefant. Flüstern und Rufen (nicht zu laut) geht auch.',g:['loud','loud','loud','loud','loud']},
+ {id:'k3',s:'kita',e:'🐢',t:'Schnell und langsam',d:'Schnecke und Hase',th:'<p>Musik kann <b>schnell</b> sein wie ein Hase oder <b>langsam</b> wie eine Schnecke. Wir hören Klick-Reihen und finden die schnellere.</p>',tip:'Geht zu Musik im Takt: erst langsam wie eine Schnecke, dann schnell wie ein Hase. Oder: Mit den Füßen den Takt stampfen.',g:['tempo','tempo','tempo','tempo','tempo']},
+ {id:'k4',s:'kita',e:'⏱',t:'Lang und kurz',d:'Töne haben eine Länge',th:'<p>Ein Ton kann <b>kurz</b> sein oder <b>lang</b>. Kurz wie ein Tropfen, lang wie ein Gummiband, das man zieht.</p>',tip:'Summt einen Ton so lange wie ihr könnt, dann ganz kurz. Wer hält länger durch?',g:['lng','lng','lng','lng','lng']},
+ {id:'k5',s:'kita',e:'🪜',t:'Treppen aus Tönen',d:'Hinauf, hinunter und zählen',th:'<p>Wenn Töne Stufen hinaufgehen, steigt die Melodie wie eine <b>Treppe</b>. Geht sie hinunter, steigen wir die Treppe ab. Wir zählen auch, wie viele Töne wir hören.</p>',tip:'Baut eine Treppe aus Bauklötzen oder Kissen und singt bei jeder Stufe einen Ton, hinauf und hinunter.',g:['steps','count','steps','count','steps']},
+ {id:'k6',s:'kita',e:'😀',t:'Fröhlich und traurig',d:'Wie Musik sich anfühlt',th:'<p>Manche Musik klingt <b>fröhlich</b>, andere <b>traurig</b>. Musiker nennen das <b>Dur</b> und <b>Moll</b>.</p>',tip:'Fragt beim nächsten Lied im Radio: Ist es fröhlich oder traurig? Malt zu Musik passende Gesichter.',g:['mood','mood','mood','mood','mood']},
+ {id:'k7',s:'kita',e:'👏',t:'Klatsch-Rhythmus',d:'Das Muster nachklatschen',th:'<p>Hör das Muster und tippe es auf die große Fläche nach, in demselben Tempo. Kurze Töne gehen schnell, lange Töne brauchen Zeit.</p>',tip:'Klatscht Namen: „Mi-cha“, „Lu-ka“, „Schoko-la-de“. Jede Silbe ein Klatscher. Das ist schon Rhythmus.',g:['tapEasy','tapEasy','tapEasy']},
+ /* ── Schulkind ── */
+ {id:'s1',s:'schule',e:'🎼',t:'Das Notensystem',d:'Fünf Linien und ein Schlüssel',th:'<p>Noten wohnen auf <b>fünf Linien</b>. Wir zählen sie von <b>unten nach oben</b>. Am Anfang steht der <b>Violinschlüssel</b>. Je höher die Note sitzt, desto höher klingt der Ton.</p>',tip:'Zeichnet zusammen fünf Linien auf Papier und setzt Münzen als Noten darauf: hoch, tief, in der Mitte.',st:[st('Wie viele Linien hat das Notensystem?','5',['4','6','3'],'Das Notensystem hat fünf Linien.'),st('Von welcher Seite zählt man die Linien?','Von unten',['Von oben','Von links','Von der Mitte'],'Man zählt von unten nach oben.'),st('Wie heißt das Zeichen am Anfang der Zeile bei der Geige?','Violinschlüssel',['Bassschlüssel','Hausschlüssel','Taktstrich'],'Der Violinschlüssel steht bei hohen Instrumenten wie der Geige.'),st('Wie klingt eine Note, die höher im System sitzt?','Höher',['Tiefer','Lauter','Leiser'],'Je höher die Note sitzt, desto höher klingt sie.')],g:[]},
+ {id:'s2',s:'schule',e:'🔤',t:'Notennamen C bis H',d:'Das Musik-Alphabet',th:'<p>Die Töne heißen <b>C D E F G A H</b>. Danach beginnt es wieder bei C, nur höher. Das H gibt es nur in Deutschland, im Englischen heißt es B.</p><p>Tipp: Die Linien von unten nach oben heißen <b>E G H D F</b>.</p>',tip:'Legt die Buchstaben C bis H als Karten und singt sie auf- und abwärts. Wer findet das G am schnellsten?',g:['noteK','noteK','noteK','noteK','noteK']},
+ {id:'s3',s:'schule',e:'🥁',t:'Notenwerte',d:'Ganze, halbe, Viertel, Achtel',th:'<ul><li>Ganze Note: 4 Schläge</li><li>Halbe Note: 2 Schläge</li><li>Viertelnote: 1 Schlag</li><li>Achtelnote: ein halber Schlag</li></ul><p>Der Schlag ist wie ein gleichmäßiger Herzschlag.</p>',tip:'Zählt „1 2 3 4“ und klatscht: eine ganze Note = ein Klatscher auf 1 und dann Pause bis 4. Viertel = jede Zahl ein Klatscher.',g:['dur','dur','dur','dur'],st:[st('Welche Note dauert am längsten?','Ganze Note',['Halbe Note','Viertelnote','Achtelnote'],'Die ganze Note dauert vier Schläge.')]},
+ {id:'s4',s:'schule',e:'📏',t:'Takt und Taktstrich',d:'Musik in Päckchen',th:'<p>Senkrechte Striche teilen die Noten in <b>Takte</b>. Bei <b>4/4</b> passen vier Viertel in einen Takt. Der erste Schlag im Takt ist meist der stärkste.</p>',tip:'Marschiert im Takt und betont jede erste Zahl: „EINS zwei drei vier, EINS zwei drei vier“.',g:[],st:[st('Wie viele Viertel passen in einen 4/4-Takt?','4',['2','3','8'],'Bei 4/4 gibt es vier Viertel pro Takt.'),st('Was trennt zwei Takte?','Der Taktstrich',['Die Pause','Der Schlüssel','Der Punkt'],'Der Taktstrich ist ein senkrechter Strich.'),st('Welcher Schlag ist im Takt meist der stärkste?','Der erste',['Der zweite','Der dritte','Der vierte'],'Der erste Schlag im Takt wird meist betont.')]},
+ {id:'s5',s:'schule',e:'👏',t:'Rhythmus nachklatschen',d:'Mit kurzen und langen Tönen',th:'<p>Jetzt sind auch <b>schnelle</b> Töne dabei. Hör zuerst gut zu, dann tippe das Muster nach. Schnelle Töne kommen doppelt so schnell hintereinander.</p>',tip:'Denkt euch Rhythmen mit Wörtern aus: „Ba-na-ne“ (kurz kurz lang). Eins lässt der andere nachklatschen.',g:['tapMid','tapMid','tapMid','tapMid']},
+ {id:'s6',s:'schule',e:'🔊',t:'Laut und leise in Noten',d:'p, f und mehr',th:'<ul><li><b>p</b> (piano): leise</li><li><b>f</b> (forte): laut</li><li><b>mf</b> (mezzoforte): mittellaut</li><li><b>crescendo</b>: lauter werden</li><li><b>decrescendo</b>: leiser werden</li></ul>',tip:'Singt dasselbe Lied leise (p), laut (f) und dann immer lauter werdend (crescendo).',g:['loud','loud'],st:[st('Was bedeutet das Zeichen p?','leise',['laut','schnell','langsam'],'p steht für piano, das heißt leise.'),st('Was bedeutet f?','laut',['leise','kurz','hoch'],'f steht für forte, das heißt laut.'),st('Was bedeutet crescendo?','Immer lauter werden',['Immer leiser werden','Schneller werden','Aufhören'],'Crescendo heißt: Es wird lauter.')]},
+ {id:'s7',s:'schule',e:'🪜',t:'Tonleiter hören',d:'Acht Töne nach oben',th:'<p>Eine <b>Tonleiter</b> ist eine Treppe aus Tönen. Die C-Dur-Tonleiter geht C D E F G A H C. Du hörst Töne und sagst, ob es hinauf oder hinunter geht.</p>',tip:'Singt „Do Re Mi Fa So La Si Do“ hinauf und hinunter. Mit der Hand eine Treppe in die Luft zeichnen.',g:['steps','dirS','steps','dirS','steps']},
+ {id:'s8',s:'schule',e:'🎭',t:'Dur und Moll',d:'Hell oder dunkel',th:'<p>Ein Dreiklang aus drei Tönen kann <b>Dur</b> (hell, fröhlich) oder <b>Moll</b> (dunkel, traurig) klingen. Hör genau hin.</p>',tip:'Schaut gemeinsam Filmmusik an: Welche Szene hat Dur, welche Moll?',g:['mm','mm','mm','mm','mm']},
+ /* ── Anfänger ── */
+ {id:'e1',s:'erw',e:'🎼',t:'Noten lesen mit Vorzeichen',d:'♯ und ♭ erkennen',th:'<p>Ein <b>♯</b> hebt den Ton um einen Halbton an, ein <b>♭</b> senkt ihn. Im Namen: Cis, Des, Fis, B (= H♭).</p>',g:['note','noteA','noteA','note','noteA']},
+ {id:'e2',s:'erw',e:'⏱',t:'Notenwerte und Punkt',d:'Dauer berechnen',th:'<p>Ein Punkt verlängert um die Hälfte: punktierte Halbe = 3 Schläge, punktierte Viertel = 1½.</p>',g:['dur','dur','dur','dur'],st:[st('Wie lang ist eine punktierte Halbe?','3 Schläge',['2 Schläge','4 Schläge','2,5 Schläge'],'2 + 1 = 3 Schläge.')]},
+ {id:'e3',s:'erw',e:'↕',t:'Intervalle',d:'Abstände benennen',th:'<p>Man zählt den Anfangston mit: C–E ist eine Terz, C–G eine Quinte, C–C eine Oktave.</p>',g:['iv','iv','iv','iv','iv']},
+ {id:'e4',s:'erw',e:'♯',t:'Dur und Vorzeichen',d:'Tonleiter und Tonarten',th:'<p>Dur-Muster: Ganz-Ganz-Halb-Ganz-Ganz-Ganz-Halb. Kreuz-Reihenfolge: F C G D A E H. Quintenzirkel aufwärts: G (1♯), D (2♯), A (3♯), E (4♯).</p>',g:['sig','sig','sig','sig'],st:[st('Welche Schrittfolge hat eine Dur-Tonleiter?','G-G-H-G-G-G-H',['G-H-G-G-H-G-G','H-G-G-G-H-G-G','G-G-G-H-G-G-H'],'Dur: Ganz, Ganz, Halb, Ganz, Ganz, Ganz, Halb.')]},
+ {id:'e5',s:'erw',e:'🎹',t:'Dreiklänge hören',d:'Dur oder Moll',th:'<p>Grundton, Terz, Quinte. Große Terz (4 Halbtöne) = Dur, kleine Terz (3 Halbtöne) = Moll.</p>',g:['triad','triad','triad','triad','triad']},
+ {id:'e6',s:'erw',e:'🅰',t:'Moll-Formen',d:'Natürlich, harmonisch, melodisch',th:'<p>a-Moll: natürlich A H C D E F G A; harmonisch mit G♯; melodisch aufwärts mit F♯ und G♯, abwärts natürlich.</p>',g:[],st:[st('Welcher Ton wird in harmonisch Moll erhöht?','Die siebte Stufe',['Die zweite Stufe','Die vierte Stufe','Die dritte Stufe'],'Harmonisch Moll hat eine erhöhte siebte Stufe.'),st('Welche Vorzeichen hat a-Moll?','Keine',['Ein ♯','Ein ♭','Zwei ♯'],'a-Moll hat dieselben Vorzeichen wie C-Dur, nämlich keine.'),st('Wie ist die melodische Moll-Tonleiter abwärts?','Wie natürliches Moll',['Wie Dur','Wie harmonisches Moll','Gar nicht'],'Abwärts spielt man sie wie natürliches Moll.')]}
+,
+ /* ── Stilwelten ── */
+ {id:'x1',s:'stil',e:'🌑',t:'Moll, Dur und Dunkelheit',d:'Wie Metal Spannung baut',th:'<p>Moll klingt dunkel, weil die dritte Stufe klein ist. Metal liebt Moll, weil es Druck und Schwere erzeugt. Ein Powerchord besteht nur aus Grundton und Quinte, ganz ohne Terz. Ohne Terz weiß das Ohr nicht, ob Dur oder Moll gemeint ist, und das Riff klingt stark und offen.</p>',g:['mm','mm','tri','tri','mode'],st:[st('Woraus besteht ein Powerchord?','Grundton und Quinte',['Grundton und Terz','Terz und Septime','Nur dem Grundton'],'Ohne Terz klingt er weder hell noch dunkel, nur kraftvoll.')]},
+ {id:'x2',s:'stil',e:'🧭',t:'Kirchentonarten',d:'Dorisch, Mixolydisch, Phrygisch',th:'<p>Kirchentonarten sind Tonleitern auf den weißen Tasten, nur mit anderem Grundton:</p><ul><li><b>Dorisch</b> (D bis D): Moll mit großer Sexte, offen und keltisch</li><li><b>Mixolydisch</b> (G bis G): Dur mit kleiner Septime, rockig und volkstümlich</li><li><b>Phrygisch</b> (E bis E): Moll mit kleiner Sekunde, dunkel, spanisch und Metal</li></ul>',g:['mode','mode','modeD','modeM','modeP'],st:[st('Welche Tonart hat einen Halbton direkt über dem Grundton?','Phrygisch',['Dorisch','Mixolydisch','Dur'],'Phrygisch beginnt mit einem Halbtonschritt: E F G …'),st('Was ist Dorisch?','Moll mit großer Sexte',['Dur mit kleiner Septime','Moll mit kleiner Sekunde','Dur mit großer Terz'],'D-dorisch ist D E F G A H C D.')]},
+ {id:'x3',s:'stil',e:'☘️',t:'Irische Tanzformen',d:'Jig, Reel und Co.',th:'<ul><li><b>Jig</b>: 6/8, sechs Achtel in zwei Dreiergruppen, springend</li><li><b>Slip Jig</b>: 9/8, drei Dreiergruppen</li><li><b>Reel</b>: 4/4, durchlaufende Achtel, schnell und flüssig</li><li><b>Hornpipe</b>: 4/4, schwerer und mit punktiertem Gefühl</li></ul><p>Im Geigenpult findest du „Haste to the Wedding“ und „St. Patrick’s Day“ (Jigs) und „Drowsy Maggie“ (Reel). Spiele sie zuerst langsam.</p>',g:['pulse','pulse','tapIrish','tapIrish','pulse'],st:[st('Wie viele Achtel hat ein Takt im Jig (6/8)?','6',['4','8','9'],'Sechs Achtel, in zwei Dreiergruppen.'),st('Welche Taktart hat ein Slip Jig?','9/8',['6/8','4/4','3/4'],'Drei Dreiergruppen ergeben 9/8.')]},
+ {id:'x4',s:'stil',e:'✨',t:'Irische Verzierungen',d:'Cut, Tap, Roll',th:'<p>Irische Melodien leben von kleinen Verzierungen. Das gehört zum Stil, nicht zur Melodie:</p><ul><li><b>Cut</b>: ein ganz kurzer höherer Ton unmittelbar vor dem Hauptton</li><li><b>Tap</b>: ein kurzer tieferer Ton</li><li><b>Roll</b>: Hauptton, Cut, Hauptton, Tap, Hauptton, in einer Länge einer Viertel</li></ul><p>Auf der Geige setzt man sie mit den Fingern der linken Hand, der Bogen streicht sie oft einfach mit. Lerne erst die Melodie sauber, dann kommen die Verzierungen.</p>',g:[],st:[st('Was ist ein Cut?','Ein kurzer Ton vor dem Hauptton',['Eine lange Pause','Ein Bogenwechsel','Ein Sprung in die Oktave'],'Ein Cut ist eine sehr kurze Nachbarnote.'),st('Was sollte zuerst sitzen?','Die Melodie ohne Verzierung',['Alle Verzierungen','Das höchste Tempo','Die Doppelgriffe'],'Erst Melodie sauber, dann Verzierungen.'),st('Welche Hand setzt die Verzierungen meist auf der Geige?','Die linke Hand',['Die rechte Hand','Beide gleich','Die Füße'],'Die Finger der linken Hand erzeugen die schnellen Töne.')]},
+ {id:'x5',s:'stil',e:'🇸🇪',t:'Schwedische Polska',d:'Drei Schläge, ungleich lang',th:'<p>Die Polska steht im Dreivierteltakt, fühlt sich aber anders an als ein Walzer: Die Schläge sind oft ungleich lang, und die Betonung wandert im Takt. Typisch sind Moll oder Dorisch und das Spiel auf Fiedel oder Nyckelharpa.</p><p>Im Geigenpult gibt es eine Polska-Übung im Stil (kein echtes Volkslied).</p>',g:['pulse','pulse','pulse','modeD','modeD'],st:[st('Welche Taktart hat die Polska?','3/4',['6/8','4/4','9/8'],'Sie steht im Dreivierteltakt.'),st('Was spielt man in Schweden gern zur Polska?','Nyckelharpa oder Fiedel',['Dudelsack','Banjo','Orgel'],'Die Nyckelharpa ist die schwedische Schlüsselfiedel.')]},
+ {id:'x6',s:'stil',e:'🤘',t:'Galopp und Gitarrenrhythmen',d:'Schnelle Achtel und Sechzehntel',th:'<p>Der <b>Galopp</b> ist ein Metal-Klassiker: ein Achtel und zwei Sechzehntel, immer wieder. Auch auf der Geige geht er gut: Übe ihn erst mit leeren Saiten, dann mit Tönen. Klatsche ihn nach, bevor du ihn spielst.</p>',g:['gallop','gallop','gallop'],st:[st('Aus welchen Werten besteht der Galopp?','Ein Achtel, zwei Sechzehntel',['Zwei Viertel','Drei Achtel','Eine Halbe'],'Lang, kurz, kurz, immer wieder.')]},
+ {id:'x7',s:'stil',e:'😈',t:'Tritonus und Spannung',d:'Der Teufel in der Musik',th:'<p>Der <b>Tritonus</b> hat sechs Halbtöne und teilt die Oktave in der Mitte. Er klingt unruhig und will sich auflösen. In Metal und Filmmusik schafft er Bedrohung. Die <b>reine Quinte</b> dagegen (sieben Halbtöne) klingt offen und stabil.</p>',g:['tri','tri','tri','tri','tri']}
+];
+function lesById(id){return LES.find(function(l){return l.id===id})}
+
+/* ── Fortschritt ── */
+var PR;
+function loadP(){PR=MK.get('theory',{});PR.xp=PR.xp||0;PR.stars=PR.stars||{};PR.days=PR.days||{}}
+function saveP(){MK.set('theory',PR)}
+function lvl(){return Math.floor(Math.sqrt(PR.xp/30))+1}
+function streak(){var d=new Date(),n=0;d=new Date(d.getFullYear(),d.getMonth(),d.getDate());if(!PR.days[MK.day(d)])d.setDate(d.getDate()-1);while(PR.days[MK.day(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function starsHtml(n){return '<span class="stars" aria-label="'+n+' von 3 Sternen">'+[1,2,3].map(function(i){return i<=n?'★':'<span class="off">★</span>'}).join('')+'</span>'}
+var stage=MK.profile().stage||'erw';
+function render(){
+  var p=MK.profile(),a=30*(lvl()-1)*(lvl()-1),b=30*lvl()*lvl();
+  $('#who').textContent=p.emoji+' '+p.name+' · Level '+lvl();
+  $('#xp-t').textContent=PR.xp+' XP';$('#xp-fill').style.width=Math.round((PR.xp-a)/(b-a)*100)+'%';
+  var tot=0,dn=0;LES.forEach(function(l){var s=PR.stars[l.id]||0;tot+=s;if(s>0)dn++});
+  $('#st-stars').textContent=tot;$('#st-done').textContent=dn+'/'+LES.length;$('#st-streak').textContent=streak();
+  $('#tabs').innerHTML=Object.keys(STG).map(function(k){return '<button type="button" role="tab" data-s="'+k+'" aria-selected="'+(k===stage)+'"><b>'+STG[k].e+' '+STG[k].n+'</b><span>'+STG[k].sub+'</span></button>'}).join('');
+  var l=$('#list');l.className='grid'+(stage==='kita'?' kid':'');
+  document.body.classList.toggle('kid',stage==='kita');
+  l.innerHTML=(stage==='kita'?'<button class="les" type="button" data-id="xylo"><span class="e">🎹</span><span class="t">Xylophon</span><span class="d">Spielen und Lieder nachspielen, mit leuchtenden Stäben</span></button>':'')+LES.filter(function(x){return x.s===stage}).map(function(x){
+    return '<button class="les" type="button" data-id="'+x.id+'"><span class="e">'+x.e+'</span><span class="t">'+esc(x.t)+'</span><span class="d">'+esc(x.d)+'</span>'+starsHtml(PR.stars[x.id]||0)+'</button>';
+  }).join('');
+}
+$('#tabs').addEventListener('click',function(e){var b=e.target.closest('button');if(b){stage=b.dataset.s;show('list');render()}});
+$('#list').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;if(b.dataset.id==='xylo')openXylo();else openLesson(b.dataset.id)});
+function show(w){['list','lesson','quiz','result','xylo'].forEach(function(id){$('#'+id).hidden=id!==w});$('#tabs').hidden=w!=='list';$('#prog').hidden=w==='quiz'}
+
+/* ── Lektion und Quiz ── */
+var cur=null,Q=null;
+function openLesson(id){
+  cur=lesById(id);show('lesson');
+  $('#l-title').textContent=cur.e+' '+cur.t;$('#l-th').innerHTML=cur.th;
+  $('#l-tip').hidden=!cur.tip;$('#l-tip').innerHTML=cur.tip?'<b>Für Eltern und Kinder:</b> '+esc(cur.tip):'';
+  $('#l-say').hidden=!(CAN_SPEAK&&cur.s==='kita');
+}
+$('#l-close').addEventListener('click',function(){show('list');render()});
+$('#l-say').addEventListener('click',function(){speak($('#l-th').textContent)});
+$('#l-go').addEventListener('click',function(){startQuiz(cur)});
+function mkQuiz(l,seed){
+  var r=mkRng(seed),qs=[];
+  (l.st||[]).forEach(function(f){qs.push(f(r))});
+  (l.g||[]).forEach(function(n){qs.push(KG[n](r))});
+  return shuffle(r,qs).slice(0,5);
+}
+function startQuiz(l){
+  Q={l:l,qs:mkQuiz(l,Date.now()),i:0,right:0,ok:false,locked:false};
+  show('quiz');showQ();
+}
+function showQ(){
+  var q=Q.qs[Q.i],kid=Q.l.s==='kita';
+  Q.locked=false;Q.ok=false;Q.taps=[];
+  $('#q-head').textContent=Q.l.t+' · Frage '+(Q.i+1)+' von '+Q.qs.length;$('#q-bar').style.width=Math.round(Q.i/Q.qs.length*100)+'%';
+  $('#q-emo').hidden=!q.emo;$('#q-emo').textContent=q.emo||'';
+  $('#q-text').textContent=q.q;
+  $('#q-play').hidden=!(q.ear||q.tap);$('#q-play').textContent=q.tap?'▶ Muster anhören':'▶ Anhören';
+  $('#q-say').hidden=!(CAN_SPEAK&&kid);
+  var sv=$('#q-staff');sv.hidden=!q.note;sv.innerHTML=q.note?staffSvg([q.note]):'';
+  $('#q-tap').hidden=!q.tap;$('#q-opts').innerHTML='';
+  if(q.tap){
+    $('#q-blocks').innerHTML=q.tap.pat.map(function(d){return '<span style="flex:'+d+'">'+(d>=2?'ta-a':d>=1?'ta':'ti')+'</span>'}).join('');
+    $('#q-tapst').textContent='Zuerst anhören, dann '+q.tap.pat.length+' Mal tippen.';
+  }else{
+    $('#q-opts').innerHTML=q.opts.map(function(o,i){return '<button class="btn" type="button" data-i="'+i+'">'+esc(o)+'</button>'}).join('');
+  }
+  $('#q-fb').hidden=true;$('#q-next').hidden=true;$('#q-retry').hidden=true;
+  if(q.ear||q.tap)setTimeout(function(){try{$('#q-play').focus()}catch(e){}},0);
+}
+$('#q-play').addEventListener('click',function(){var q=Q.qs[Q.i];if(q.tap)playEar({rhythm:q.tap.pat,bpm:q.tap.bpm});else playEar(q.ear)});
+$('#q-say').addEventListener('click',function(){speak(Q.qs[Q.i].q)});
+function feedback(ok,why){
+  var kid=Q.l.s==='kita',fb=$('#q-fb');
+  fb.hidden=false;fb.className='fb '+(ok?'good':'bad');
+  fb.textContent=(ok?(kid?'Super gemacht! 🎉 ':'Richtig. '):(kid?'Fast! Hör noch einmal genau hin. ':'Nicht ganz. '))+(why||'');
+  var nb=$('#q-next');nb.hidden=false;nb.textContent=Q.i+1<Q.qs.length?'Weiter':'Fertig';
+}
+$('#q-opts').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b||Q.locked)return;
+  Q.locked=true;var q=Q.qs[Q.i],i=+b.dataset.i,ok=i===q.a;if(ok)Q.right++;
+  $$('#q-opts button').forEach(function(x,j){x.disabled=true;if(j===q.a)x.classList.add('right');else if(j===i)x.classList.add('wrong')});
+  feedback(ok,q.why);$('#q-next').focus();
+});
+/* Klatsch-Aufgabe: Abstände zum Muster vergleichen, Gesamtversatz egal. */
+function tapEval(pat,bpm,taps,tol){
+  var beat=60000/bpm,exp=[],x=0;pat.forEach(function(d){exp.push(x*beat);x+=d});
+  var off=0;taps.forEach(function(t,i){off+=t-exp[i]});off/=taps.length;
+  var worst=0;taps.forEach(function(t,i){worst=Math.max(worst,Math.abs(t-off-exp[i]))});
+  return worst<=tol*beat;
+}
+$('#q-pad').addEventListener('pointerdown',function(e){
+  var q=Q&&Q.qs[Q.i];if(!q||!q.tap||Q.locked)return;
+  e.preventDefault();var now=performance.now(),pad=$('#q-pad');
+  try{thump(ac().currentTime)}catch(er){}
+  pad.classList.add('hit');setTimeout(function(){pad.classList.remove('hit')},90);
+  Q.taps.push(now);$('#q-tapst').textContent=Q.taps.length+' von '+q.tap.pat.length+' getippt.';
+  if(Q.taps.length>=q.tap.pat.length){
+    var ok=tapEval(q.tap.pat,q.tap.bpm,Q.taps,Q.l.s==='kita'?.5:.38);
+    if(ok){Q.locked=true;Q.right++;feedback(true,'Dein Rhythmus passt.');$('#q-retry').hidden=true}
+    else{Q.taps=[];feedback(false,'Das Muster stimmte noch nicht ganz. Hör es noch einmal an und versuche es gleich noch einmal.');$('#q-next').textContent='Überspringen';$('#q-retry').hidden=false}
+  }
+});
+$('#q-retry').addEventListener('click',function(){Q.taps=[];$('#q-fb').hidden=true;$('#q-next').hidden=true;$('#q-retry').hidden=true;$('#q-tapst').textContent='Noch einmal: '+Q.qs[Q.i].tap.pat.length+' Mal tippen.'});
+$('#q-next').addEventListener('click',function(){
+  if(Q.i+1<Q.qs.length){Q.i++;showQ();return}
+  finishQuiz();
+});
+$('#q-close').addEventListener('click',function(){show('list');render()});
+function finishQuiz(){
+  var n=Q.qs.length,r=Q.right,frac=r/n,stars=frac>=.99?3:frac>=.7?2:frac>=.4?1:0,id=Q.l.id,old=PR.stars[id]||0;
+  var xp=Math.max(0,stars-old)*10+r*2;
+  if(stars>old)PR.stars[id]=stars;
+  PR.xp+=xp;PR.days[MK.day()]=1;saveP();
+  show('result');
+  $('#r-title').textContent=stars===3?'Perfekt! 🎉':stars>0?'Gut gemacht!':'Noch einmal versuchen';
+  $('#r-stars').innerHTML=starsHtml(stars);
+  $('#r-text').textContent=r+' von '+n+' richtig · +'+xp+' XP';
+  render();
+}
+$('#r-again').addEventListener('click',function(){startQuiz(Q.l)});
+$('#r-back').addEventListener('click',function(){show('list');render()});
+
+loadP();render();show('list');
+/* ── Xylophon (Entdecker) ── */
+var XN=[['C',60],['D',62],['E',64],['F',65],['G',67],['A',69],['H',71],['C',72]],XCOL=['#d64545','#e57f2b','#c99a00','#3f9e55','#2f8fa8','#3a63c9','#7a4fc2','#d64545'];
+/* Töne als Stab-Nummern 0 bis 7 (C D E F G A H C') */
+var XSONGS=[
+ {t:'Freies Spiel',s:null},
+ {t:'Alle meine Entchen',s:[0,1,2,3,4,4,5,5,5,5,4,5,5,5,5,4,3,3,3,3,2,2,1,1,1,1,0]},
+ {t:'Hänschen klein',s:[4,2,2,3,1,1,0,1,2,3,4,4,4,4,2,2,3,1,1,0,2,4,4,0]},
+ {t:'Ode an die Freude',s:[2,2,3,4,4,3,2,1,0,0,1,2,2,1,1,2,2,3,4,4,3,2,1,0,0,1,2,1,0,0]},
+ {t:'Jingle Bells (Refrain)',s:[2,2,2,2,2,2,2,4,0,1,2,3,3,3,3,3,2,2,2,2,1,1,2,1,4]}
+];
+var xs=0,xi=0;
+function openXylo(){
+  show('xylo');
+  $('#x-song').innerHTML=XSONGS.map(function(s,i){return '<option value="'+i+'">'+esc(s.t)+'</option>'}).join('');
+  $('#x-bars').innerHTML=XN.map(function(n,i){return '<button type="button" data-i="'+i+'" style="background:'+XCOL[i]+';height:'+(190-i*10)+'px" aria-label="Ton '+n[0]+(i===7?' hoch':'')+'">'+n[0]+(i===7?'′':'')+'</button>'}).join('');
+  xs=0;xi=0;xRender();
+}
+function xRender(){
+  var s=XSONGS[xs].s;
+  $$('#x-bars button').forEach(function(b){b.classList.toggle('next',!!s&&+b.dataset.i===s[xi])});
+  $('#x-hint').textContent=!s?'Tippe auf die Stäbe und probiere aus.':xi>=s.length?'Geschafft! 🎉 Du hast das ganze Lied gespielt.':'Tippe auf den leuchtenden Stab ('+(xi+1)+' von '+s.length+').';
+  $('#x-tip').textContent=!s?'Tiefe Töne sind die langen Stäbe links, hohe die kurzen rechts.':'Gespielt wird Ton für Ton. Du kannst dir Zeit lassen.';
+}
+$('#x-bars').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  var i=+b.dataset.i,s=XSONGS[xs].s;
+  try{tone(XN[i][1],ac().currentTime,.5,.4)}catch(er){}
+  b.classList.add('hit');setTimeout(function(){b.classList.remove('hit')},120);
+  if(!s||xi>=s.length)return;
+  if(i===s[xi]){
+    xi++;
+    if(xi>=s.length){PR.xp+=5;PR.days[MK.day()]=1;saveP();render()}
+    xRender();
+  }else{b.classList.add('no');setTimeout(function(){b.classList.remove('no')},260)}
+});
+$('#x-song').addEventListener('change',function(e){xs=+e.target.value;xi=0;xRender()});
+$('#x-again').addEventListener('click',function(){xi=0;xRender()});
+$('#x-close').addEventListener('click',function(){show('list');render()});
+window.__th={XSONGS:XSONGS,get xi(){return xi},LES:LES,KG:KG,tapEval:tapEval,get PR(){return PR},get Q(){return Q}};
+})();
+</script>
+</body>
+</html>

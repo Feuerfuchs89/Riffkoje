@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Riffkoje</title>
+<meta name="theme-color" content="#121314">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<script src="shared.js"></script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--bg:#121314;--card:#1b1d1f;--line:#2b2e32;--text:#ebe7df;--mute:#9b978e;--amber:#f2a93b;--red:#e5484d;--green:#3fb27f;--r:12px;--in:#111214;--btn:#25282c;--meterbg:#0d0e0f;--row:#16181a;--tst:#2a2d31;--chipb:#24533f;--recbg:#2a1416;--recb:#5a2226;--recf:#ff8b8f;--onamber:#1a1205;--hdr:rgba(18,19,20,.94);color-scheme:dark}
+html[data-mk=light]{--bg:#f6f4ee;--card:#ffffff;--line:#d6d2c6;--text:#1d1f24;--mute:#656a75;--amber:#e08a00;--red:#c4342d;--green:#1f8a4c;--in:#ffffff;--btn:#eeebe2;--meterbg:#e6e2d6;--row:#faf8f2;--tst:#ffffff;--chipb:#9fd3b6;--recbg:#fdecec;--recb:#efb4b4;--recf:#b3261e;--onamber:#ffffff;--hdr:rgba(246,244,238,.94);color-scheme:light}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));background:var(--hdr);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:50%;background:var(--amber);position:relative;flex:none}
+.logo::after{content:"";position:absolute;left:50%;top:5px;width:3px;height:12px;margin-left:-1.5px;border-radius:2px;background:#1a1205;transform-origin:50% 13px;transform:rotate(40deg)}
+h1{font-size:18px;margin:0;letter-spacing:.02em;line-height:1.2}
+header small{color:var(--mute);font-size:12px}
+.chip{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mute);max-width:45vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip.on{color:var(--green);border-color:var(--chipb)}
+main{max-width:760px;margin:0 auto;padding:12px 16px 90px;display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;gap:10px;min-width:0}
+h2{font-size:13px;margin:0;text-transform:uppercase;letter-spacing:.1em;color:var(--mute);font-weight:600}
+h3{font-size:14px;margin:0;color:var(--mute);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.between{justify-content:space-between}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{background:var(--in);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;width:100%}
+.row>input,.row>select{flex:1 1 160px;width:auto;min-width:0}
+textarea{min-height:70px;resize:vertical}
+label{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:14px}
+label input{width:96px}
+.tog input{width:20px;height:20px;min-height:0;padding:0;accent-color:var(--amber)}
+button{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--btn);cursor:pointer;font-weight:600}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.45;cursor:default}
+.primary{background:var(--amber);border-color:var(--amber);color:var(--onamber)}
+.ghost{background:transparent}
+.small{min-height:36px;padding:0 10px;font-size:13px}
+.danger{color:var(--red)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.big{font-size:22px}
+.muted{color:var(--mute);font-size:13px;margin:0}
+.video{position:relative;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden}
+#ytHost,#ytHost iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#ytEmpty{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);font-size:14px;text-align:center;padding:16px}
+.transport{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#clock{margin-left:auto;font-size:18px}
+.transport select{width:auto;flex:0 0 auto}
+.ab{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center}
+.abv{display:flex;align-items:center;gap:6px}
+.abv .mono{min-width:64px;color:var(--amber)}
+.rec{background:var(--recbg);border-color:var(--recb);color:var(--recf);min-height:64px;padding:0 24px;font-size:18px;border-radius:999px;flex:none}
+.rec.on{background:var(--red);color:#fff;border-color:var(--red);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(229,72,77,.18)}}
+.recrow{display:flex;align-items:center;gap:16px}
+#takes{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+#takes li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--row)}
+#takes li.empty{display:block;border-style:dashed;background:none}
+.tmeta{display:grid}
+.tbtns{display:flex;gap:6px;flex-wrap:wrap}
+.tbtns button{min-height:38px;padding:0 12px;font-size:14px}
+.meter{position:relative;height:16px;background:var(--meterbg);border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+#meterBar{height:100%;width:0;background:var(--green)}
+#clip{position:absolute;right:8px;top:0;line-height:14px;font-size:11px;font-weight:800;color:#fff;opacity:0}
+#clip.on{opacity:1}
+input[type=range]{padding:0;min-height:32px;accent-color:var(--amber);border:0;background:none}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--tst);color:var(--text);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center;border:1px solid var(--line);z-index:9}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.rec.on{animation:none}#toast{transition:none}}
+.filebtn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--amber);background:var(--amber);color:var(--onamber);font-weight:600;cursor:pointer;font-size:16px;color:var(--onamber)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:none}
+.seg button{border:0;border-radius:0;min-height:38px;padding:0 12px;background:transparent;font-size:13px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--amber);color:var(--onamber)}
+.tabbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tabbar .small{min-height:38px}
+.tabbar select{width:auto;min-height:38px;padding:4px 8px;font-size:13px;max-width:180px}
+#tPlay{min-width:52px}
+#tRec.on{background:var(--red);color:#fff;border-color:var(--red)}
+#tPos{margin-left:auto;font-size:13px}
+.tabwrap{position:relative;background:#f6f3ec;border-radius:10px;overflow:hidden;color:#1d1b17}
+#tabView{height:min(62vh,580px);overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
+#tabEmpty{padding:40px 16px;text-align:center;color:#6b665c;font-size:14px}
+#tabLoad{position:absolute;top:8px;right:8px;background:#1d1b17;color:#f6f3ec;font-size:12px;padding:4px 10px;border-radius:999px;pointer-events:none}
+.at-cursor-bar{background:rgba(242,169,59,.22)}
+.at-cursor-beat{background:#e5484d;width:3px}
+.at-highlight *{fill:#c2410c;stroke:#c2410c}
+.at-selection div{background:rgba(242,169,59,.35)}
+details summary{cursor:pointer;color:var(--mute);font-size:14px;padding:6px 0}
+.mixer{display:grid;gap:4px;margin-top:4px}
+.mrow{display:flex;align-items:center;gap:6px;font-size:14px}
+.mrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrow.cur span{color:var(--amber)}
+.ms{min-height:34px;width:38px;padding:0;font-size:12px}
+.ms.m.on{background:var(--red);color:#fff;border-color:var(--red)}
+.ms.s.on{background:var(--amber);color:var(--onamber);border-color:var(--amber)}
+.card.big{position:fixed;inset:0;z-index:20;border-radius:0;border:0;display:flex;flex-direction:column;padding:8px;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.card.big .nobig{display:none!important}
+.card.big .tabwrap{flex:1;min-height:0}
+.card.big #tabView{height:100%}
+body.bigmode{overflow:hidden}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo" aria-hidden="true"></span><div><h1>Riffkoje</h1><small>Mitspielen · Aufnehmen · Üben</small></div></div>
+  <span id="inStatus" class="chip">Eingang aus</span>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Song</h2>
+    <div class="row">
+      <select id="songSel" aria-label="Song wählen"></select>
+      <button id="newSong" class="ghost">+ Neu</button>
+      <button id="delSong" class="ghost danger">Löschen</button>
+    </div>
+    <input id="title" placeholder="Songtitel, z. B. My Curse – Killswitch Engage">
+    <div class="row">
+      <input id="url" placeholder="YouTube-Link einfügen" inputmode="url" autocomplete="off">
+      <button id="loadUrl">Laden</button>
+    </div>
+    <div class="video"><div id="ytHost"></div><div id="ytEmpty">Kein Video geladen</div></div>
+    <div class="transport">
+      <button id="toA" class="ghost" aria-label="Zum Punkt A">⏮</button>
+      <button id="playBtn" class="primary">▶ Play</button>
+      <span id="clock" class="mono">0:00.0</span>
+      <select id="rate" aria-label="Tempo"><option value="0.5">50 %</option><option value="0.75">75 %</option><option value="1" selected>100 %</option></select>
+    </div>
+    <div class="ab">
+      <button id="setA" class="ghost small">A setzen</button>
+      <div class="abv"><span id="aVal" class="mono">–</span><button class="ghost small" data-n="A,-0.1">−</button><button class="ghost small" data-n="A,0.1">+</button></div>
+      <button id="setB" class="ghost small">B setzen</button>
+      <div class="abv"><span id="bVal" class="mono">–</span><button class="ghost small" data-n="B,-0.1">−</button><button class="ghost small" data-n="B,0.1">+</button></div>
+    </div>
+    <div class="row between">
+      <label class="tog"><input type="checkbox" id="loop"> Schleife A–B</label>
+      <button id="clrAB" class="ghost small">A/B löschen</button>
+    </div>
+    <div class="row">
+      <label>BPM <input id="bpm" type="number" min="40" max="300" inputmode="numeric"></label>
+      <label class="tog"><input type="checkbox" id="countIn"> Einzähler</label>
+      <label>Stimmung <input id="tuning" placeholder="Drop C"></label>
+    </div>
+    <textarea id="notes" placeholder="Pedal-Setup & Notizen, z. B. LS-2 B · ML-2 Dist 11 Uhr · IR-2 Ambience 10 Uhr"></textarea>
+  </section>
+
+  <section class="card" id="tabCard">
+    <div class="row between nobig"><h2>Tabs &amp; Noten</h2><span id="gpName" class="muted"></span></div>
+    <div class="row nobig">
+      <label class="filebtn" id="gpOpenLbl"><input type="file" id="gpFile" hidden>GP-Datei öffnen</label>
+      <button id="gpRemove" class="ghost small danger" hidden>Datei entfernen</button>
+    </div>
+    <div class="row nobig" id="srcRow" hidden>
+      <span class="muted">Abspielen zu:</span>
+      <div class="seg" id="srcSeg"><button data-src="gp">GP-Backing</button><button data-src="yt">YouTube-Video</button></div>
+    </div>
+    <div class="tabbar" id="tabBar" hidden>
+      <button id="tPlay" class="primary small" aria-label="Abspielen">▶</button>
+      <button id="tStop" class="ghost small" aria-label="Zum Anfang">⏮</button>
+      <button id="tRec" class="ghost small" aria-label="Aufnahme">●</button>
+      <select id="trackSel" aria-label="Spur"></select>
+      <div class="seg" id="viewSeg"><button data-v="tab">Tab</button><button data-v="both">Beides</button><button data-v="score">Noten</button></div>
+      <button id="zOut" class="ghost small" aria-label="Kleiner">A−</button>
+      <button id="zIn" class="ghost small" aria-label="Größer">A+</button>
+      <button id="bigBtn" class="ghost small">⛶ Groß</button>
+      <span id="tPos" class="mono muted"></span>
+    </div>
+    <div class="tabwrap"><div id="tabView"><div id="tabEmpty">Öffne eine Guitar-Pro-Datei (GP3–GP8), um Tabs und Noten zu sehen.</div><div id="atHost"></div></div><div id="tabLoad" hidden></div></div>
+    <div id="gpOpts" class="nobig" hidden>
+      <div class="row" id="gpOnly">
+        <label>Tempo <select id="gpSpeed"></select></label>
+        <label class="tog"><input type="checkbox" id="gpMetro"> Metronom</label>
+        <label class="tog"><input type="checkbox" id="gpLoop"> Auswahl in Schleife</label>
+        <button id="gpClrSel" class="ghost small">Auswahl löschen</button>
+      </div>
+      <div class="row" id="ytOnly">
+        <span class="muted">Takt 1 im Video bei</span><span id="offVal" class="mono">0:00.00</span>
+        <button id="offSet" class="ghost small">= jetzt</button>
+        <button class="ghost small" data-off="-0.05">−</button><button class="ghost small" data-off="0.05">+</button>
+      </div>
+      <p id="gpHint" class="muted"></p>
+      <details><summary>Spuren-Mixer (stumm / solo)</summary><div id="mixer" class="mixer"></div></details>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Aufnahme</h2>
+    <div class="recrow">
+      <button id="recBtn" class="rec">● Aufnahme</button>
+      <div><div id="recTime" class="mono big">0:00</div><p id="recInfo" class="muted">Startet bei A (falls gesetzt) und stoppt bei B</p></div>
+    </div>
+    <div class="row between"><h3>Takes</h3><button id="stopTake" class="ghost small" hidden>■ Stop</button></div>
+    <ul id="takes"></ul>
+  </section>
+
+  <section class="card">
+    <h2>Eingang</h2>
+    <div class="row">
+      <select id="devSel" aria-label="Eingang wählen"><option value="">Standard-Eingang</option></select>
+      <button id="inBtn" class="primary">Aktivieren</button>
+    </div>
+    <div class="meter"><div id="meterBar"></div><div id="clip">CLIP</div></div>
+    <label class="tog"><input type="checkbox" id="monitor"> Mithören über das Gerät (nur fürs Mikrofon nötig)</label>
+    <p class="muted">Tipp: IR-2 per USB anschließen und im System als Ein- und Ausgabe wählen. Dann hörst du Video und Gitarre zusammen im Kopfhörer am IR-2.</p>
+  </section>
+
+  <section class="card">
+    <h2>Latenz</h2>
+    <p class="muted">Damit deine Aufnahme exakt zum Video passt. Kopfhörer auf, Saiten abdämpfen und ab dem 3. Klick auf jeden Klick einmal kurz anschlagen.</p>
+    <div class="row between"><button id="calBtn">Kalibrieren</button><span id="latVal" class="mono big">0 ms</span></div>
+    <input type="range" id="latSlider" min="-100" max="500" step="1" aria-label="Latenz in Millisekunden">
+    <p id="calInfo" class="muted">Feinjustieren: Klingt die Gitarre beim Anhören zu spät, Regler nach rechts.</p>
+  </section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(MK.key('rk_' + k)); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(MK.key('rk_' + k), JSON.stringify(v)); } catch (e) {} }
+};
+function toast(msg, ms = 2800) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), ms); }
+function fmt(s, dec = 1) { if (s == null || isNaN(s)) return '–'; const m = Math.floor(s / 60); const r = s - m * 60; const rs = r.toFixed(dec); return m + ':' + (r < 10 ? '0' : '') + rs; }
+
+/* ---------- Speicher (IndexedDB) ---------- */
+const DB = {
+  db: null,
+  open() { return new Promise((res, rej) => { const r = indexedDB.open(MK.dbName('riffkoje'), 1); r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('songs', { keyPath: 'id' }); d.createObjectStore('takes', { keyPath: 'id' }).createIndex('song', 'songId'); }; r.onsuccess = () => { this.db = r.result; res(); }; r.onerror = () => rej(r.error); }); },
+  req(store, mode, fn) { return new Promise((res, rej) => { if (!this.db) return res(mode === 'readonly' ? [] : null); const r = fn(this.db.transaction(store, mode).objectStore(store)); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  put(s, v) { return this.req(s, 'readwrite', o => o.put(v)); },
+  del(s, id) { return this.req(s, 'readwrite', o => o.delete(id)); },
+  all(s) { return this.req(s, 'readonly', o => o.getAll()); },
+  bySong(id) { return this.req('takes', 'readonly', o => o.index('song').getAll(id)); }
+};
+
+/* ---------- Songs ---------- */
+let song = null, songs = [];
+const blankSong = () => ({ id: uid(), title: '', url: '', videoId: '', A: null, B: null, rate: 1, bpm: 120, countIn: true, tuning: 'Drop C', notes: '', gpSrc: 'gp', gpView: 'tab', gpZoom: 1, gpSpeed: 1, gpOffset: 0, updated: Date.now() });
+const saveable = s => !!(s && (s.title.trim() || s.videoId));
+const takeKey = () => saveable(song) ? song.id : 'free';
+
+async function refreshSongs() {
+  songs = (await DB.all('songs')).sort((a, b) => b.updated - a.updated);
+  const sel = $('#songSel'); sel.innerHTML = '';
+  const o = new Option(songs.length ? '– Song wählen –' : 'Noch keine Songs', ''); sel.add(o);
+  for (const s of songs) sel.add(new Option(s.title || ('Video ' + s.videoId), s.id));
+  sel.value = song && songs.some(s => s.id === song.id) ? song.id : '';
+}
+let saveT;
+function saveSong(now) {
+  if (!song) return; song.updated = Date.now(); clearTimeout(saveT);
+  const run = async () => { if (saveable(song)) { await DB.put('songs', song); store.set('lastSong', song.id); refreshSongs(); } };
+  if (now) return run(); saveT = setTimeout(run, 400);
+}
+function applySong(s) {
+  song = s;
+  $('#title').value = s.title; $('#url').value = s.url; $('#bpm').value = s.bpm;
+  $('#countIn').checked = s.countIn; $('#tuning').value = s.tuning || ''; $('#notes').value = s.notes || '';
+  updateAB(); if (s.videoId) loadVideo(s.videoId); else clearVideo();
+  $('#songSel').value = songs.some(x => x.id === s.id) ? s.id : '';
+  renderTakes(); gpBuild();
+}
+function parseYT(u) {
+  u = (u || '').trim(); if (/^[\w-]{11}$/.test(u)) return u;
+  const m = u.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([\w-]{11})/); return m ? m[1] : null;
+}
+
+/* ---------- YouTube ---------- */
+let player = null, playerReady = false, ytReady = false, pendingId = null, playing = false, playWaiters = [];
+window.onYouTubeIframeAPIReady = () => { ytReady = true; if (pendingId) { const id = pendingId; pendingId = null; loadVideo(id); } };
+function loadVideo(id) {
+  $('#ytEmpty').textContent = 'Video wird geladen …';
+  if (!ytReady) { pendingId = id; return; }
+  if (player && playerReady) { player.cueVideoById(id); applyRate(); $('#ytEmpty').hidden = true; return; }
+  $('#ytHost').innerHTML = '<div id="yt"></div>'; playerReady = false;
+  if (location.protocol === 'file:') {
+    $('#ytEmpty').hidden = false;
+    $('#ytEmpty').textContent = 'YouTube spielt nur, wenn die Riffkoje online liegt (GitHub Pages) – nicht als geöffnete Datei.';
+    return;
+  }
+  const pv = { playsinline: 1, rel: 0, modestbranding: 1, origin: location.origin };
+  player = new YT.Player('yt', { videoId: id, width: '100%', height: '100%', playerVars: pv,
+    events: { onReady: onPlayerReady, onStateChange: onPlayerState, onError: e => {
+      $('#ytEmpty').hidden = true;
+      toast(e.data === 101 || e.data === 150 ? 'Dieses Video erlaubt kein Einbetten – anderes Video probieren' : 'Video-Fehler ' + e.data);
+    } } });
+  const ifr = player.getIframe && player.getIframe(); if (ifr) ifr.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+}
+function clearVideo() {
+  if (player) { try { player.destroy(); } catch (e) {} } player = null; playerReady = false; playing = false; pendingId = null;
+  $('#ytHost').innerHTML = ''; const e = $('#ytEmpty'); e.hidden = false; e.textContent = 'Kein Video geladen'; updatePlayBtn();
+}
+function onPlayerReady() {
+  playerReady = true; $('#ytEmpty').hidden = true;
+  const rates = (player.getAvailablePlaybackRates() || [0.5, 0.75, 1]).filter(r => r <= 1);
+  const sel = $('#rate'); sel.innerHTML = ''; rates.forEach(r => sel.add(new Option(Math.round(r * 100) + ' %', r)));
+  applyRate();
+}
+function applyRate() {
+  if (!player || !playerReady) return;
+  const opts = [...$('#rate').options].map(o => +o.value);
+  const r = opts.reduce((a, b) => Math.abs(b - song.rate) < Math.abs(a - song.rate) ? b : a, 1);
+  player.setPlaybackRate(r); $('#rate').value = r;
+}
+function onPlayerState(e) {
+  const d = e.data;
+  if (gpExt()) { lastExtMs = -1; extTick(); if (d === 1 && gpState !== 1) gpApi.play(); else if ((d === 2 || d === 0) && gpState === 1) gpApi.pause(); }
+  if (d === 1) {
+    playing = true;
+    const info = { ctxTime: ctx ? ctx.currentTime : 0, videoTime: player.getCurrentTime() };
+    const ws = playWaiters; playWaiters = []; ws.forEach(w => w.res(info));
+  } else if (d === 3 && rec && rec.t0) {
+    toast('Video puffert – dieser Take könnte versetzt sein');
+  } else if (d === 2 || d === 0) {
+    playing = false;
+    if (takeWithVideo) stopTake();
+    if (d === 0 && rec && rec.t0) stopRec();
+  }
+  updatePlayBtn();
+}
+function waitPlaying(ms = 8000) {
+  return new Promise((res, rej) => { const w = { res, rej }; playWaiters.push(w);
+    setTimeout(() => { const i = playWaiters.indexOf(w); if (i >= 0) { playWaiters.splice(i, 1); rej(new Error('timeout')); } }, ms); });
+}
+function updatePlayBtn() { $('#playBtn').textContent = playing ? '⏸ Pause' : '▶ Play'; if (typeof updateTabUI === 'function') updateTabUI(); }
+const curTime = () => (player && playerReady && player.getCurrentTime) ? (player.getCurrentTime() || 0) : 0;
+
+/* ---------- A/B ---------- */
+function updateAB() { $('#aVal').textContent = fmt(song.A); $('#bVal').textContent = fmt(song.B); }
+function setPoint(which, t) {
+  t = Math.max(0, Math.round(t * 10) / 10);
+  if (which === 'A') { song.A = t; if (song.B != null && song.B <= t) song.B = null; }
+  else { if (song.A != null && t <= song.A) return toast('B muss nach A liegen'); song.B = t; }
+  updateAB(); saveSong();
+}
+
+/* ---------- Audio ---------- */
+let ctx = null, inStream = null, inSrc = null, analyser = null, capNode = null, monGain = null;
+let latencyMs = store.get('latency', null);
+const WORKLET = `
+class RkCap extends AudioWorkletProcessor {
+  constructor(){ super(); this.on=false; this.buf=new Float32Array(8192); this.n=0;
+    this.port.onmessage = e => { const m=e.data;
+      if (m==='start'){ this.on=true; this.n=0; this.port.postMessage({t:'started', frame: currentFrame}); }
+      else if (m==='stop'){ this.flush(); this.on=false; this.port.postMessage({t:'stopped'}); } }; }
+  flush(){ if (this.n){ this.port.postMessage({t:'data', d:this.buf.slice(0,this.n)}); this.n=0; } }
+  process(inputs){ const ch = inputs[0] && inputs[0][0];
+    if (this.on){ const L = ch ? ch.length : 128; if (this.n + L > this.buf.length) this.flush();
+      if (ch) this.buf.set(ch, this.n); else this.buf.fill(0, this.n, this.n + L); this.n += L; }
+    return true; }
+}
+registerProcessor('rk-cap', RkCap);`;
+
+async function ensureCtx() {
+  if (!ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    ctx = new AC({ latencyHint: 'interactive' });
+    const url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));
+    await ctx.audioWorklet.addModule(url);
+    capNode = new AudioWorkletNode(ctx, 'rk-cap', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: 1, channelCountMode: 'explicit' });
+    capNode.port.onmessage = onCapMsg; capNode.connect(ctx.destination);
+    monGain = ctx.createGain(); monGain.gain.value = $('#monitor').checked ? 1 : 0; monGain.connect(ctx.destination);
+    analyser = ctx.createAnalyser(); analyser.fftSize = 2048;
+    if (latencyMs == null) setLatency(Math.round(((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 2000 + 20));
+  }
+  if (ctx.state !== 'running') await ctx.resume();
+  return ctx;
+}
+
+async function listDevices(selId) {
+  try {
+    const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput');
+    const sel = $('#devSel'); sel.innerHTML = '';
+    devs.forEach((d, i) => sel.add(new Option(d.label || ('Eingang ' + (i + 1)), d.deviceId)));
+    if (!devs.length) sel.add(new Option('Kein Eingang gefunden', ''));
+    if (selId && devs.some(d => d.deviceId === selId)) sel.value = selId;
+  } catch (e) {}
+}
+async function openInput(id) {
+  try { await ensureCtx(); } catch (e) { return toast('Dein Browser unterstützt die Aufnahme nicht'); }
+  if (inStream) { inStream.getTracks().forEach(t => t.stop()); try { inSrc.disconnect(); } catch (e) {} inSrc = null; }
+  const base = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+  try {
+    inStream = await navigator.mediaDevices.getUserMedia({ audio: id ? { ...base, deviceId: { exact: id } } : base });
+  } catch (e) {
+    try { inStream = await navigator.mediaDevices.getUserMedia({ audio: base }); }
+    catch (e2) { $('#inStatus').textContent = 'Kein Zugriff'; return toast('Kein Zugriff auf den Eingang – Browser-Berechtigung prüfen'); }
+  }
+  inSrc = ctx.createMediaStreamSource(inStream);
+  inSrc.connect(analyser); inSrc.connect(capNode); inSrc.connect(monGain);
+  const tr = inStream.getAudioTracks()[0]; const sid = tr.getSettings().deviceId || '';
+  store.set('dev', sid); await listDevices(sid);
+  const chip = $('#inStatus'); chip.textContent = '● ' + (tr.label || 'Eingang aktiv'); chip.classList.add('on');
+  $('#inBtn').textContent = 'Neu verbinden'; $('#inBtn').classList.remove('primary');
+  meterLoop();
+}
+let meterOn = false, clipUntil = 0;
+function meterLoop() {
+  if (meterOn) return; meterOn = true; const buf = new Float32Array(2048); const bar = $('#meterBar'), clip = $('#clip');
+  (function f() {
+    if (!analyser) return requestAnimationFrame(f);
+    analyser.getFloatTimeDomainData(buf); let p = 0; for (let i = 0; i < buf.length; i++) { const a = Math.abs(buf[i]); if (a > p) p = a; }
+    const db = 20 * Math.log10(p + 1e-9); const w = Math.max(0, Math.min(1, (db + 60) / 60));
+    bar.style.width = (w * 100) + '%'; bar.style.background = db > -3 ? 'var(--red)' : db > -12 ? 'var(--amber)' : 'var(--green)';
+    if (p > 0.98) clipUntil = performance.now() + 1200; clip.classList.toggle('on', performance.now() < clipUntil);
+    requestAnimationFrame(f);
+  })();
+}
+
+/* Aufnahme-Puffer */
+let capChunks = [], capStartFrame = 0, capOnStart = null, capOnStop = null;
+function onCapMsg(e) { const m = e.data; if (m.t === 'data') capChunks.push(m.d); else if (m.t === 'started') { capStartFrame = m.frame; capOnStart && capOnStart(); } else if (m.t === 'stopped') capOnStop && capOnStop(); }
+function capStart() { capChunks = []; return new Promise(r => { capOnStart = r; capNode.port.postMessage('start'); }); }
+function capStop() {
+  return new Promise(r => { capOnStop = r; capNode.port.postMessage('stop'); }).then(() => {
+    let n = 0; for (const c of capChunks) n += c.length; const out = new Float32Array(n); let o = 0;
+    for (const c of capChunks) { out.set(c, o); o += c.length; } capChunks = []; return out; });
+}
+
+/* Klick & Einzähler */
+function click(t, accent) {
+  const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = accent ? 1760 : 1100;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(accent ? 0.7 : 0.45, t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.08);
+}
+async function countIn(bpm) {
+  await ensureCtx(); const beat = 60 / Math.max(30, Math.min(300, bpm || 120)); const t0 = ctx.currentTime + 0.1;
+  for (let i = 0; i < 4; i++) click(t0 + i * beat, i === 0);
+  await sleep(Math.max(0, (t0 + 4 * beat - 0.15 - ctx.currentTime) * 1000));
+}
+
+/* ---------- Aufnahme ---------- */
+let rec = null;
+function recUI(on) {
+  const b = $('#recBtn'); b.classList.toggle('on', on); b.textContent = on ? '■ Stopp' : '● Aufnahme';
+  $('#playBtn').disabled = on; $('#calBtn').disabled = on;
+  if (!on) { $('#recInfo').textContent = 'Startet bei A (falls gesetzt) und stoppt bei B'; }
+  updateTabUI();
+}
+async function startRec() {
+  if (!inSrc) { toast('Erst unten den Eingang aktivieren'); $('#inBtn').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  stopTake(); await ensureCtx();
+  const useGp = !!(gpApi && gpReady && gpSrc() === 'gp');
+  if (gpSrc() === 'gp' && !useGp) return toast('Tabs/Klänge laden noch …');
+  const hasVideo = !useGp && !!(player && playerReady && song.videoId);
+  rec = { mark: null, rate: 1, src: useGp ? 'gp' : hasVideo ? 'yt' : 'free', videoId: hasVideo ? song.videoId : null, t0: 0, endTick: null }; recUI(true);
+  if (hasVideo) {
+    player.pauseVideo(); player.seekTo(song.A != null ? song.A : curTime(), true); rec.rate = player.getPlaybackRate();
+  }
+  if (useGp) {
+    gpApi.pause(); const r = gpApi.playbackRange;
+    if (r && song.gpLoop) { gpApi.tickPosition = r.startTick; rec.endTick = r.endTick; }
+    rec.rate = gpApi.playbackSpeed || 1; gpApi.isLooping = false; gpApi.countInVolume = 0;
+  }
+  if (song.countIn) { $('#recInfo').textContent = 'Einzählen …'; await countIn(song.bpm * rec.rate); }
+  if (!rec) return;
+  await capStart(); rec.t0 = performance.now(); $('#recInfo').textContent = (hasVideo || useGp) ? 'Läuft – spiel mit!' : 'Läuft (ohne Video)';
+  if (useGp) {
+    const p = waitGpPos(gpApi.timePosition); gpApi.play();
+    try { const m = await p; if (rec && !rec.mark) rec.mark = m; }
+    catch (e) { toast('Tab-Wiedergabe startet nicht'); }
+  }
+  if (hasVideo) {
+    const p = waitPlaying(); player.playVideo();
+    try { const info = await p; if (rec && !rec.mark) rec.mark = info; }
+    catch (e) { toast('Video startet nicht – auf iPhone/iPad das Video einmal direkt antippen'); }
+  }
+}
+async function stopRec() {
+  if (!rec || rec.stopping) return; const r = rec; r.stopping = true;
+  if (!r.t0) { rec = null; recUI(false); return; }
+  const pcm = await capStop(); if (player && playerReady && r.videoId) player.pauseVideo();
+  if (r.src === 'gp' && gpApi) { gpApi.pause(); applyGpPlayer(); }
+  rec = null; recUI(false);
+  if (pcm.length < ctx.sampleRate * 0.3) return toast('Aufnahme zu kurz');
+  if (saveable(song)) await saveSong(true);
+  const take = { id: uid(), songId: takeKey(), date: Date.now(), sr: ctx.sampleRate, pcm, src: r.src, videoId: r.videoId, rate: r.rate,
+    markSample: r.mark ? Math.round(r.mark.ctxTime * ctx.sampleRate - capStartFrame) : null,
+    markVideoTime: r.mark && r.src === 'yt' ? r.mark.videoTime : null, markTabMs: r.mark && r.src === 'gp' ? r.mark.tabMs : null };
+  try { await DB.put('takes', take); toast('Take gespeichert'); } catch (e) { toast('Speichern fehlgeschlagen – Gerätespeicher voll?'); }
+  renderTakes();
+}
+
+/* ---------- Takes ---------- */
+let playSrc = null, takeWithVideo = false;
+function stopTake() {
+  takeWithVideo = false;
+  if (takeWithTab) { takeWithTab = false; if (gpApi) { gpApi.pause(); applyGpPlayer(); } }
+  if (playSrc) { const s = playSrc; playSrc = null; try { s.stop(); } catch (e) {} } $('#stopTake').hidden = true; }
+async function playTake(t, withVideo) {
+  await ensureCtx(); stopTake();
+  const buf = ctx.createBuffer(1, t.pcm.length, t.sr); buf.copyToChannel(t.pcm, 0);
+  const s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination);
+  s.onended = () => { if (playSrc === s) { playSrc = null; $('#stopTake').hidden = true; } };
+  if (!withVideo) { playSrc = s; s.start(); $('#stopTake').hidden = false; if (playing) player.pauseVideo(); if (gpApi && gpState === 1 && gpSrc() === 'gp') gpApi.pause(); return; }
+  if (t.src === 'gp') {
+    if (!gpApi || !gpReady || gpSrc() !== 'gp') return toast('Dafür unter Tabs „GP-Backing“ wählen');
+    gpApi.pause(); gpApi.isLooping = false; gpApi.countInVolume = 0; gpApi.playbackSpeed = t.rate; gpApi.timePosition = t.markTabMs;
+    const pg = waitGpPos(t.markTabMs); gpApi.play(); let gi;
+    try { gi = await pg; } catch (e) { return toast('Tab-Wiedergabe startet nicht'); }
+    playSrc = s; takeWithTab = true; $('#stopTake').hidden = false;
+    const goff = t.markSample / t.sr + (latencyMs || 0) / 1000 + (gi.tabMs - t.markTabMs) / 1000 / t.rate;
+    const gnow = ctx.currentTime; if (goff >= 0) s.start(gnow, goff); else s.start(gnow - goff, 0);
+    return;
+  }
+  if (!player || !playerReady || song.videoId !== t.videoId) return toast('Passendes Video ist nicht geladen');
+  player.pauseVideo(); song.rate = t.rate; applyRate(); player.seekTo(t.markVideoTime, true);
+  const p = waitPlaying(); player.playVideo(); let info;
+  try { info = await p; } catch (e) { return toast('Video startet nicht – einmal direkt aufs Video tippen'); }
+  playSrc = s; takeWithVideo = true; $('#stopTake').hidden = false;
+  const off = t.markSample / t.sr + (latencyMs || 0) / 1000 + (info.videoTime - t.markVideoTime) / t.rate;
+  const now = ctx.currentTime; if (off >= 0) s.start(now, off); else s.start(now - off, 0);
+}
+function wavBlob(pcm, sr) {
+  const n = pcm.length, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0, o = 44; i < n; i++, o += 2) { const x = Math.max(-1, Math.min(1, pcm[i])); v.setInt16(o, x < 0 ? x * 0x8000 : x * 0x7fff, true); }
+  return new Blob([buf], { type: 'audio/wav' });
+}
+function dlWav(t, num) {
+  const base = ((song && song.title) || 'riffkoje').replace(/[^\wäöüÄÖÜß\- ]+/g, '').trim().replace(/\s+/g, '_') || 'riffkoje';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(wavBlob(t.pcm, t.sr)); a.download = base + '_Take' + num + '.wav';
+  document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 3000);
+}
+function mkBtn(label, fn, cls) { const b = document.createElement('button'); b.className = 'ghost' + (cls ? ' ' + cls : ''); b.textContent = label; b.onclick = fn; return b; }
+async function renderTakes() {
+  const ul = $('#takes'); const list = (await DB.bySong(takeKey())).sort((a, b) => b.date - a.date); ul.innerHTML = '';
+  if (!list.length) { const li = document.createElement('li'); li.className = 'empty muted'; li.textContent = 'Noch keine Takes für diesen Song'; ul.append(li); return; }
+  list.forEach((t, i) => {
+    const num = list.length - i; const li = document.createElement('li');
+    const meta = document.createElement('div'); meta.className = 'tmeta';
+    const b = document.createElement('b'); b.textContent = 'Take ' + num;
+    const sm = document.createElement('span'); sm.className = 'muted';
+    sm.textContent = new Date(t.date).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' · ' + fmt(t.pcm.length / t.sr, 0) + ' · ' + Math.round(t.rate * 100) + ' %';
+    meta.append(b, sm);
+    const btns = document.createElement('div'); btns.className = 'tbtns';
+    const synced = t.markSample != null && (t.videoId || t.src === 'gp');
+    if (synced) btns.append(mkBtn(t.src === 'gp' ? '▶ mit Tab' : '▶ mit Video', () => playTake(t, true)));
+    btns.append(mkBtn(synced ? '▶ solo' : '▶ Abspielen', () => playTake(t, false)));
+    btns.append(mkBtn('WAV', () => dlWav(t, num)));
+    btns.append(mkBtn('✕', async () => { if (confirm('Take ' + num + ' löschen?')) { await DB.del('takes', t.id); renderTakes(); } }, 'danger'));
+    li.append(meta, btns); ul.append(li);
+  });
+}
+
+/* ---------- Latenz ---------- */
+function setLatency(v, silent) {
+  latencyMs = Math.round(v); store.set('latency', latencyMs);
+  $('#latVal').textContent = latencyMs + ' ms'; $('#latSlider').value = latencyMs;
+}
+async function calibrate() {
+  if (!inSrc) return toast('Erst den Eingang aktivieren');
+  if (rec) return; await ensureCtx(); stopTake(); if (playing) player.pauseVideo();
+  const btn = $('#calBtn'), info = $('#calInfo'); btn.disabled = true; $('#recBtn').disabled = true;
+  info.textContent = 'Zwei Vorzähl-Klicks, dann auf jeden Klick kurz anschlagen …';
+  await capStart(); const sr = ctx.sampleRate, beat = 0.6, t0 = ctx.currentTime + 1.2, clicks = [];
+  for (let i = 0; i < 10; i++) { const t = t0 + i * beat; click(t, i < 2); if (i >= 2) clicks.push(t); }
+  await sleep((t0 + 10 * beat + 0.6 - ctx.currentTime) * 1000);
+  const pcm = await capStop(); btn.disabled = false; $('#recBtn').disabled = false;
+  const F = 64, env = new Float32Array(Math.ceil(pcm.length / F)); let peak = 0;
+  for (let i = 0; i < pcm.length; i++) { const a = Math.abs(pcm[i]); const f = (i / F) | 0; if (a > env[f]) env[f] = a; if (a > peak) peak = a; }
+  if (peak < 0.02) { info.textContent = 'Kein Signal erkannt – ist der Eingang richtig gewählt?'; return; }
+  const thr = peak * 0.35, offs = [];
+  for (const c of clicks) {
+    const ci = c * sr - capStartFrame; const f0 = Math.max(9, Math.floor((ci - 0.12 * sr) / F)), f1 = Math.min(env.length, Math.ceil((ci + 0.45 * sr) / F));
+    for (let f = f0; f < f1; f++) {
+      if (env[f] > thr) { let prev = 0; for (let k = f - 8; k < f; k++) prev = Math.max(prev, env[k]); if (prev < thr * 0.6) { offs.push(((f * F) - ci) / sr * 1000); break; } }
+    }
+  }
+  if (offs.length < 5) { info.textContent = 'Nur ' + offs.length + ' Anschläge erkannt – bitte nochmal, kräftig und gedämpft.'; return; }
+  offs.sort((a, b) => a - b); const med = offs[offs.length >> 1]; const spread = Math.round((offs[offs.length - 1] - offs[0]) / 2);
+  setLatency(med);
+  info.textContent = 'Gemessen: ' + Math.round(med) + ' ms aus ' + offs.length + ' Anschlägen (Streuung ±' + spread + ' ms).' + (spread > 40 ? ' Recht unruhig – ggf. wiederholen.' : '');
+}
+
+/* ---------- Tabs & Noten (alphaTab) ---------- */
+const AT_CDN = 'https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.6.3/dist/';
+let atLoading = null, gpApi = null, gpScore = null, gpReady = false, gpState = 0, gpPosWaiters = [], takeWithTab = false, lastExtMs = -1;
+const gpSrc = () => (song && song.gp) ? (song.gpSrc || 'gp') : null;
+const gpExt = () => !!(gpApi && gpScore && gpSrc() === 'yt');
+function viewProfile(v) { const P = alphaTab.StaveProfile; return v === 'score' ? P.Score : v === 'both' ? P.ScoreTab : P.Tab; }
+function showTabLoad(t) { const e = $('#tabLoad'); e.textContent = t; e.hidden = false; }
+function hideTabLoad() { $('#tabLoad').hidden = true; }
+function loadAlphaTab() {
+  if (window.alphaTab) return Promise.resolve();
+  if (!atLoading) atLoading = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = AT_CDN + 'alphaTab.min.js';
+    s.onload = res; s.onerror = () => { atLoading = null; s.remove(); rej(new Error('cdn')); }; document.head.append(s);
+  });
+  return atLoading;
+}
+function gpDestroy() {
+  if (gpApi) { try { gpApi.destroy(); } catch (e) {} }
+  gpApi = null; gpScore = null; gpReady = false; gpState = 0; gpPosWaiters = []; lastExtMs = -1;
+  $('#atHost').innerHTML = ''; hideTabLoad();
+}
+async function gpBuild() {
+  gpDestroy(); updateTabUI();
+  if (!song || !song.gp) return;
+  const mySong = song; showTabLoad('Tab-Bibliothek wird geladen …');
+  try { await loadAlphaTab(); } catch (e) { showTabLoad('Tab-Bibliothek nicht erreichbar – Internet nötig'); return; }
+  if (song !== mySong) return;
+  const at = alphaTab, ext = gpSrc() === 'yt';
+  const api = new at.AlphaTabApi($('#atHost'), {
+    core: { fontDirectory: AT_CDN + 'font/', scriptFile: AT_CDN + 'alphaTab.min.js' },
+    display: { scale: song.gpZoom || 1, layoutMode: at.LayoutMode.Page, staveProfile: viewProfile(song.gpView) },
+    player: {
+      playerMode: ext ? at.PlayerMode.EnabledExternalMedia : at.PlayerMode.EnabledSynthesizer,
+      soundFont: AT_CDN + 'soundfont/sonivox.sf2', scrollElement: $('#tabView'), scrollMode: at.ScrollMode.Continuous,
+      scrollOffsetY: -40, enableCursor: true, enableAnimatedBeatCursor: true, enableUserInteraction: true
+    }
+  });
+  gpApi = api;
+  api.error.on(e => { console.error(e); showTabLoad('Fehler: Datei konnte nicht gelesen werden'); });
+  api.scoreLoaded.on(sc => { if (gpApi !== api) return; gpScore = sc; onScore(sc); if (ext) attachExt(); updateTabUI(); });
+  api.renderStarted.on(() => showTabLoad('Tabs werden gezeichnet …'));
+  api.renderFinished.on(() => { if (gpReady || ext) hideTabLoad(); else showTabLoad('Klänge werden geladen …'); });
+  if (api.soundFontLoad) api.soundFontLoad.on(e => { if (e.total) showTabLoad('Klänge laden … ' + Math.round(e.loaded / e.total * 100) + ' %'); });
+  api.playerReady.on(() => { if (gpApi !== api) return; gpReady = true; hideTabLoad(); applyMix(); applyGpPlayer(); if (ext) attachExt(); updateTabUI(); });
+  api.playerStateChanged.on(e => { if (gpApi !== api) return; gpState = e.state; onGpState(e); updateTabUI(); });
+  api.playerPositionChanged.on(onGpPos);
+  api.playerFinished.on(() => { if (rec && rec.src === 'gp' && rec.t0) stopRec(); if (takeWithTab) stopTake(); });
+  if (ext) attachExt();
+  const tr = song.gpTrack || 0;
+  api.load(new Uint8Array(song.gp), [tr]);
+}
+function onScore(sc) {
+  const sel = $('#trackSel'); sel.innerHTML = '';
+  sc.tracks.forEach(t => sel.add(new Option((t.index + 1) + ' · ' + (t.name || 'Spur'), t.index)));
+  if (!sc.tracks[song.gpTrack || 0]) song.gpTrack = 0;
+  sel.value = song.gpTrack || 0;
+  let changed = false;
+  if (song.gpTitleAuto && sc.title) { song.title = [sc.title, sc.artist].filter(Boolean).join(' – '); $('#title').value = song.title; delete song.gpTitleAuto; changed = true; }
+  if (song.gpNewFile) { if (sc.tempo) { song.bpm = Math.round(sc.tempo); $('#bpm').value = song.bpm; } delete song.gpNewFile; changed = true; }
+  if (changed) saveSong();
+  renderMixer();
+}
+function applyGpPlayer() {
+  if (!gpApi || gpSrc() !== 'gp') return;
+  gpApi.playbackSpeed = song.gpSpeed || 1;
+  gpApi.metronomeVolume = song.gpMetro ? 1 : 0;
+  gpApi.countInVolume = song.countIn ? 1 : 0;
+  gpApi.isLooping = !!song.gpLoop;
+}
+function applyMix() {
+  if (!gpApi || !gpScore || gpSrc() !== 'gp') return;
+  const mix = song.gpMix || {};
+  for (const t of gpScore.tracks) { const st = mix[t.index] || {}; try { gpApi.changeTrackMute([t], !!st.m); gpApi.changeTrackSolo([t], !!st.s); } catch (e) {} }
+}
+function renderMixer() {
+  const box = $('#mixer'); box.innerHTML = ''; if (!gpScore) return;
+  const mix = song.gpMix || (song.gpMix = {});
+  const cur = document.createElement('button'); cur.className = 'ghost small'; cur.textContent = 'Angezeigte Spur stumm (zum Mitspielen)';
+  cur.onclick = () => { const i = song.gpTrack || 0; mix[i] = { ...(mix[i] || {}), m: true }; renderMixer(); applyMix(); saveSong(); toast('Spur ' + (i + 1) + ' stumm'); };
+  box.append(cur);
+  for (const t of gpScore.tracks) {
+    const st = mix[t.index] || {}; const row = document.createElement('div'); row.className = 'mrow' + (t.index === (song.gpTrack || 0) ? ' cur' : '');
+    const name = document.createElement('span'); name.textContent = (t.index + 1) + ' · ' + (t.name || 'Spur');
+    const mk = (k, label) => { const b = document.createElement('button'); b.className = 'ghost ms ' + k + (st[k] ? ' on' : ''); b.textContent = label;
+      b.onclick = () => { mix[t.index] = { ...(mix[t.index] || {}), [k]: !st[k] }; renderMixer(); applyMix(); saveSong(); }; return b; };
+    row.append(name, mk('m', 'M'), mk('s', 'S')); box.append(row);
+  }
+}
+function attachExt() {
+  const out = gpApi && gpApi.player && gpApi.player.output; if (!out) return;
+  out.handler = {
+    get backingTrackDuration() { const d = (player && playerReady) ? (player.getDuration() || 0) : 0; return Math.max(0, (d - (song.gpOffset || 0)) * 1000); },
+    get playbackRate() { return 1; }, set playbackRate(v) {},
+    get masterVolume() { return 1; }, set masterVolume(v) {},
+    seekTo(ms) { if (player && playerReady) { player.seekTo((song.gpOffset || 0) + ms / 1000, true); lastExtMs = -1; } },
+    play() { if (player && playerReady && !playing && !rec) player.playVideo(); },
+    pause() { if (player && playerReady && playing && !rec) player.pauseVideo(); }
+  };
+}
+function extTick() {
+  if (!gpExt() || !player || !playerReady) return;
+  const out = gpApi.player && gpApi.player.output; if (!out || !out.updatePosition) return;
+  const ms = Math.max(0, (curTime() - (song.gpOffset || 0)) * 1000);
+  if (Math.abs(ms - lastExtMs) > 1) { lastExtMs = ms; try { out.updatePosition(ms); } catch (e) {} }
+}
+function onGpPos(e) {
+  if (gpSrc() === 'gp') $('#tPos').textContent = fmt(e.currentTime / 1000, 0) + ' / ' + fmt(e.endTime / 1000, 0);
+  if (gpState === 1 && !e.isSeek && gpPosWaiters.length) { const ws = gpPosWaiters; gpPosWaiters = []; ws.forEach(w => w(e)); }
+  if (rec && rec.src === 'gp' && rec.t0 && rec.endTick != null && e.currentTick >= rec.endTick) stopRec();
+}
+function onGpState(e) {
+  if (gpSrc() !== 'gp' || e.state !== 0) return;
+  if (takeWithTab) stopTake();
+  if (rec && rec.src === 'gp' && rec.t0 && rec.mark && !rec.stopping) stopRec();
+}
+function waitGpPos(startMs, ms = 10000) {
+  return new Promise((res, rej) => {
+    let done = false;
+    const f = e => { if (done) return; if (e.currentTime <= startMs + 1) { gpPosWaiters.push(f); return; } done = true; clearTimeout(to); res({ ctxTime: ctx.currentTime, tabMs: e.currentTime }); };
+    gpPosWaiters.push(f);
+    const to = setTimeout(() => { done = true; rej(new Error('timeout')); }, ms);
+  });
+}
+function updateTabUI() {
+  const has = !!(song && song.gp), src = gpSrc();
+  $('#tabEmpty').hidden = has; $('#tabBar').hidden = !has; $('#gpOpts').hidden = !has; $('#srcRow').hidden = !has; $('#gpRemove').hidden = !has;
+  $('#gpOpenLbl').lastChild.textContent = has ? 'Andere GP-Datei' : 'GP-Datei öffnen';
+  $('#gpName').textContent = has ? song.gpName || '' : '';
+  if (!has) return;
+  document.querySelectorAll('#srcSeg button').forEach(b => b.classList.toggle('on', b.dataset.src === src));
+  document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (song.gpView || 'tab')));
+  $('#gpOnly').hidden = src !== 'gp'; $('#ytOnly').hidden = src !== 'yt';
+  $('#offVal').textContent = fmt(song.gpOffset || 0, 2);
+  $('#gpSpeed').value = String(song.gpSpeed || 1); $('#gpMetro').checked = !!song.gpMetro; $('#gpLoop').checked = !!song.gpLoop;
+  const isPlay = src === 'gp' ? gpState === 1 : playing;
+  $('#tPlay').textContent = isPlay ? '⏸' : '▶';
+  $('#tRec').classList.toggle('on', !!rec);
+  if (src === 'yt') $('#tPos').textContent = fmt(curTime(), 0);
+  $('#gpHint').textContent = src === 'gp'
+    ? 'Tipp: Mit Maus/Finger über Takte ziehen markiert eine Auswahl. Tippen auf eine Note springt dorthin. Im Mixer deine Gitarrenspur stumm schalten und zum Backing spielen.'
+    : 'Video an den Anfang von Takt 1 stellen und „= jetzt“ tippen. Danach läuft der Tab-Cursor mit dem Video. Tippen auf eine Note spult das Video dorthin.';
+}
+(function initGpSpeed() { const s = $('#gpSpeed'); [0.25, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.25].forEach(v => s.add(new Option(Math.round(v * 100) + ' %', String(v)))); s.value = '1'; })();
+
+$('#gpFile').onchange = async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (f.size > 30e6) return toast('Datei ist zu groß');
+  stopTake(); if (rec) return toast('Erst die Aufnahme stoppen');
+  song.gp = await f.arrayBuffer(); song.gpName = f.name; song.gpTrack = 0; song.gpMix = {}; song.gpNewFile = true;
+  if (!song.gpSrc) song.gpSrc = 'gp';
+  if (!song.title.trim()) { song.title = f.name.replace(/\.[^.]+$/, ''); song.gpTitleAuto = true; $('#title').value = song.title; }
+  await saveSong(true); gpBuild();
+};
+$('#gpRemove').onclick = async () => {
+  if (!confirm('GP-Datei aus diesem Song entfernen?')) return;
+  stopTake(); gpDestroy(); delete song.gp; delete song.gpName; await saveSong(true); updateTabUI();
+};
+document.querySelectorAll('#srcSeg button').forEach(b => b.onclick = () => {
+  if (rec) return; if (b.dataset.src === gpSrc()) return;
+  stopTake(); if (playing && player) player.pauseVideo();
+  song.gpSrc = b.dataset.src; saveSong(); gpBuild();
+  if (song.gpSrc === 'yt' && !song.videoId) toast('Lade oben noch ein YouTube-Video');
+});
+document.querySelectorAll('#viewSeg button').forEach(b => b.onclick = () => {
+  song.gpView = b.dataset.v; saveSong(); updateTabUI();
+  if (gpApi && window.alphaTab) { gpApi.settings.display.staveProfile = viewProfile(song.gpView); gpApi.updateSettings(); gpApi.render(); }
+});
+function setZoom(d) {
+  song.gpZoom = Math.round(Math.max(0.5, Math.min(2.5, (song.gpZoom || 1) + d)) * 100) / 100; saveSong();
+  if (gpApi) { gpApi.settings.display.scale = song.gpZoom; gpApi.updateSettings(); gpApi.render(); }
+  toast('Zoom ' + Math.round(song.gpZoom * 100) + ' %', 900);
+}
+$('#zIn').onclick = () => setZoom(0.15);
+$('#zOut').onclick = () => setZoom(-0.15);
+$('#trackSel').onchange = e => {
+  song.gpTrack = +e.target.value; saveSong(); renderMixer();
+  if (gpApi && gpScore) gpApi.renderTracks([gpScore.tracks[song.gpTrack]]);
+};
+$('#bigBtn').onclick = () => {
+  const on = !$('#tabCard').classList.contains('big');
+  $('#tabCard').classList.toggle('big', on); document.body.classList.toggle('bigmode', on);
+  $('#bigBtn').textContent = on ? '✕ Klein' : '⛶ Groß';
+  if (gpApi) setTimeout(() => { try { gpApi.render(); } catch (e) {} }, 60);
+};
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('#tabCard').classList.contains('big')) $('#bigBtn').click();
+  if (e.code === 'Space' && song && song.gp && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); $('#tPlay').click(); }
+});
+$('#tPlay').onclick = () => {
+  if (gpSrc() === 'yt') return $('#playBtn').click();
+  if (!gpReady) return toast('Tabs/Klänge laden noch …');
+  if (rec) return;
+  stopTake(); if (gpState !== 1) applyGpPlayer(); gpApi.playPause();
+};
+$('#tStop').onclick = () => {
+  if (gpSrc() === 'yt') { if (player && playerReady) { player.pauseVideo(); player.seekTo(song.A != null ? song.A : (song.gpOffset || 0), true); } return; }
+  if (gpApi && !rec) { stopTake(); gpApi.stop(); }
+};
+$('#tRec').onclick = () => $('#recBtn').click();
+$('#gpSpeed').onchange = e => { song.gpSpeed = +e.target.value; saveSong(); if (gpApi && gpSrc() === 'gp') gpApi.playbackSpeed = song.gpSpeed; };
+$('#gpMetro').onchange = e => { song.gpMetro = e.target.checked; saveSong(); if (gpApi && gpSrc() === 'gp') gpApi.metronomeVolume = song.gpMetro ? 1 : 0; };
+$('#gpLoop').onchange = e => { song.gpLoop = e.target.checked; saveSong(); if (gpApi && gpSrc() === 'gp') gpApi.isLooping = song.gpLoop; if (song.gpLoop && gpApi && !gpApi.playbackRange) toast('Jetzt Takte in der Tab markieren'); };
+$('#gpClrSel').onclick = () => {
+  if (!gpApi) return; gpApi.playbackRange = null;
+  try { if (gpApi.clearPlaybackRangeHighlight) gpApi.clearPlaybackRangeHighlight(); else gpApi.render(); } catch (e) {}
+};
+$('#offSet').onclick = () => { if (!player || !playerReady) return toast('Erst oben ein Video laden'); song.gpOffset = Math.round(curTime() * 100) / 100; lastExtMs = -1; saveSong(); updateTabUI(); toast('Takt 1 = ' + fmt(song.gpOffset, 2)); };
+document.querySelectorAll('[data-off]').forEach(b => b.onclick = () => { song.gpOffset = Math.max(0, Math.round(((song.gpOffset || 0) + +b.dataset.off) * 100) / 100); lastExtMs = -1; saveSong(); updateTabUI(); });
+
+/* ---------- Bedienung ---------- */
+$('#songSel').onchange = e => { const s = songs.find(x => x.id === e.target.value); if (s) { stopTake(); applySong(s); store.set('lastSong', s.id); } };
+$('#newSong').onclick = () => { stopTake(); applySong(blankSong()); $('#title').focus(); };
+$('#delSong').onclick = async () => {
+  if (!songs.some(s => s.id === song.id)) { applySong(blankSong()); return; }
+  if (!confirm('„' + (song.title || 'Song') + '“ samt aller Takes löschen?')) return;
+  for (const t of await DB.bySong(song.id)) await DB.del('takes', t.id);
+  await DB.del('songs', song.id); await refreshSongs(); applySong(blankSong()); toast('Song gelöscht');
+};
+$('#title').oninput = e => { song.title = e.target.value; saveSong(); };
+$('#loadUrl').onclick = () => {
+  const u = $('#url').value, id = parseYT(u); if (!id) return toast('Kein gültiger YouTube-Link');
+  if (id !== song.videoId) { song.A = null; song.B = null; updateAB(); }
+  song.url = u.trim(); song.videoId = id; saveSong(true).then(renderTakes); loadVideo(id);
+};
+$('#url').onkeydown = e => { if (e.key === 'Enter') $('#loadUrl').click(); };
+$('#bpm').oninput = e => { song.bpm = +e.target.value || 120; saveSong(); };
+$('#countIn').onchange = e => { song.countIn = e.target.checked; saveSong(); };
+$('#tuning').oninput = e => { song.tuning = e.target.value; saveSong(); };
+$('#notes').oninput = e => { song.notes = e.target.value; saveSong(); };
+$('#rate').onchange = e => { song.rate = +e.target.value; if (player && playerReady) player.setPlaybackRate(song.rate); saveSong(); };
+$('#setA').onclick = () => { if (!playerReady) return toast('Erst ein Video laden'); setPoint('A', curTime()); };
+$('#setB').onclick = () => { if (!playerReady) return toast('Erst ein Video laden'); setPoint('B', curTime()); };
+document.querySelectorAll('[data-n]').forEach(b => b.onclick = () => {
+  const [w, d] = b.dataset.n.split(','); const cur = song[w]; if (cur == null) return toast(w + ' ist noch nicht gesetzt'); setPoint(w, cur + +d);
+});
+$('#clrAB').onclick = () => { song.A = null; song.B = null; updateAB(); saveSong(); };
+$('#toA').onclick = () => { if (playerReady) player.seekTo(song.A != null ? song.A : 0, true); };
+$('#playBtn').onclick = async () => {
+  if (!player || !playerReady) return toast('Erst ein Video laden');
+  if (playing) { player.pauseVideo(); return; }
+  stopTake();
+  if (song.countIn) { try { await countIn(song.bpm * player.getPlaybackRate()); } catch (e) {} }
+  player.playVideo();
+};
+$('#recBtn').onclick = () => rec ? stopRec() : startRec();
+$('#stopTake').onclick = () => { const v = takeWithVideo; stopTake(); if (v && playing) player.pauseVideo(); };
+$('#stopTake').hidden = true;
+$('#inBtn').onclick = () => openInput($('#devSel').value || store.get('dev', ''));
+$('#devSel').onchange = e => { if (inStream) openInput(e.target.value); };
+$('#monitor').onchange = e => { if (monGain) monGain.gain.value = e.target.checked ? 1 : 0; if (e.target.checked) toast('Nur mit Kopfhörern – sonst pfeift es'); };
+$('#calBtn').onclick = calibrate;
+$('#latSlider').oninput = e => setLatency(+e.target.value);
+if (navigator.mediaDevices) navigator.mediaDevices.ondevicechange = () => listDevices($('#devSel').value);
+
+setInterval(() => {
+  if (player && playerReady) {
+    const t = curTime(); $('#clock').textContent = fmt(t);
+    if (playing && song.B != null) {
+      if (rec && rec.t0 && rec.mark && t >= song.B) stopRec();
+      else if (!rec && !takeWithVideo && $('#loop').checked && song.A != null && t >= song.B) player.seekTo(song.A, true);
+    }
+  }
+  if (rec && rec.t0) $('#recTime').textContent = fmt((performance.now() - rec.t0) / 1000, 0);
+  extTick();
+  if (gpSrc() === 'yt' && playing) $('#tPos').textContent = fmt(curTime(), 0);
+}, 40);
+
+(async () => {
+  try { await DB.open(); } catch (e) { toast('Lokaler Speicher nicht verfügbar'); }
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  await refreshSongs();
+  const last = store.get('lastSong', null); applySong(songs.find(x => x.id === last) || blankSong());
+  if (latencyMs == null) { $('#latVal').textContent = 'offen'; $('#latSlider').value = 0; } else setLatency(latencyMs);
+  const tag = document.createElement('script'); tag.src = 'https://www.youtube.com/iframe_api'; document.head.append(tag);
+  
+  try { const p = await navigator.permissions.query({ name: 'microphone' }); if (p.state === 'granted') listDevices(store.get('dev', '')); } catch (e) {}
+})();
+</script>
+</body>
+</html>
