@@ -82,6 +82,13 @@
   input[type=checkbox],input[type=radio]{width:18px;height:18px;accent-color:var(--accent)}
   .notice{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-size:.9rem;overflow-wrap:anywhere}
   .notice.bad{border-color:var(--bad);color:var(--bad)}
+  .exgoal{padding:10px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--surface);display:grid;gap:6px}
+  .exgoal .t{font-weight:600}.exgoal .dots{display:flex;gap:6px;flex-wrap:wrap}
+  .exgoal .dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.8rem;font-weight:700}
+  .exgoal .dot.on{background:var(--ok);border-color:var(--ok);color:var(--on-accent)}
+  .exgoal .w{font-size:.88rem;color:var(--muted)}
+  .exgoal.done{border-color:var(--ok)}
+  body.pult .exgoal{display:none!important}
   .grp{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
   .grp .lab,.lab{font-size:.8rem;color:var(--muted)}
   .settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 18px}
@@ -218,7 +225,9 @@
   /* Vollbild-Pult */
   body.pult{overflow:hidden;padding-inline:0}
   body.pult .wrap{max-width:none;padding:0;gap:0}
-  body.pult .wrap>*:not(#sec-player){display:none!important}
+  body.pult .wrap>*:not(#tab-play){display:none!important}
+  body.pult #tab-play>*:not(#sec-player){display:none!important}
+  body.pult #mknav,body.pult #mksub{display:none!important}
   body.pult #sec-player>*:not(#paper):not(#hud):not(#msg):not(#pult-exit){display:none!important}
   body.pult #paper{position:fixed;inset:0;z-index:50;margin:0;border:0;border-radius:0;box-shadow:none;padding:14px 18px 84px;min-height:0;overflow:hidden}
   body.pult #stage{transition:none}
@@ -228,7 +237,7 @@
   body.pult #hud .bpm{min-width:6em}
   body.pult .adv{display:none}
   body.pult .pultonly{display:flex}
-  body.pult #msg:not([hidden]){display:block;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:70;width:max-content;max-width:min(680px,calc(100vw - 120px));box-shadow:0 4px 16px rgba(0,0,0,.25);background:var(--surface);color:var(--ink)}
+  body.pult #msg:not([hidden]){display:block;position:fixed;top:12px;left:12px;z-index:70;width:max-content;max-width:min(680px,calc(100vw - 190px));box-shadow:0 4px 16px rgba(0,0,0,.25);background:var(--surface);color:var(--ink)}
   body.pult #msg.bad{color:var(--bad)}
   #pult-exit{display:none}
   body.pult #pult-exit{display:inline-flex;position:fixed;top:12px;right:12px;z-index:61;transition:opacity .25s}
@@ -484,6 +493,7 @@
     <p class="hint" id="modehint"></p>
     <div class="legend" id="legend" hidden><span class="h">getroffen</span><span class="u">zu hoch</span><span class="d">zu tief</span><span class="r">erst nach Fehlversuch</span><span class="m">verfehlt</span></div>
     <div id="msg" class="notice" hidden></div>
+    <div id="exgoal" class="exgoal" hidden></div>
     <details class="card" id="fbcard" open>
       <summary>Griffbrett: wo spiele ich diesen Ton?</summary>
       <div id="fb-svg"></div>
@@ -1853,7 +1863,7 @@ function relayout(force){
   if(force||Math.abs($('#osmd').clientWidth-S.renderW)>30)renderScore(q);
   else{layoutPages();S.viewKey='';S.lastSys=-1;if(S.events.length)drawCursor(S.events[S.idx].q)}
 }
-window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){relayout(false)},300)});
+window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if(typeof hudPad==='function')hudPad();relayout(false)},300)});
 
 /* ───────── Vollbild-Pult ───────── */
 var hudT=0;
@@ -1878,8 +1888,16 @@ function setPgMode(m){
 $('#pg-mode').onclick=function(){setPgMode(S.pgMode==='page'?'scroll':'page')};
 $('#pgsel').addEventListener('change',function(e){setPgMode(e.target.value)});
 
+function hudPad(){
+  var p=$('#paper'),h=$('#hud');
+  if(!S.pult){p.style.paddingBottom='';return false}
+  var want=Math.ceil(h.getBoundingClientRect().height)+26+'px';
+  if(p.style.paddingBottom===want)return false;
+  p.style.paddingBottom=want;return true;
+}
+if(window.ResizeObserver){try{new ResizeObserver(function(){if(hudPad()){clearTimeout(hudPad.t);hudPad.t=setTimeout(function(){relayout(false)},120)}}).observe($('#hud'))}catch(e){}}
 function afterPultChange(){
-  hudPoke();
+  hudPad();hudPoke();
   setTimeout(function(){relayout(true)},260);
 }
 async function enterPult(){
@@ -2308,7 +2326,7 @@ applyKey();
 
 /* ───────── Lernen: Fortschritt, Lehrplan, Quiz, Tagesplan, Coach (nur App-Version) ───────── */
 var P=lsGet('gp.prog',{});
-['lessons','badges','quiz','goalDone','dq','best','rec','sc'].forEach(function(k){if(!P[k]||typeof P[k]!=='object')P[k]={}});
+['lessons','badges','quiz','goalDone','dq','best','rec','sc','reps'].forEach(function(k){if(!P[k]||typeof P[k]!=='object')P[k]={}});
 P.xp=P.xp||0;P.goal=P.goal||15;
 function saveP(){lsSet('gp.prog',P)}
 var LVT=['Leersaite','Anfänger','Tonleiter-Läufer','Taktgeber','Saitenspringer','Bogenführer','Melodiespieler','Tonartenkenner','Ensemble-Geiger','Virtuose in spe'];
@@ -2437,6 +2455,21 @@ var LESSONS=[
 ];
 function lessonBy(id){return LESSONS.find(function(l){return l.id===id})}
 function nextLesson(){return LESSONS.find(function(l){return !P.lessons[l.id]})}
+function exGoal(id){var l=lessonBy(id);return (l&&l.goal)||3}
+function exBanner(id,msg,fin){
+  var el=$('#exgoal');if(!el)return;
+  if(!id){el.hidden=true;return}
+  var l=lessonBy(id),g=exGoal(id),n=Math.min(g,P.reps[id]||0),done=!!P.lessons[id],h='';
+  for(var i=0;i<g;i++)h+='<span class="dot'+((done||i<n)?' on':'')+'">'+((done||i<n)?'✓':(i+1))+'</span>';
+  var nx=nextLesson();
+  el.className='exgoal'+(done?' done':'');
+  el.innerHTML='<div class="t">'+(done?'✓ Lektion geschafft: ':'Aufgabe: ')+esc(l.t)+'</div>'
+   +'<div class="dots" aria-label="'+(done?g:n)+' von '+g+' Durchgängen">'+h+'</div>'
+   +'<div class="w">'+esc(msg||(done?'Gut gemacht.':'Spiele die Übung '+g+'-mal sauber durch (mindestens die Hälfte der Töne beim ersten Versuch richtig). Fertig: '+n+' von '+g+'.'))+'</div>'
+   +(done&&nx?'<div class="row"><button class="btn small primary" type="button" id="ex-next" data-l="'+nx.id+'">Nächste Lektion: '+esc(nx.t)+'</button></div>':'')
+   +(done&&!nx?'<div class="w">Das war die letzte Lektion. Stark!</div>':'');
+  el.hidden=false;
+}
 function completeLesson(id,half,why){
   if(P.lessons[id]||!lessonBy(id))return false;
   P.lessons[id]={d:today(),half:!!half};saveP();addXp(half?20:40,'Lektion: '+lessonBy(id).t);return true;
@@ -2466,7 +2499,8 @@ async function loadExercise(spec,ctx){
   S.exercise={spec:spec,ctx:ctx||{}};
   if(S.bpm!==ex.bpm&&typeof setTempo==='function'){try{setTempo(ex.bpm)}catch(e){}}
   setMode((ctx&&ctx.mode)||'wait');
-  note($('#msg'),'Übung geladen: '+ex.title+'. Schalte das Mikro ein und spiele. Ab ca. 50 % gleich richtig (Warten) oder 60 % Treffer (Mitspielen) gilt sie als geschafft.');
+  note($('#msg'),'Übung geladen: '+ex.title+'. Schalte das Mikro ein und spiele. Ab ca. 50 % gleich richtig (Warten) oder 60 % Treffer (Mitspielen) zählt ein Durchgang.');
+  exBanner(ctx&&ctx.lessonId);
   var sp=$('#sec-player');if(sp&&sp.scrollIntoView)sp.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function exercisePassed(){
@@ -2486,10 +2520,20 @@ function progOnRun(ended){
     if(pct>(P.rec.hit||0)){P.rec.hit=pct;saveP();checkBadges()}
   }
   var ex=S.exercise;
-  if(!ex||!ended||!exercisePassed())return;
+  if(!ex||!ended)return;
   var c=ex.ctx||{};
+  if(!exercisePassed()){if(c.lessonId)exBanner(c.lessonId,'Dieser Durchgang zählt noch nicht. Ziel: mindestens die Hälfte der Töne gleich beim ersten Mal richtig. Spiele ihn einfach nochmal, ruhig langsamer.');return}
   if(ex.spec.gen==='scale'&&!P.sc[ex.spec.key+(ex.spec.form||'')]){P.sc[ex.spec.key+(ex.spec.form||'')]=1;saveP()}
-  if(c.lessonId)completeLesson(c.lessonId,false);
+  if(c.lessonId){
+    var lid=c.lessonId;
+    if(!P.lessons[lid]){
+      P.reps[lid]=(P.reps[lid]||0)+1;saveP();
+      var gl=exGoal(lid);
+      if(P.reps[lid]>=gl){completeLesson(lid,false);toast('Lektion geschafft: '+lessonBy(lid).t);exBanner(lid)}
+      else{toast('Durchgang '+P.reps[lid]+' von '+gl+' geschafft');exBanner(lid,'Durchgang '+P.reps[lid]+' von '+gl+' geschafft. Spiele die Übung nochmal ('+(gl-P.reps[lid])+' noch).');S.exercise=ex;
+        render();return}
+    }else exBanner(lid)
+  }
   if(c.planIdx!=null&&P.plan&&P.plan.items[c.planIdx]&&!P.plan.items[c.planIdx].done){P.plan.items[c.planIdx].done=true;saveP();addXp(10,'Plan-Punkt erledigt')}
   S.exercise=null;checkBadges();render();
 }
@@ -2574,7 +2618,7 @@ var curLesson=null;
 function openLesson(id){
   var l=lessonBy(id);if(!l)return;curLesson=id;
   $('#lesson').hidden=false;$('#lesson-title').textContent=l.t;$('#lesson-theory').innerHTML=l.th;
-  $('#lesson-state').textContent=P.lessons[id]?'Abgeschlossen am '+P.lessons[id].d.split('-').reverse().join('.')+'.':'Quiz machen und die Übung spielen, dann ist die Lektion geschafft.';
+  $('#lesson-state').textContent=P.lessons[id]?'Abgeschlossen am '+P.lessons[id].d.split('-').reverse().join('.')+'.':'So wird die Lektion geschafft: Übung '+exGoal(id)+'-mal sauber spielen (bisher '+Math.min(exGoal(id),P.reps[id]||0)+'). Das Quiz hilft beim Lernen, ist aber freiwillig.';
   $('#les-manual').hidden=!!P.lessons[id];
   $('#lesson').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -2582,6 +2626,7 @@ $('#lesson-close').addEventListener('click',function(){$('#lesson').hidden=true}
 $('#les-quiz').addEventListener('click',function(){startQuiz({lesson:curLesson})});
 $('#les-ex').addEventListener('click',function(){var l=lessonBy(curLesson);loadExercise(l.ex,{lessonId:l.id})});
 $('#les-manual').addEventListener('click',function(){if(completeLesson(curLesson,true))openLesson(curLesson)});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('#ex-next');if(!b)return;if(typeof gpTab==='function')gpTab('ueben');openLesson(b.dataset.l)});
 $('#lesson-list').addEventListener('click',function(e){var b=e.target.closest('button');if(b)openLesson(b.dataset.l)});
 
 /* ── Tagesplan ── */
@@ -2966,7 +3011,7 @@ songRender();
   }).catch(function(){
     note($('#msg'),'Notenanzeige und Klang konnten nicht geladen werden. Dafür wird einmal eine Internetverbindung gebraucht. Der Eingang mit Stimmgerät funktioniert trotzdem.',true);
   });
-  window.__gp2={liveBub:(typeof liveBub==='function'?liveBub:null),drawCursor:drawCursor,S:S,inp:inp,CFG:CFG,P:(typeof P!=='undefined'?P:null)};
+  window.__gp2={liveBub:(typeof liveBub==='function'?liveBub:null),drawCursor:drawCursor,S:S,inp:inp,CFG:CFG,P:(typeof P!=='undefined'?P:null),L:(typeof progOnRun==='function'?{progOnRun:progOnRun,loadExercise:loadExercise,openLesson:openLesson,nextLesson:nextLesson}:null)};
 })();
 
 })();

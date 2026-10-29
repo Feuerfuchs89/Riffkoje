@@ -16,8 +16,12 @@ Jede Person hat ein eigenes Profil mit eigenem Fortschritt, eigenen Stücken und
 - **Xylophon** (Theorie, Entdecker): Farbige Klangstäbe, freies Spiel und vier Lieder zum Nachspielen für die Zwillinge.
 - **Adventskalender** auf der Startseite vom 1. bis 24. Dezember. Zum Ausprobieren: `index.html?advent=12` anhängen.
 
+## Neu: Lektionen mit Ziel, Vollbild-Pult repariert
+- **Ziel pro Übung:** Jede Lektions-Übung zeigt jetzt „Aufgabe: … 1 2 3“. Ein Durchgang zählt, wenn mindestens die Hälfte der Töne gleich beim ersten Mal richtig ist. Nach 3 gezählten Durchgängen ist die Lektion geschafft, dann erscheint der Knopf „Nächste Lektion“. Das Quiz ist freiwillig.
+- **Vollbild-Pult:** Die Steuerleiste verdeckt die letzte Notenzeile nicht mehr (Seitenaufteilung richtet sich nach der Höhe der Leiste). Das Notenblatt war seit der Aufteilung in Üben/Spielen/Werkzeuge im Vollbild unsichtbar. Jetzt füllt es Hoch- und Querformat, und die Hinweisbox verdeckt „Pult verlassen“ nicht mehr.
+
 ## Neu: Farbstil wie die Knotenpunkt-Praxis
-Alle Bereiche, die Navigationsleiste und das App-Icon nutzen jetzt die Farben der Praxis-App: Marineblau, warmes Sandweiß, gedämpftes Grün; im Dunkelmodus Blaugrau mit hellblauem Akzent.
+Alle Bereiche und die Navigationsleiste nutzen jetzt die Farben der Praxis-App: Marineblau, warmes Sandweiß, gedämpftes Grün; im Dunkelmodus Blaugrau mit hellblauem Akzent.
 
 ## Neu: Einstellungen und Live-Anzeige beim Üben
 - **Einstellungen:** ⚙ oben rechts → eigene Seite `einstellungen.html`. Dort stehen Mikrofon-Quelle (Auswahlliste aller Eingänge, mit Hinweis, welche Quelle gerade wirklich benutzt wird), ein Mikrofon-Test mit Pegelanzeige, erkanntem Ton und Cent-Nadel, Empfindlichkeit, Kammerton (A4), Hell/Dunkel, Sicherung/Geräte-Abgleich und Profile.
