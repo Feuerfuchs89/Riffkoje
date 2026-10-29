@@ -130,6 +130,8 @@
   #osmd svg{display:block}
   #overlay{position:absolute;inset:0;pointer-events:none}
   #cursor{position:absolute;left:0;top:0;width:3px;border-radius:2px;background:var(--cursor);box-shadow:0 0 0 1px rgba(255,255,255,.65);will-change:transform}
+  .livebub{position:absolute;left:0;top:0;z-index:6;pointer-events:none;font:700 13px/1 var(--f-ui);padding:5px 8px;border-radius:7px;color:#fff;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+  .livebub.good{background:#1f8a4c}.livebub.near{background:#b9770e}.livebub.off{background:#c4452c}
   .flag{position:absolute;left:0;top:0;font:600 11px/1 var(--f-ui);color:var(--on-accent);background:var(--accent);padding:3px 5px;border-radius:3px}
   .flag::after{content:"";position:absolute;left:50%;top:100%;width:1.5px;height:var(--fh,40px);background:var(--accent);transform:translateX(-50%)}
   #marks i{position:absolute;width:9px;height:9px;margin-left:-4.5px;box-sizing:border-box}
@@ -439,6 +441,7 @@
   <section>
     <details class="card" id="incard">
       <summary>Eingang: Mikro, Aux oder Interface</summary>
+      <p class="hint" style="margin:0 0 6px"><a href="einstellungen.html">🎤 Mikrofon einrichten und testen</a> (einfacher, mit Live-Anzeige)</p>
       <div class="row">
         <button class="btn primary" id="inp-on" type="button">Eingang einschalten</button>
         <label class="grp"><span class="lab">Gerät</span><select id="dev" aria-label="Audio-Eingang"><option value="">Standard</option></select></label>
@@ -488,7 +491,7 @@
       <p class="small muted">Erste Lage. „tief“ heißt: Finger dicht an den vorigen. „hoch“: etwas weiter oben. Klebe kleine Markierungen auf das Griffbrett, bis die Finger sitzen.</p>
     </details>
 
-    <div class="paper" id="paper"><div id="stage"><div id="osmd"></div><div id="overlay"><div id="marks"></div><div id="cursor" hidden></div><div class="flag" id="flagA" hidden>A</div><div class="flag" id="flagB" hidden>B</div></div></div></div>
+    <div class="paper" id="paper"><div id="stage"><div id="osmd"></div><div id="overlay"><div id="marks"></div><div id="cursor" hidden></div><div id="livebub" class="livebub" hidden></div><div class="flag" id="flagA" hidden>A</div><div class="flag" id="flagB" hidden>B</div></div></div></div>
     <p class="hint">Tippe auf eine Stelle im Notenblatt, um dort zu starten. Mit A und B legst du eine Übe-Schleife fest. Leertaste startet und pausiert. Mit „Vollbild-Pult“ füllt das Notenblatt den Schirm.</p>
 
     <button class="btn small" id="pult-exit" type="button">Pult verlassen ✕</button>
@@ -946,6 +949,7 @@ var NO_DET={valid:false,level:0,midiF:0,hz:0};
 
 var CFG={sens:55,a4:440,tol:45,oct:true,lat:160,dev:''};
 (function(){var sv=lsGet('gp2.cfg',{});for(var k in sv){if(k in CFG)CFG[k]=sv[k]}})();
+(function(){try{var m=MK.mic();['dev','sens','a4'].forEach(function(k){if(k in m)CFG[k]=m[k]})}catch(e){}})();
 function saveCfg(){lsSet('gp2.cfg',CFG)}
 
 var UI=lsGet('gp.ui',{zoom:.8,pg:'page'});
@@ -1118,6 +1122,22 @@ function detect(){
   if(r&&r.conf>0.8){det.valid=true;det.hz=r.hz;det.midiF=69+12*Math.log2(r.hz/CFG.a4)}
   return det;
 }
+
+/* Live-Anzeige im Notenblatt: zeigt am Cursor, welchen Ton du gerade spielst und ob zu hoch oder zu tief */
+function liveBub(now){
+  var el=$('#livebub');if(!el)return;
+  var c=$('#cursor'),a=S.events&&S.events[S.idx],m=MK.mic();
+  if(!inp.on||m.live===false||!a||!c||c.hidden||now-inp.lastValid>300){el.hidden=true;return}
+  var mf=inp.lastMidiF,r=Math.round(mf),txt,cls;
+  var cc=(a.exp&&a.exp.length)?matchExp(a.exp,mf,100,CFG.oct):null;
+  if(cc!==null){
+    var ac=Math.abs(cc),dir=cc>8?'▲ zu hoch':cc<-8?'▼ zu tief':'✓ sauber';
+    txt=noteName(r)+' '+dir+(ac>8?' '+Math.round(ac)+' ct':'');cls=ac<=10?'good':ac<=25?'near':'off';
+  }else if(a.exp&&a.exp.length){txt=noteName(r)+' · gesucht: '+noteName(Math.round(a.exp[0]));cls='off'}
+  else{var d=(mf-r)*100;txt=noteName(r)+' '+(d>8?'▲':d<-8?'▼':'✓');cls='near'}
+  el.hidden=false;el.className='livebub '+cls;el.textContent=txt;
+  el.style.transform='translate('+a.x+'px,'+(a.y-6)+'px) translate(-50%,-100%)';
+}
 function updateTuner(det,now){
   var db=det.level>1e-5?20*Math.log10(det.level):-100;
   $('#lvl').style.width=Math.max(0,Math.min(100,(db+60)/60*100))+'%';
@@ -1135,13 +1155,14 @@ function updateTuner(det,now){
     $('#tnote').textContent='–';$('#tinfo').textContent='kein Ton';nd.style.left='50%';nd.className='';
     $('#hnote').textContent='–';hn.style.left='50%';hn.className='';
   }
+  liveBub(now);
 }
 $('#inp-on').addEventListener('click',async function(){
   if(inp.on){stopInput();return}
   try{await startInput()}catch(e){inputError(e)}
 });
 $('#dev').addEventListener('change',async function(e){
-  CFG.dev=e.target.value;saveCfg();
+  CFG.dev=e.target.value;saveCfg();try{MK.micSet({dev:CFG.dev})}catch(e2){}
   if(inp.on){try{await startInput()}catch(err){inputError(err)}}
 });
 if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener){
@@ -1152,10 +1173,10 @@ function bindCfg(){
   $('#sens').value=CFG.sens;$('#lat').value=CFG.lat;$('#tol').value=CFG.tol;$('#a4').value=CFG.a4;$('#oct').checked=!!CFG.oct;
   function labels(){$('#latv').textContent=CFG.lat+' ms';$('#tolv').textContent='±'+CFG.tol+' ct'}
   labels();
-  $('#sens').addEventListener('input',function(e){CFG.sens=+e.target.value;saveCfg()});
+  $('#sens').addEventListener('input',function(e){CFG.sens=+e.target.value;saveCfg();try{MK.micSet({sens:CFG.sens})}catch(e2){}});
   $('#lat').addEventListener('input',function(e){CFG.lat=+e.target.value;labels();saveCfg()});
   $('#tol').addEventListener('input',function(e){CFG.tol=+e.target.value;labels();saveCfg()});
-  $('#a4').addEventListener('change',function(e){var v=+e.target.value;if(v>=400&&v<=470){CFG.a4=v;saveCfg()}else e.target.value=CFG.a4});
+  $('#a4').addEventListener('change',function(e){var v=+e.target.value;if(v>=400&&v<=470){CFG.a4=v;saveCfg();try{MK.micSet({a4:v})}catch(e2){}}else e.target.value=CFG.a4});
   $('#oct').addEventListener('change',function(e){CFG.oct=e.target.checked;saveCfg()});
 }
 bindCfg();
@@ -2945,7 +2966,7 @@ songRender();
   }).catch(function(){
     note($('#msg'),'Notenanzeige und Klang konnten nicht geladen werden. Dafür wird einmal eine Internetverbindung gebraucht. Der Eingang mit Stimmgerät funktioniert trotzdem.',true);
   });
-  window.__gp2={drawCursor:drawCursor,S:S,inp:inp,CFG:CFG,P:(typeof P!=='undefined'?P:null)};
+  window.__gp2={liveBub:(typeof liveBub==='function'?liveBub:null),drawCursor:drawCursor,S:S,inp:inp,CFG:CFG,P:(typeof P!=='undefined'?P:null)};
 })();
 
 })();

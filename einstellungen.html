@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1c1e24">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Einstellungen</title>
+<script src="shared.js"></script>
+<style>
+:root{--bg:#f6f4ee;--card:#fff;--ink:#1d1f24;--muted:#656a75;--line:#dcd8cd;--acc:#2848d2;--on:#fff;--ok:#1f8a4c;--bad:#c4452c;--star:#f2a93b;--dot:#1d1f24;--doton:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#14161a;--card:#1d2026;--ink:#ecebe6;--muted:#a1a5ae;--line:#2e323a;--acc:#7b94ff;--on:#10131f;--ok:#4cc27e;--bad:#ff7a5c;--dot:#ecebe6;--doton:#14161a;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#14161a;--card:#1d2026;--ink:#ecebe6;--muted:#a1a5ae;--line:#2e323a;--acc:#7b94ff;--on:#10131f;--ok:#4cc27e;--bad:#ff7a5c;--dot:#ecebe6;--doton:#14161a;color-scheme:dark}
+:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px 16px 80px;display:grid;gap:14px}
+h1{font-size:1.6rem;margin:4px 0 0}h2{font-size:1.15rem;margin:0}h3{margin:0;font-size:1rem}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;cursor:pointer;min-height:42px}
+.btn.primary{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+.btn.sm{min-height:36px;padding:6px 11px;font-size:.9rem}
+.btn[aria-pressed=true]{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+select,input[type=number]{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px}
+.stats{display:flex;gap:18px;flex-wrap:wrap}.stats b{font-size:1.5rem;display:block;line-height:1.1}.stats span{font-size:.8rem;color:var(--muted)}
+#tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#tabs button{text-align:center;padding:10px 6px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+#tabs button b{display:block}#tabs button span{font-size:.75rem;color:var(--muted)}
+#tabs button[aria-selected=true]{border-color:var(--acc);background:var(--acc);color:var(--on)}
+#tabs button[aria-selected=true] span{color:var(--on);opacity:.85}
+@media (max-width:440px){#tabs button span{display:none}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.les{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px;display:grid;gap:4px;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.les .e{font-size:1.8rem;line-height:1}.les .t{font-weight:600}.les .d{font-size:.86rem;color:var(--muted)}.les .k{font-size:.82rem;color:var(--acc);font-weight:600}
+.th p{margin:0 0 .6em}.th ul{margin:0 0 .6em;padding-left:1.2em}
+.tip{border-left:4px solid var(--star);padding:8px 12px;background:var(--bg);border-radius:0 10px 10px 0}
+.chords{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ch{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:8px;display:grid;gap:4px;justify-items:center;text-align:center}
+.ch b{font-size:1.15rem}.ch .n{font-size:.78rem;color:var(--muted)}
+.ch svg{width:100%;max-width:130px;height:auto}
+.ch.known{border-color:var(--ok)}
+.ch .row{justify-content:center;gap:6px}
+.big svg{max-width:240px}
+.chdiag text{fill:var(--ink)}
+.bigchord{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:center}
+.bigchord .ch{border:0;padding:0}
+.bigchord .nm{font-size:2.6rem;font-weight:700;text-align:center;line-height:1}
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.opts .btn{white-space:normal;padding:12px}
+.opts .btn.right{background:var(--ok);border-color:var(--ok);color:#fff}.opts .btn.wrong{border-color:var(--bad);color:var(--bad)}
+.fb{padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.fb.good{border-color:var(--ok)}.fb.bad{border-color:var(--bad)}
+.bar{height:10px;border-radius:5px;background:var(--bg);border:1px solid var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.stars{letter-spacing:2px;color:var(--star)}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:.78rem;color:var(--muted)}
+.pill.ok{border-color:var(--ok);color:var(--ok)}
+.cur{outline:3px solid var(--acc);outline-offset:3px;border-radius:12px}
+.rhy{display:grid;gap:6px;overflow:hidden}
+.rhy .rw{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px}
+.rhy .sl{border:1px solid var(--line);border-radius:8px;background:var(--card);text-align:center;padding:4px 0;min-height:56px;display:grid;align-content:center;gap:2px}
+.rhy .sl .ar{font-size:1.35rem;font-weight:700;line-height:1}
+.rhy .sl .ct{font-size:.72rem;color:var(--muted)}
+.rhy .sl.on{background:var(--acc);border-color:var(--acc);color:var(--on)}.rhy .sl.on .ct{color:var(--on)}
+.rhy .sl.rest .ar{color:var(--muted);font-weight:400}
+.rhy .sl.bt .ct{font-weight:700;color:var(--ink)}
+.rhy .sl.mu .ar{text-decoration:underline dotted}
+.timer{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+<style>
+.meter{position:relative;height:14px;border-radius:7px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .08s}
+.meter b{position:absolute;top:0;bottom:0;width:2px;background:var(--bad)}
+.needle{position:relative;height:16px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+.needle .mid{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--ok)}
+.needle i{position:absolute;top:-3px;width:8px;height:22px;border-radius:4px;background:var(--muted);left:50%;transform:translateX(-50%);transition:left .08s,background .1s}
+.needle i.good{background:var(--ok)}.needle i.near{background:var(--star)}.needle i.off{background:var(--bad)}
+.big{font-size:2.4rem;font-weight:700;line-height:1}
+.src{padding:8px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.sg{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+details summary{cursor:pointer;font-weight:600}
+input[type=range]{width:100%}
+</style>
+</head>
+<body>
+<main>
+  <div><h1>⚙ Einstellungen</h1><p class="muted" style="margin:4px 0 0">Mikrofon, Darstellung, Sicherung und Profile an einem Ort.</p></div>
+
+  <section class="card" id="mic">
+    <h2>🎤 Mikrofon</h2>
+    <p class="small muted" style="margin:0">So hört die App dein Spiel. Gilt für Geigenpult, Riffkoje und Low Whistle auf diesem Gerät. Die Einstellung wird pro Gerät gemerkt.</p>
+    <div class="row"><button class="btn primary" id="m-go" type="button">Mikrofon testen</button><span class="pill" id="m-state">aus</span></div>
+    <div class="src" id="m-src">Aktuelle Quelle: noch keine. Drücke „Mikrofon testen“, der Browser fragt dann nach der Erlaubnis.</div>
+    <label class="small">Eingang wählen
+      <select id="m-dev" aria-label="Audio-Eingang" style="width:100%"><option value="">Standard des Geräts (empfohlen für das eingebaute Mikrofon)</option></select></label>
+    <p class="small muted" id="m-hint" style="margin:0">Nach der ersten Erlaubnis erscheinen hier alle Eingänge mit Namen, zum Beispiel das eingebaute Mikrofon oder ein USB-Interface.</p>
+    <div class="meter" aria-label="Eingangspegel"><i id="m-lvl"></i><b id="m-gate"></b></div>
+    <div class="big" id="m-note" aria-live="polite">–</div>
+    <div class="needle" aria-hidden="true"><span class="mid"></span><i id="m-needle"></i></div>
+    <div class="small" id="m-info">Spiele einen Ton und halte ihn ruhig. Hier siehst du, welchen Ton die App hört und ob er zu hoch oder zu tief ist.</div>
+    <div class="sg">
+      <label class="small">Empfindlichkeit <span class="muted" id="m-sensv"></span><input type="range" id="m-sens" min="0" max="100"></label>
+      <label class="small">Kammerton a′ (Hz)<input type="number" id="m-a4" min="400" max="470" step="1" style="width:100%"></label>
+    </div>
+    <label class="small"><input type="checkbox" id="m-live"> Live-Anzeige im Notenblatt (Ton und zu hoch/zu tief am Cursor)</label>
+    <details>
+      <summary>Hilfe: Es wird nichts erkannt</summary>
+      <ul class="small">
+        <li><b>Erlaubnis:</b> In der Adressleiste (Schloss-Symbol) oder in den Safari-/Chrome-Einstellungen für diese Seite „Mikrofon“ auf „Erlauben“ stellen.</li>
+        <li><b>Abstand:</b> Tablet oder Handy 30 bis 60 cm vom Instrument, Mikrofonöffnung nicht mit der Hand verdecken.</li>
+        <li><b>Leise Töne:</b> Empfindlichkeit höher stellen. Der rote Strich im Pegelbalken ist die Schwelle, der grüne Balken muss darüber kommen.</li>
+        <li><b>Mehrere Eingänge:</b> Bei Tablets gibt es oft ein Mikrofon vorne und eines hinten. Probiere beide in der Liste.</li>
+        <li><b>Kopfhörer:</b> Nutze Kopfhörer, sonst hört das Mikrofon die Begleitung der App mit.</li>
+        <li><b>Rückkopplung oder Pfeifen:</b> Lautsprecher leiser, Kopfhörer verwenden.</li>
+        <li><b>Hinweis:</b> Die Filter des Browsers (Echo, Rauschen, Lautstärke) sind in der App ausgeschaltet, damit die Töne nicht verfälscht werden.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>🌓 Darstellung</h2>
+    <div class="row" id="th"><button class="btn" data-t="auto" type="button">Automatisch</button><button class="btn" data-t="light" type="button">Hell</button><button class="btn" data-t="dark" type="button">Dunkel</button></div>
+    <p class="small muted" style="margin:0">Automatisch folgt der Einstellung deines Geräts.</p>
+  </section>
+
+  <section class="card">
+    <h2>💾 Sicherung und Geräte-Abgleich</h2>
+    <p class="small muted" style="margin:0">Fortschritt sichern, auf ein anderes Gerät übertragen oder über eine Sync-Datei in deiner Cloud abgleichen.</p>
+    <div class="row"><button class="btn primary" id="o-set" type="button">Sicherung und Abgleich öffnen</button></div>
+  </section>
+
+  <section class="card">
+    <h2>👥 Profile</h2>
+    <p class="small muted" style="margin:0">Aktives Profil: <b id="p-name"></b>. Hier wechselst du Profile, legst neue an oder bearbeitest sie.</p>
+    <div class="row"><button class="btn" id="o-prof" type="button">Profile verwalten</button></div>
+  </section>
+</main>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var NN=['C','Cis','D','Dis','E','F','Fis','G','Gis','A','B','H'];
+function noteName(m){return NN[((m%12)+12)%12]+(Math.floor(m/12)-1)}
+var _cm=new Float32Array(2048),_d=new Float32Array(2048);
+function yin(buf,sr,fMin,fMax,thr,W,off){
+  var tauMax=Math.min(Math.floor(sr/fMin),buf.length-off-W-1,_cm.length-1);
+  var tauMin=Math.max(2,Math.floor(sr/fMax)),tau,j,x,s;
+  if(tauMax<=tauMin+2)return null;
+  for(tau=1;tau<=tauMax;tau++){s=0;for(j=0;j<W;j++){x=buf[off+j]-buf[off+j+tau];s+=x*x}_d[tau]=s}
+  var run=0;_cm[0]=1;
+  for(tau=1;tau<=tauMax;tau++){run+=_d[tau];_cm[tau]=run>0?_d[tau]*tau/run:1}
+  var t=-1;
+  for(tau=tauMin;tau<=tauMax;tau++){if(_cm[tau]<thr){while(tau+1<=tauMax&&_cm[tau+1]<_cm[tau])tau++;t=tau;break}}
+  if(t<0)return null;
+  var better=t;
+  if(t>1&&t<tauMax){var s0=_cm[t-1],s1=_cm[t],s2=_cm[t+1],a=s0+s2-2*s1;if(a!==0)better=t+(s0-s2)/(2*a)}
+  return {hz:sr/better,conf:1-_cm[t]};
+}
+function gateOf(sens){return 0.03*Math.pow(0.02,sens/100)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+var M=MK.mic(),cfg={dev:M.dev||'',sens:'sens' in M?M.sens:55,a4:'a4' in M?M.a4:440,live:M.live!==false};
+var T={on:false,stream:null,ctx:null,an:null,buf:null,iv:0,lastValid:0,lastM:0};
+
+function kind(label){
+  var l=(label||'').toLowerCase();
+  if(/back|rück|rear|environment/.test(l))return ' (Rückseite)';
+  if(/front|vorder|user/.test(l))return ' (Vorderseite)';
+  if(/usb|interface|scarlett|focusrite|line|external|extern/.test(l))return ' (externes Gerät)';
+  if(/bluetooth|airpod|headset/.test(l))return ' (Bluetooth, hat oft Verzögerung)';
+  return '';
+}
+function devList(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.enumerateDevices)return;
+  navigator.mediaDevices.enumerateDevices().then(function(l){
+    var ins=l.filter(function(d){return d.kind==='audioinput'&&d.deviceId&&d.deviceId!=='default'&&d.deviceId!=='communications'});
+    var sel=$('#m-dev');
+    sel.innerHTML='<option value="">Standard des Geräts (empfohlen für das eingebaute Mikrofon)</option>'+ins.map(function(d,i){return '<option value="'+esc(d.deviceId)+'">'+esc((d.label||('Eingang '+(i+1)))+kind(d.label))+'</option>'}).join('');
+    sel.value=ins.some(function(d){return d.deviceId===cfg.dev})?cfg.dev:'';
+    var named=ins.some(function(d){return d.label});
+    $('#m-hint').textContent=ins.length?(named?ins.length+' Eingang'+(ins.length>1?'änge':'')+' gefunden. Wähle den, den du benutzen willst.':'Namen der Eingänge erscheinen nach der ersten Erlaubnis.'):'Noch kein Eingang gefunden.';
+  }).catch(function(){});
+}
+function setUi(){
+  $('#m-state').textContent=T.on?'an':'aus';$('#m-state').className='pill'+(T.on?' ok':'');
+  $('#m-go').textContent=T.on?'Test beenden':'Mikrofon testen';
+}
+function stop(){
+  if(!T.on)return;clearInterval(T.iv);
+  try{T.stream.getTracks().forEach(function(t){t.stop()});T.ctx.close()}catch(e){}
+  T.on=false;setUi();show(null,0);
+  $('#m-src').textContent='Aktuelle Quelle: Test beendet.';
+}
+function start(){
+  if(T.on){stop();return}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('#m-src').textContent='Dieser Browser erlaubt hier keinen Mikrofon-Zugriff. Nutze Chrome, Edge, Firefox oder Safari und öffne die App über https.';return}
+  var cons={echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1};
+  if(cfg.dev)cons.deviceId={ideal:cfg.dev};
+  navigator.mediaDevices.getUserMedia({audio:cons}).then(function(st){
+    var K=window.AudioContext||window.webkitAudioContext,c=new K({latencyHint:'interactive'});
+    if(c.state==='suspended')c.resume();
+    var src=c.createMediaStreamSource(st),an=c.createAnalyser();an.fftSize=4096;an.smoothingTimeConstant=0;src.connect(an);
+    T.on=true;T.stream=st;T.ctx=c;T.an=an;T.buf=new Float32Array(an.fftSize);setUi();
+    var tr=st.getAudioTracks()[0],set=tr&&tr.getSettings?tr.getSettings():{};
+    $('#m-src').innerHTML='Aktuelle Quelle: <b>'+esc(tr&&tr.label?tr.label:'Standard-Mikrofon')+'</b>'+esc(kind(tr&&tr.label))+(c.sampleRate?' · '+Math.round(c.sampleRate/1000*10)/10+' kHz':'');
+    devList();T.iv=setInterval(tick,50);
+  }).catch(function(e){
+    var n=e&&e.name;
+    $('#m-src').textContent=n==='NotAllowedError'||n==='SecurityError'?'Zugriff verweigert. Erlaube das Mikrofon für diese Seite in den Browser-Einstellungen (Schloss-Symbol in der Adressleiste) und versuche es erneut.':n==='NotFoundError'||n==='OverconstrainedError'?'Kein passender Eingang gefunden. Wähle in der Liste „Standard des Geräts“ oder schließe dein Gerät an.':n==='NotReadableError'?'Das Mikrofon wird gerade von einer anderen App benutzt. Schließe diese und versuche es erneut.':'Das Mikrofon ließ sich nicht starten: '+((e&&e.message)||e);
+  });
+}
+function tick(){
+  T.an.getFloatTimeDomainData(T.buf);
+  var b=T.buf,n=b.length,N=2048,s=0,i;for(i=n-N;i<n;i++)s+=b[i]*b[i];
+  var rms=Math.sqrt(s/N),mf=0;
+  if(rms>=gateOf(cfg.sens)){
+    var W=2048,tauMax=Math.floor(T.ctx.sampleRate/125),off=Math.max(0,n-W-tauMax-2),r=yin(b,T.ctx.sampleRate,125,2800,.14,W,off);
+    if(r&&r.conf>.8)mf=69+12*Math.log2(r.hz/cfg.a4);
+  }
+  show(mf||null,rms);
+}
+function show(mf,rms){
+  var db=rms>1e-5?20*Math.log10(rms):-100;
+  $('#m-lvl').style.width=Math.max(0,Math.min(100,(db+60)/60*100))+'%';
+  $('#m-gate').style.left=Math.max(0,Math.min(100,(20*Math.log10(gateOf(cfg.sens))+60)/60*100))+'%';
+  var nd=$('#m-needle'),now=Date.now();
+  if(mf){T.lastValid=now;T.lastM=mf}
+  if(now-T.lastValid<300&&T.lastM){
+    var r=Math.round(T.lastM),c=(T.lastM-r)*100,ac=Math.abs(c);
+    $('#m-note').textContent=noteName(r);
+    $('#m-info').textContent=ac<=10?'✓ sauber ('+(c>=0?'+':'−')+Math.round(ac)+' Cent)':c>0?'▲ zu hoch: '+Math.round(ac)+' Cent über dem Ton':'▼ zu tief: '+Math.round(ac)+' Cent unter dem Ton';
+    nd.style.left=(50+Math.max(-50,Math.min(50,c)))+'%';nd.className=ac<=10?'good':ac<=25?'near':'off';
+  }else{
+    $('#m-note').textContent='–';nd.style.left='50%';nd.className='';
+    if(T.on)$('#m-info').textContent=rms<gateOf(cfg.sens)?'Zu leise oder kein Ton: spiele lauter, rücke näher heran oder erhöhe die Empfindlichkeit.':'Ton wird gesucht. Spiele einen einzelnen Ton und halte ihn ruhig.';
+  }
+}
+$('#m-go').addEventListener('click',start);
+$('#m-dev').addEventListener('change',function(){cfg.dev=this.value;MK.micSet({dev:cfg.dev});if(T.on){stop();start()}});
+$('#m-sens').value=cfg.sens;$('#m-sensv').textContent=cfg.sens+' %';
+$('#m-sens').addEventListener('input',function(){cfg.sens=+this.value;$('#m-sensv').textContent=cfg.sens+' %';MK.micSet({sens:cfg.sens})});
+$('#m-a4').value=cfg.a4;
+$('#m-a4').addEventListener('change',function(){var v=+this.value;if(v>=400&&v<=470){cfg.a4=v;MK.micSet({a4:v})}else this.value=cfg.a4});
+$('#m-live').checked=cfg.live;
+$('#m-live').addEventListener('change',function(){cfg.live=this.checked;MK.micSet({live:cfg.live})});
+function thUi(){var t=MK.theme();Array.prototype.forEach.call(document.querySelectorAll('#th button'),function(b){b.setAttribute('aria-pressed',String(b.dataset.t===t))})}
+$('#th').addEventListener('click',function(e){var b=e.target.closest('button');if(b){MK.theme(b.dataset.t);thUi()}});
+thUi();
+$('#o-set').addEventListener('click',function(){MK.openSettings()});
+$('#o-prof').addEventListener('click',function(){MK.openProfiles()});
+$('#p-name').textContent=MK.profile().name;
+devList();
+window.addEventListener('pagehide',stop);
+window.__st={show:show,cfg:cfg,get on(){return T.on},start:start,stop:stop};
+})();
+</script>
+</body>
+</html>

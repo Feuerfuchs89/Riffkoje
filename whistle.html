@@ -419,7 +419,7 @@ var W={armed:true,hold:0,last:null};
 function micOn(cb){
   if(MIC.on){cb&&cb(true);return}
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('Mikrofon nicht verfügbar');cb&&cb(false);return}
-  var dev=$('#m-dev').value,cons={echoCancellation:false,noiseSuppression:false,autoGainControl:false};if(dev)cons.deviceId={ideal:dev};
+  var dev=$('#m-dev').value||MK.mic().dev||'',cons={echoCancellation:false,noiseSuppression:false,autoGainControl:false};if(dev)cons.deviceId={ideal:dev};
   navigator.mediaDevices.getUserMedia({audio:cons}).then(function(st){
     var K=window.AudioContext||window.webkitAudioContext,c=new K(),src=c.createMediaStreamSource(st),an=c.createAnalyser();an.fftSize=2048;src.connect(an);
     MIC.on=true;MIC.stream=st;MIC.ctx=c;MIC.an=an;MIC.buf=new Float32Array(2048);
@@ -485,14 +485,14 @@ $('#t-ok').addEventListener('click',function(){
 function devList(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.enumerateDevices)return;
   navigator.mediaDevices.enumerateDevices().then(function(l){
-    var sel=$('#m-dev'),cur=sel.value,saved=MK.get('wh.dev','');
+    var sel=$('#m-dev'),cur=sel.value,saved=MK.mic().dev||'';
     var ins=l.filter(function(d){return d.kind==='audioinput'&&d.deviceId&&d.deviceId!=='default'&&d.deviceId!=='communications'});
     sel.innerHTML='<option value="">Standard (internes Mikrofon)</option>'+ins.map(function(d,i){return '<option value="'+esc(d.deviceId)+'">'+esc(d.label||('Eingang '+(i+1)))+'</option>'}).join('');
     var want=cur||saved;sel.value=ins.some(function(d){return d.deviceId===want})?want:'';
   }).catch(function(){});
 }
 $('#m-dev').addEventListener('change',function(){
-  MK.set('wh.dev',$('#m-dev').value);
+  MK.micSet({dev:$('#m-dev').value});
   if(MIC.on){var was=T.mode;micOff();micOn(function(){if(was==='wait')T.mode='wait'})}
 });
 devList();

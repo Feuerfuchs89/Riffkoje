@@ -16,6 +16,12 @@ Jede Person hat ein eigenes Profil mit eigenem Fortschritt, eigenen Stücken und
 - **Xylophon** (Theorie, Entdecker): Farbige Klangstäbe, freies Spiel und vier Lieder zum Nachspielen für die Zwillinge.
 - **Adventskalender** auf der Startseite vom 1. bis 24. Dezember. Zum Ausprobieren: `index.html?advent=12` anhängen.
 
+## Neu: Einstellungen und Live-Anzeige beim Üben
+- **Einstellungen:** ⚙ oben rechts → eigene Seite `einstellungen.html`. Dort stehen Mikrofon-Quelle (Auswahlliste aller Eingänge, mit Hinweis, welche Quelle gerade wirklich benutzt wird), ein Mikrofon-Test mit Pegelanzeige, erkanntem Ton und Cent-Nadel, Empfindlichkeit, Kammerton (A4), Hell/Dunkel, Sicherung/Geräte-Abgleich und Profile.
+- **Mikrofon-Test:** „Test starten“, einen Ton spielen oder singen. Die Seite zeigt Notenname, „zu hoch“/„zu tief“ in Cent und die aktive Quelle. Beim Tablet-Mikro bitte die Auswahl „Eingebautes Mikrofon“ probieren, falls der Standard nicht reagiert.
+- **Live-Anzeige im Notenblatt (Geigenpult):** Beim Mitspielen erscheint am Cursor eine kleine Blase mit deinem gespielten Ton und „▲ zu hoch“, „▼ zu tief“ oder „✓ sauber“. Spielst du einen anderen Ton als den gesuchten, steht dort „gesucht: …“. Abschaltbar unter Einstellungen („Live-Anzeige“).
+- Die Einstellungen gelten für alle Bereiche (Geigenpult, Riffkoje, Low Whistle) pro Gerät.
+
 ## Neu: Abgleich zwischen Geräten
 ⚙ → „Geräte-Abgleich“ hält den Fortschritt auf Handy, Tablet und Computer gleich, über eine Sync-Datei in einem Cloud-Ordner (Google Drive, iCloud, Nextcloud, Dropbox). Die App hat keinen eigenen Server, deshalb liegt die Datei bei dir.
 - **Chrome/Edge am Computer (und teils Android):** „Neue Sync-Datei anlegen“, Cloud-Ordner wählen, fertig. Danach „Jetzt abgleichen“ (die Startseite erinnert nach 12 Stunden).

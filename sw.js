@@ -1,6 +1,6 @@
 /* Service Worker: App-Hülle offline, Bibliotheken (Tone, OSMD, PDF.js, Schriften) nach dem ersten Laden aus dem Cache. */
-const V = 'musikkoje-v8';
-const SHELL = ['./', 'index.html', 'geigenpult.html', 'riffkoje.html', 'theorie.html', 'akkorde.html', 'tabs.html', 'whistle.html', 'shared.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'icon.svg'];
+const V = 'musikkoje-v9';
+const SHELL = ['./', 'index.html', 'geigenpult.html', 'riffkoje.html', 'theorie.html', 'akkorde.html', 'tabs.html', 'whistle.html', 'einstellungen.html', 'shared.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'icon.svg'];
 const CDN = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'unpkg.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', e => {

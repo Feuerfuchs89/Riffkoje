@@ -834,8 +834,8 @@ $('#playBtn').onclick = async () => {
 $('#recBtn').onclick = () => rec ? stopRec() : startRec();
 $('#stopTake').onclick = () => { const v = takeWithVideo; stopTake(); if (v && playing) player.pauseVideo(); };
 $('#stopTake').hidden = true;
-$('#inBtn').onclick = () => openInput($('#devSel').value || store.get('dev', ''));
-$('#devSel').onchange = e => { if (inStream) openInput(e.target.value); };
+$('#inBtn').onclick = () => openInput((window.MK && MK.mic().dev) || $('#devSel').value || store.get('dev', ''));
+$('#devSel').onchange = e => { try { MK.micSet({ dev: e.target.value }); } catch (e2) {} if (inStream) openInput(e.target.value); };
 $('#monitor').onchange = e => { if (monGain) monGain.gain.value = e.target.checked ? 1 : 0; if (e.target.checked) toast('Nur mit Kopfhörern – sonst pfeift es'); };
 $('#calBtn').onclick = calibrate;
 $('#latSlider').oninput = e => setLatency(+e.target.value);

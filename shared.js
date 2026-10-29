@@ -128,7 +128,7 @@ var SKIP=/(^|\.)gp\.gkey$/;
 function allLs(only,id){
   var o={};
   for(var i=0;i<localStorage.length;i++){
-    var k=localStorage.key(i);if(!k||SKIP.test(k)||k.indexOf('mk.last')===0)continue;
+    var k=localStorage.key(i);if(!k||SKIP.test(k)||k.indexOf('mk.last')===0||k.indexOf('mk.mic')===0)continue;
     if(only){
       if(k.indexOf('mk.')===0)continue;
       var m=/^(p\d+)\./.exec(k),owner=m?m[1]:'p1';
@@ -146,6 +146,11 @@ function stamp(){return MK.day()}
 MK.backupAll=function(){download('musikkoje-sicherung-'+stamp()+'.json',{app:'musikkoje',v:1,kind:'all',date:stamp(),ls:allLs(false)});sv('mk.last',Date.now())};
 MK.exportProfile=function(id){var p=MK.profiles().find(function(x){return x.id===id});if(!p)return;download('musikkoje-'+p.name.replace(/[^\wäöüÄÖÜß-]+/g,'_')+'-'+stamp()+'.json',{app:'musikkoje',v:1,kind:'profile',date:stamp(),profile:{name:p.name,emoji:p.emoji,stage:p.stage},ls:allLs(true,id)})};
 MK.lastBackup=function(){return ld('mk.last',0)};
+/* Mikrofon-Einstellungen: gelten pro Gerät (nicht im Profil, nicht in der Sicherung), für alle Bereiche. */
+MK.mic=function(){var m=ld('mk.mic',{});return m&&typeof m==='object'?m:{}};
+MK.micSet=function(o){var m=MK.mic();Object.keys(o).forEach(function(k){m[k]=o[k]});sv('mk.mic',m)};
+MK.openSettings=function(){setDlg()};
+MK.openProfiles=function(){openDlg()};
 function readFile(cb){
   var i=document.createElement('input');i.type='file';i.accept='.json,application/json';
   i.onchange=function(){var f=i.files&&i.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d||d.app!=='musikkoje'||!d.ls||typeof d.ls!=='object')throw 0;cb(d)}catch(e){msg('Diese Datei ist keine Musikkoje-Sicherung.',true)}};r.readAsText(f)};
@@ -317,7 +322,7 @@ MK.nav=function(){
   css();
   var here=(location.pathname.split('/').pop()||'index.html'),p=MK.profile();
   var n=document.createElement('nav');n.id='mknav';n.setAttribute('aria-label','Bereiche');
-  n.innerHTML=LINKS.map(function(l){var cur=here===l[0]||(here===''&&l[0]==='index.html')||(l[3]&&l[3].indexOf(here)>=0);return '<a href="'+l[0]+'"'+(cur?' aria-current="page"':'')+'><span class="lf">'+l[1]+'</span><span class="ls">'+l[2]+'</span></a>'}).join('')+'<span class="sp"></span><button id="mk-theme" class="ic" type="button"></button><button id="mk-set" class="ic" type="button" aria-label="Einstellungen und Sicherung" title="Einstellungen und Sicherung">⚙</button><button id="mk-prof" type="button" aria-haspopup="dialog">'+esc(p.emoji)+'<span class="nm"> '+esc(p.name)+'</span></button>';
+  n.innerHTML=LINKS.map(function(l){var cur=here===l[0]||(here===''&&l[0]==='index.html')||(l[3]&&l[3].indexOf(here)>=0);return '<a href="'+l[0]+'"'+(cur?' aria-current="page"':'')+'><span class="lf">'+l[1]+'</span><span class="ls">'+l[2]+'</span></a>'}).join('')+'<span class="sp"></span><button id="mk-theme" class="ic" type="button"></button><button id="mk-set" class="ic" type="button" aria-label="Einstellungen" title="Einstellungen">⚙</button><button id="mk-prof" type="button" aria-haspopup="dialog">'+esc(p.emoji)+'<span class="nm"> '+esc(p.name)+'</span></button>';
   document.body.insertBefore(n,document.body.firstChild);
   if(SUBS.some(function(x){return x[0]===here})){
     var sb=document.createElement('nav');sb.id='mksub';sb.setAttribute('aria-label','Gitarre');
@@ -326,8 +331,9 @@ MK.nav=function(){
   }
   if(here&&here!=='index.html'&&here!=='')sv('mk.lastpage',{p:here,t:(document.title||here).replace(/\s*·.*$/,''),d:Date.now()});
   document.getElementById('mk-prof').addEventListener('click',openDlg);
-  document.getElementById('mk-set').addEventListener('click',setDlg);
+  document.getElementById('mk-set').addEventListener('click',function(){location.href='einstellungen.html'});
   document.getElementById('mk-theme').addEventListener('click',function(){var o=['auto','light','dark'];MK.theme(o[(o.indexOf(themePref())+1)%3])});
+  if(here==='einstellungen.html'){var g=document.getElementById('mk-set');if(g)g.setAttribute('aria-current','page'),g.style.background='var(--na)',g.style.color='var(--nao)'}
   applyTheme();
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',MK.nav);else MK.nav();
