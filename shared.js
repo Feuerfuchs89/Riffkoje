@@ -37,7 +37,7 @@ function applyTheme(){
   if(t==='auto')h.removeAttribute('data-theme');else h.setAttribute('data-theme',t);
   h.setAttribute('data-mk',r);
   var m=document.querySelector('meta[name=theme-color]');
-  if(m)m.setAttribute('content',r==='dark'?'#121314':'#f6f4ee');
+  if(m)m.setAttribute('content',r==='dark'?'#0F1A24':'#F5F1EA');
   var b=document.getElementById('mk-theme');
   if(b){b.textContent=t==='auto'?'🌓':t==='light'?'☀️':'🌙';b.setAttribute('aria-label','Darstellung: '+(t==='auto'?'automatisch':t==='light'?'hell':'dunkel')+'. Zum Wechseln drücken.');b.title=b.getAttribute('aria-label')}
 }
@@ -50,8 +50,8 @@ var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige'
 var SUBS=[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur']];
 function css(){
   var s=document.createElement('style');
-  s.textContent=':root{--nb:#1c1e24;--nf:#f2f0ea;--nl:#3b3f4a;--nb2:#2c2f38;--nm:#a9a69d;--na:#f2a93b;--nao:#1a1205}'+
-  'html[data-mk=light]{--nb:#fbfaf6;--nf:#1d1f24;--nl:#d6d2c6;--nb2:#eeebe2;--nm:#656a75;--na:#2848d2;--nao:#ffffff}'+
+  s.textContent=':root{--nb:#0B1520;--nf:#E7EDF2;--nl:#3A5068;--nb2:#1E3346;--nm:#A3B3C2;--na:#8CBBEA;--nao:#0B1520}'+
+  'html[data-mk=light]{--nb:#12304B;--nf:#F5F1EA;--nl:#4D6A84;--nb2:#1D4568;--nm:#C9D6E2;--na:#8CBBEA;--nao:#0B1520}'+
   '#mknav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top));background:var(--nb);color:var(--nf);border-bottom:1px solid var(--nl);font:500 14px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;position:relative;z-index:30}'+
   '#mknav a{color:var(--nf);opacity:.8;text-decoration:none;padding:8px 12px;border-radius:999px}#mknav a:hover{background:var(--nb2);opacity:1}#mknav a[aria-current=page]{background:var(--nf);color:var(--nb);opacity:1}'+
   '#mknav .ls{display:none}#mknav .sp{flex:1}#mknav button{font:inherit;color:var(--nf);background:var(--nb2);border:1px solid var(--nl);border-radius:999px;padding:7px 12px;min-height:36px;cursor:pointer}'+
@@ -156,7 +156,7 @@ function readFile(cb){
   i.onchange=function(){var f=i.files&&i.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d||d.app!=='musikkoje'||!d.ls||typeof d.ls!=='object')throw 0;cb(d)}catch(e){msg('Diese Datei ist keine Musikkoje-Sicherung.',true)}};r.readAsText(f)};
   i.click();
 }
-function msg(t,bad){var m=document.getElementById('mk-msg');if(m){m.textContent=t;m.style.color=bad?'#e5484d':'var(--nm)';m.hidden=false}}
+function msg(t,bad){var m=document.getElementById('mk-msg');if(m){m.textContent=t;m.style.color=bad?'#E08A80':'var(--nm)';m.hidden=false}}
 function restoreAll(d){
   Object.keys(d.ls).forEach(function(k){if(!SKIP.test(k)&&k.indexOf('mk.last')!==0&&typeof d.ls[k]==='string')try{localStorage.setItem(k,d.ls[k])}catch(e){}});
   location.reload();

@@ -19,8 +19,8 @@
 <style>
   /* Layout: ein schmaler Pult-Streifen. Oben Titel mit vier Saiten, dann Laden und Eingang, dann das Notenblatt auf weißem Papier, unten die feste Spielleiste. Im Vollbild füllt das Papier den Schirm und die Leiste schwebt klein darüber. */
   :root{
-    --bg:#e8ebef; --surface:#f7f8fa; --ink:#192027; --muted:#56636f; --line:#c9d0d8;
-    --accent:#2848d2; --on-accent:#ffffff; --cursor:#e5432a; --ok:#1b7748; --warn:#9a6200; --bad:#b3261e;
+    --bg:#F5F1EA; --surface:#FFFFFF; --ink:#14283B; --muted:#4D5F70; --line:#DDD5C8;
+    --accent:#17466E; --on-accent:#ffffff; --cursor:#e5432a; --ok:#3F5F45; --warn:#7A4E33; --bad:#A3352B;
     --paper:#fdfdfc; --paper-ink:#14181c;
     --f-display:'Newsreader',Georgia,'Times New Roman',serif;
     --f-ui:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -28,14 +28,14 @@
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#111519; --surface:#1a2026; --ink:#e6ebef; --muted:#97a4af; --line:#2d363e;
-      --accent:#869cff; --on-accent:#0d1230; --cursor:#ff6b4d; --ok:#56c48a; --warn:#e3b341; --bad:#ff8a80;
+      --bg:#0F1A24; --surface:#172633; --ink:#E7EDF2; --muted:#A3B3C2; --line:#2B3D4E;
+      --accent:#8CBBEA; --on-accent:#0B1520; --cursor:#ff6b4d; --ok:#86B08D; --warn:#E6B999; --bad:#E08A80;
       color-scheme:dark;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#111519; --surface:#1a2026; --ink:#e6ebef; --muted:#97a4af; --line:#2d363e;
-    --accent:#869cff; --on-accent:#0d1230; --cursor:#ff6b4d; --ok:#56c48a; --warn:#e3b341; --bad:#ff8a80;
+    --bg:#0F1A24; --surface:#172633; --ink:#E7EDF2; --muted:#A3B3C2; --line:#2B3D4E;
+    --accent:#8CBBEA; --on-accent:#0B1520; --cursor:#ff6b4d; --ok:#86B08D; --warn:#E6B999; --bad:#E08A80;
     color-scheme:dark;
   }
   *{box-sizing:border-box}
@@ -131,7 +131,7 @@
   #overlay{position:absolute;inset:0;pointer-events:none}
   #cursor{position:absolute;left:0;top:0;width:3px;border-radius:2px;background:var(--cursor);box-shadow:0 0 0 1px rgba(255,255,255,.65);will-change:transform}
   .livebub{position:absolute;left:0;top:0;z-index:6;pointer-events:none;font:700 13px/1 var(--f-ui);padding:5px 8px;border-radius:7px;color:#fff;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.35)}
-  .livebub.good{background:#1f8a4c}.livebub.near{background:#b9770e}.livebub.off{background:#c4452c}
+  .livebub.good{background:#3F5F45}.livebub.near{background:#b9770e}.livebub.off{background:#A3352B}
   .flag{position:absolute;left:0;top:0;font:600 11px/1 var(--f-ui);color:var(--on-accent);background:var(--accent);padding:3px 5px;border-radius:3px}
   .flag::after{content:"";position:absolute;left:50%;top:100%;width:1.5px;height:var(--fh,40px);background:var(--accent);transform:translateX(-50%)}
   #marks i{position:absolute;width:9px;height:9px;margin-left:-4.5px;box-sizing:border-box}
