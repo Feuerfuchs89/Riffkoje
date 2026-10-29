@@ -60,6 +60,15 @@ select,input[type=number]{font:inherit;background:var(--card);color:var(--ink);b
 .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:.78rem;color:var(--muted)}
 .pill.ok{border-color:var(--ok);color:var(--ok)}
 .cur{outline:3px solid var(--acc);outline-offset:3px;border-radius:12px}
+.rhy{display:grid;gap:6px;overflow:hidden}
+.rhy .rw{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px}
+.rhy .sl{border:1px solid var(--line);border-radius:8px;background:var(--card);text-align:center;padding:4px 0;min-height:56px;display:grid;align-content:center;gap:2px}
+.rhy .sl .ar{font-size:1.35rem;font-weight:700;line-height:1}
+.rhy .sl .ct{font-size:.72rem;color:var(--muted)}
+.rhy .sl.on{background:var(--acc);border-color:var(--acc);color:var(--on)}.rhy .sl.on .ct{color:var(--on)}
+.rhy .sl.rest .ar{color:var(--muted);font-weight:400}
+.rhy .sl.bt .ct{font-weight:700;color:var(--ink)}
+.rhy .sl.mu .ar{text-decoration:underline dotted}
 .timer{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
 #toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99}
 #toast.on{opacity:1;transform:translate(-50%,0)}
@@ -110,6 +119,20 @@ select,input[type=number]{font:inherit;background:var(--card);color:var(--ink);b
       <p class="small muted" id="p-info" style="margin:0"></p>
       <div class="bigchord" id="p-show"></div>
       <div class="row"><button class="btn primary" id="p-go" type="button">Start</button></div>
+    </div>
+    <div class="card" id="t-rhy">
+      <h2>Rhythmus-Trainer: Auf- und Abschlag</h2>
+      <p class="small muted" style="margin:0">↓ Abschlag, ↑ Aufschlag, B = Basston, · = Hand schwingt durch, ohne zu treffen. Vorher zählt ein Takt Klick ein. Spiele zu einem Akkord oder zu einer Folge, die Akkorde wechseln pro Takt.</p>
+      <div class="row"><label class="small">Muster <select id="r-pat"></select></label>
+        <label class="small">Akkord <select id="r-ch"></select></label>
+        <label class="small">Tempo <input type="number" id="r-bpm" min="40" max="200" value="70" style="width:5em"></label></div>
+      <div class="row"><label class="small"><input type="checkbox" id="r-clk" checked> Klick</label>
+        <label class="small"><input type="checkbox" id="r-snd" checked> Akkord mitspielen</label>
+        <label class="small"><input type="checkbox" id="r-up"> Tempo steigern (alle 8 Takte +5)</label></div>
+      <p class="small muted" id="r-info" style="margin:0"></p>
+      <div id="r-show" class="rhy" aria-label="Schlagmuster"></div>
+      <div class="bigchord" id="r-chord"></div>
+      <div class="row"><button class="btn primary" id="r-go" type="button">Start</button></div>
     </div>
     <div class="card" id="t-quiz">
       <h2>Akkord-Quiz</h2>
@@ -173,9 +196,43 @@ var C={
  D5:{n:'D5',t:'D-Powerchord',f:[-1,-1,0,2,3,-1],fi:[0,0,0,3,4,0],g:'power'},
  G5:{n:'G5',t:'G-Powerchord',f:[3,5,5,-1,-1,-1],fi:[1,3,4,0,0,0],g:'power'},
  C5:{n:'C5',t:'C-Powerchord',f:[-1,3,5,5,-1,-1],fi:[0,1,3,4,0,0],g:'power'},
- F5:{n:'F5',t:'F-Powerchord',f:[1,3,3,-1,-1,-1],fi:[1,3,4,0,0,0],g:'power'}
+ F5:{n:'F5',t:'F-Powerchord',f:[1,3,3,-1,-1,-1],fi:[1,3,4,0,0,0],g:'power'},
+ Asus2:{n:'Asus2',t:'A-sus2',f:[-1,0,2,2,0,0],fi:[0,0,1,2,0,0],g:'sus'},
+ Asus4:{n:'Asus4',t:'A-sus4',f:[-1,0,2,2,3,0],fi:[0,0,1,2,4,0],g:'sus'},
+ Dsus2:{n:'Dsus2',t:'D-sus2',f:[-1,-1,0,2,3,0],fi:[0,0,0,1,3,0],g:'sus'},
+ Dsus4:{n:'Dsus4',t:'D-sus4',f:[-1,-1,0,2,3,3],fi:[0,0,0,1,2,3],g:'sus'},
+ Esus4:{n:'Esus4',t:'E-sus4',f:[0,2,2,2,0,0],fi:[0,2,3,4,0,0],g:'sus'},
+ Cmaj7:{n:'Cmaj7',t:'C-Dur-sieben',f:[-1,3,2,0,0,0],fi:[0,3,2,0,0,0],g:'maj'},
+ Gmaj7:{n:'Gmaj7',t:'G-Dur-sieben',f:[3,2,0,0,0,2],fi:[3,2,0,0,0,1],g:'maj'},
+ Amaj7:{n:'Amaj7',t:'A-Dur-sieben',f:[-1,0,2,1,2,0],fi:[0,0,3,1,2,0],g:'maj'},
+ Dmaj7:{n:'Dmaj7',t:'D-Dur-sieben',f:[-1,-1,0,2,2,2],fi:[0,0,0,1,2,3],g:'maj'},
+ Emaj7:{n:'Emaj7',t:'E-Dur-sieben',f:[0,2,1,1,0,0],fi:[0,3,1,2,0,0],g:'maj'},
+ Am7:{n:'Am7',t:'a-Moll-sieben',f:[-1,0,2,0,1,0],fi:[0,0,2,0,1,0],g:'maj'},
+ Em7:{n:'Em7',t:'e-Moll-sieben',f:[0,2,0,0,0,0],fi:[0,1,0,0,0,0],g:'maj'},
+ Dm7:{n:'Dm7',t:'d-Moll-sieben',f:[-1,-1,0,2,1,1],fi:[0,0,0,2,1,1],g:'maj'},
+ Cadd9:{n:'Cadd9',t:'C-add9',f:[-1,3,2,0,3,0],fi:[0,2,1,0,3,0],g:'add'},
+ Gadd9:{n:'Gadd9',t:'G-add9',f:[3,0,0,2,0,3],fi:[2,0,0,1,0,3],g:'add'},
+ B:{n:'H',t:'H-Dur (Barré)',f:[-1,2,4,4,4,2],fi:[0,1,3,3,3,1],b:{fret:2,from:1,to:5},g:'barre'},
+ Fm:{n:'Fm',t:'f-Moll (Barré)',f:[1,3,3,1,1,1],fi:[1,3,4,1,1,1],b:{fret:1,from:0,to:5},g:'barre'},
+ Gm:{n:'Gm',t:'g-Moll (Barré)',f:[3,5,5,3,3,3],fi:[1,3,4,1,1,1],b:{fret:3,from:0,to:5},g:'barre'},
+ Cm:{n:'Cm',t:'c-Moll (Barré)',f:[-1,3,5,5,4,3],fi:[0,1,3,4,2,1],b:{fret:3,from:1,to:5},g:'barre'},
+ Bmaj7:{n:'Hmaj7',t:'H-Dur-sieben (Barré)',f:[-1,2,4,3,4,2],fi:[0,1,3,2,4,1],b:{fret:2,from:1,to:5},g:'maj'},
+ Bm7:{n:'Hm7',t:'h-Moll-sieben',f:[-1,2,0,2,0,2],fi:[0,1,0,2,0,3],g:'maj'},
+ Cmaj9:{n:'Cmaj9',t:'C-Dur-neun (Maj9)',f:[-1,3,2,4,3,0],fi:[0,2,1,4,3,0],g:'farbe'},
+ Em9:{n:'Em9',t:'e-Moll-neun',f:[0,2,0,0,0,2],fi:[0,1,0,0,0,2],g:'farbe'},
+ E9:{n:'E9',t:'E-neun',f:[0,2,0,1,0,2],fi:[0,2,0,1,0,3],g:'farbe'},
+ A9:{n:'A9',t:'A-neun',f:[-1,0,2,4,2,3],fi:[0,0,1,4,2,3],g:'farbe'},
+ C6:{n:'C6',t:'C-Dur mit Sexte',f:[-1,3,2,2,1,0],fi:[0,4,2,3,1,0],g:'farbe'},
+ E6:{n:'E6',t:'E-Dur mit Sexte',f:[0,2,2,1,2,0],fi:[0,2,3,1,4,0],g:'farbe'},
+ A6:{n:'A6',t:'A-Dur mit Sexte',f:[-1,0,2,2,2,2],fi:[0,0,1,1,1,1],b:{fret:2,from:2,to:5},g:'farbe'},
+ Am6:{n:'Am6',t:'a-Moll mit Sexte',f:[-1,0,2,2,1,2],fi:[0,0,2,3,1,4],g:'farbe'},
+ A7sus4:{n:'A7sus4',t:'A-sieben-sus-vier',f:[-1,0,2,0,3,0],fi:[0,0,1,0,3,0],g:'sus'},
+ D7sus4:{n:'D7sus4',t:'D-sieben-sus-vier',f:[-1,-1,0,2,1,3],fi:[0,0,0,2,1,3],g:'sus'},
+ E7sus4:{n:'E7sus4',t:'E-sieben-sus-vier',f:[0,2,0,2,0,0],fi:[0,2,0,3,0,0],g:'sus'},
+ Bdim:{n:'Hdim',t:'H-vermindert',f:[-1,2,3,4,3,-1],fi:[0,1,2,4,3,0],g:'farbe'},
+ Caug:{n:'Caug',t:'C-übermäßig',f:[-1,3,2,1,1,0],fi:[0,4,3,1,2,0],g:'farbe'},
 };
-var GROUPS=[['offen','Offene Griffe','Die Grundlage. Alle Saiten klingen frei mit.'],['sieben','Siebener-Akkorde','Bluesig und mit Spannung. Sie wollen zum nächsten Akkord weiter.'],['barre','Barré-Griffe','Ein Finger drückt mehrere Saiten. Braucht Kraft und Geduld.'],['power','Powerchords (Metal und Rock)','Nur zwei bis drei Töne, ohne Dur oder Moll. Sie klingen mit Verzerrung kraftvoll und eindeutig.']];
+var GROUPS=[['offen','Offene Griffe','Die Grundlage. Alle Saiten klingen frei mit.'],['sieben','Siebener-Akkorde','Bluesig und mit Spannung. Sie wollen zum nächsten Akkord weiter.'],['barre','Barré-Griffe','Ein Finger drückt mehrere Saiten. Braucht Kraft und Geduld.'],['sus','Sus-Akkorde','Ohne Terz, also weder Dur noch Moll. Sie schweben und wollen oft zum normalen Akkord „aufgelöst“ werden.'],['maj','Maj7 und Moll7','Mehr Farbe: weicher, jazziger, sehnsüchtiger als die einfachen Akkorde.'],['add','Add9','Dur-Akkord mit zusätzlichem hellen Ton (die None). Sehr beliebt in Pop und Singer-Songwriter-Musik.'],['farbe','Farbakkorde: Sexte, Neun, vermindert','Noch mehr Klangfarben. Maj9 und m9 klingen weich und jazzig, Sexten freundlich-altmodisch, Neuner bluesig. Vermindert und übermäßig sind Spannungsakkorde.'],['power','Powerchords (Metal und Rock)','Nur zwei bis drei Töne, ohne Dur oder Moll. Sie klingen mit Verzerrung kraftvoll und eindeutig.']];
 
 /* Griffbeschreibung */
 function howTo(c){
@@ -232,7 +289,7 @@ function pluckBuf(m){
   for(i=0;i<len;i++){var a=l[p],nx=l[(p+1)%N];d[i]=a;l[p]=(a+nx)*damp;p=(p+1)%N}
   BUF[m]=b;return b;
 }
-function pluck(m,t,v){var c=ac(),s=c.createBufferSource(),g=c.createGain();s.buffer=pluckBuf(m);g.gain.value=v;s.connect(g);g.connect(c.destination);s.start(t)}
+function pluck(m,t,v,dur){var c=ac(),s=c.createBufferSource(),g=c.createGain();s.buffer=pluckBuf(m);g.gain.setValueAtTime(v,t);if(dur){g.gain.setValueAtTime(v,t+dur*.6);g.gain.linearRampToValueAtTime(0,t+dur)}s.connect(g);g.connect(c.destination);s.start(t);if(dur)s.stop(t+dur+.02)}
 function chordMidis(c){var o=[];c.f.forEach(function(f,i){if(f>=0)o.push(OPEN[i]+f)});return o}
 function strum(c,t,up,gap){
   var ms=chordMidis(c);if(up)ms=ms.slice().reverse();
@@ -272,6 +329,21 @@ var LES=[
   th:'<p>Beim <b>Barré</b> legt der Zeigefinger sich flach über mehrere Saiten. Das ist anstrengend und klingt am Anfang schnarrend. Fang deshalb mit <b>Fmaj7</b> an: er klingt ähnlich wie F, hat aber nur einen kurzen Barré-Anteil.</p><ul><li>Drücke mit der <b>Kante</b> des Zeigefingers, nicht mit der Fläche, und nah am Bundstäbchen.</li><li>Der Daumen drückt hinter dem Hals leicht gegen.</li><li>Die Hand ermüdet schnell. Mach nach jeweils 30 Sekunden Pause.</li></ul>',tip:'Geduld: Fast alle brauchen für ein sauberes F einige Wochen. Das ist kein Zeichen von Unbegabtheit.',q:'barre'},
  {id:'power',e:'🤘',t:'Powerchords für Rock und Metal',d:'Nur Grundton und Quinte, verschiebbar',chords:['E5','A5','D5','G5','C5','F5'],pair:['E5','G5'],
   th:'<p>Ein <b>Powerchord</b> besteht nur aus dem Grundton und der Quinte (oft plus Oktave). Es fehlt die Terz, also ist er weder Dur noch Moll. Genau deshalb klingt er mit Verzerrung so klar und kraftvoll.</p><p>Die Form ist <b>verschiebbar</b>: Zeigefinger auf den Grundton, Ringfinger zwei Bünde höher auf die nächste Saite, kleiner Finger auf die übernächste Saite. Wandert die Form einen Bund hinauf, wandert der Akkord einen Halbton hinauf.</p><ul><li>Dämpfe die nicht gespielten Saiten mit dem Handballen der Schlaghand.</li><li>Spiele mit kurzen, harten Abschlägen. Dämpfe zwischen den Schlägen („Palm Mute“).</li></ul><p><b>Drop C</b> (wie in deinem Riffkoje eingestellt): Weil die tiefste Saite zwei Töne tiefer gestimmt ist, greifst du einen Powerchord mit <b>einem Finger flach über die drei tiefsten Saiten</b> auf dem gleichen Bund. Offen gespielt ist das schon C5, zwei Bünde höher D5, drei Bünde höher Es5, und so weiter. Diese Griffbilder hier gelten für die normale Stimmung.</p>',tip:'Nimm im Riffkoje ein Riff von YouTube und suche die Powerchords darin heraus. Oft sind es nur drei oder vier verschiedene.',q:'power'},
+ {id:'sus',e:'🌫',t:'Sus-Akkorde: schweben',d:'sus2 und sus4',chords:['Asus2','Asus4','Dsus2','Dsus4','Esus4'],pair:['A','Asus4'],
+  th:'<p>Bei einem <b>sus-Akkord</b> (von „suspended“, schwebend) wird die Terz durch einen Nachbarton ersetzt: bei <b>sus2</b> durch die Sekunde, bei <b>sus4</b> durch die Quarte. Ohne Terz weiß man nicht, ob der Akkord Dur oder Moll ist, deshalb klingt er offen und unentschieden.</p><ul><li><b>sus4</b> wirkt gespannt und löst sich gern ins normale Dur auf: Dsus4 → D.</li><li><b>sus2</b> klingt weit und ruhig, wie in vielen Intros und Balladen.</li><li>Für die Hand ist es leicht: Asus4 ist A mit einem kleinen Finger mehr, Dsus2 ist D mit einem Finger weniger.</li></ul>',
+  tip:'Spiele D – Dsus4 – D – Dsus2 – D. Du hörst, wie der Akkord „atmet“.',q:'sus'},
+ {id:'maj7',e:'🌅',t:'Maj7, Moll7 und Add9',d:'Mehr Farbe im Klang',chords:['Cmaj7','Gmaj7','Amaj7','Dmaj7','Emaj7','Am7','Em7','Dm7','Cadd9','Gadd9'],pair:['C','Cmaj7'],
+  th:'<p>Ein <b>Maj7</b> (große Septime) ist ein Dur-Akkord mit einem zusätzlichen Ton direkt unter dem Grundton. Das klingt weich und träumerisch, ein bisschen nach Jazz oder Bossa Nova. Ein <b>m7</b> (Moll-Sept) ist ein Moll-Akkord mit kleiner Septime: warm und entspannt, ohne die Schwere von reinem Moll.</p><p>Ein <b>add9</b> fügt einem Dur-Akkord die Sekunde (die None) hinzu, ohne die Septime. Es klingt hell und modern.</p><ul><li><b>Cmaj7 und Am7 sind sehr leicht</b> (nur zwei bis drei Finger) und passen oft an die Stelle von C und Am.</li><li>Die Folge Am7 – Dm7 – G – Cmaj7 hörst du in vielen Jazz- und Popstücken.</li></ul>',
+  tip:'Ersetze in einer Folge, die du schon kannst, einmal C durch Cmaj7 oder Cadd9. Du hörst sofort, wie sich die Stimmung ändert.',q:'maj7'},
+ {id:'barre2',e:'🧱',t:'Mehr Barré: H, Fm, Gm, Cm, Hmaj7',d:'Der Zeigefinger als Kapodaster',chords:['B','Bm7','Bmaj7','Fm','Gm','Cm'],pair:['Bm','B'],
+  th:'<p>Wenn du den Barré von F und Bm kannst, öffnen sich alle Tonarten. Zwei Formen reichen: die <b>E-Form</b> (Wurzel auf der tiefen E-Saite, wie F, Fm, Gm) und die <b>A-Form</b> (Wurzel auf der A-Saite, wie H, Hm, Cm, Hmaj7).</p><ul><li>Verschiebst du die Form um einen Bund, wird der Akkord einen Halbton höher: Fm im 1. Bund, Fism im 2., Gm im 3. Bund.</li><li><b>Hmaj7</b> ist die A-Form von Maj7: dieselbe Barré-Lage wie H, nur ein Finger weniger.</li><li><b>Hm7</b> kommt ohne Barré aus und ist ein dankbarer Zwischenschritt.</li></ul>',
+  tip:'Beginne mit Hm7 und Hmaj7. Wenn dir der Barré noch schnarrt, nimm das Gewicht des Arms statt Daumenkraft.'},
+ {id:'farbe',e:'🎨',t:'Farbakkorde: Sexte, Neun, Maj9, sus7',d:'Jazz, Soul und Singer-Songwriter',chords:['Cmaj9','Em9','E9','A9','C6','E6','A6','Am6','A7sus4','D7sus4','E7sus4','Bdim','Caug'],pair:['E7','E9'],
+  th:'<p>Wenn du schon Maj7 magst, sind das die nächsten Farben:</p><ul><li><b>Maj9</b> (Cmaj9): Maj7 plus die 9. Besonders weich und verträumt.</li><li><b>m9</b> (Em9): Moll-Sept plus 9. Nur zwei Finger, aber sehr schön.</li><li><b>9</b> (E9, A9): Blues-Septakkord mit zusätzlicher 9. Funkiger und voller als E7.</li><li><b>6</b> (C6, E6, A6) und <b>m6</b> (Am6): freundlich und leicht nostalgisch, typisch für Swing und Bossa.</li><li><b>7sus4</b> (A7sus4, D7sus4, E7sus4): schwebend, mit Spannung zur Auflösung.</li><li><b>dim</b> (Hdim) und <b>aug</b> (Caug): Durchgangsakkorde, die „irgendwohin wollen“.</li></ul>',
+  tip:'Ersetze in „Am – G – C – F“ einmal E durch E9 oder C durch Cmaj9. Du hörst, wie der Song erwachsener klingt.'},
+ {id:'schlag',e:'↕️',t:'Auf- und Abschlag: Rhythmus',d:'Die Hand pendelt immer',chords:['G','C','D','Em','Am'],
+  th:'<p>Beim Schlagen unterscheidet man <b>Abschlag ↓</b> (Hand geht nach unten, tiefe Saiten zuerst) und <b>Aufschlag ↑</b> (Hand geht nach oben, meist nur die dünnen hohen Saiten). Das wichtigste Prinzip ist das <b>Pendel</b>: Deine Hand schwingt gleichmäßig im Achtel-Takt weiter, auch wenn du bei manchen Schlägen die Saiten gar nicht triffst.</p><ul><li>Auf die Zahl (1, 2, 3, 4) schlägst du ↓, auf das „und“ zwischen den Zahlen ↑.</li><li>Ein Muster ändert nur, <b>welche</b> Schläge die Saiten wirklich treffen.</li><li>Im Bereich „Üben“ → „Rhythmus-Trainer“ siehst du zehn Muster als Pfeile und hörst sie mit Klick.</li></ul>',
+  tip:'Klopfe das Muster zuerst mit der Hand auf dem Oberschenkel, dann mit einem gedämpften Akkord, erst dann mit Griffwechsel.'},
  {id:'folgen',e:'🎶',t:'Akkordfolgen und Rhythmus',d:'Lieder begleiten',chords:['G','C','D','Em','Am'],pair:['G','D'],
   th:'<p>Fast jedes einfache Lied nutzt drei oder vier Akkorde, die sich wiederholen. Beispiele findest du im Bereich „Üben → Akkordfolgen“.</p><p>Ein einfaches <b>Schlagmuster</b> für den Anfang: pro Schlag ein Abschlag (↓ ↓ ↓ ↓). Danach: ↓ ↓↑ ↑↓↑ („runter, runter-rauf, rauf-runter-rauf“). Die Hand schwingt dabei <b>immer</b> im gleichen Rhythmus auf und ab, auch wenn sie manche Schläge nicht trifft.</p><ul><li>Wechsle den Akkord immer genau auf Schlag eins.</li><li>Lieber langsam und flüssig als schnell und holprig.</li></ul>',tip:'Spiel dein erstes Lied für die Familie. Sing dabei mit, auch wenn es schief klingt.',q:null}
 ];
@@ -426,7 +498,72 @@ function pgStart(){
 }
 $('#p-go').addEventListener('click',function(){if(pg.on)pgStop();else pgStart()});
 $('#p-sel').addEventListener('change',function(){pgStop();pgDraw(-1)});
-function stopAll(){chStop();pgStop()}
+
+/* ───── Rhythmus-Trainer ───── */
+var RHY=[
+ {id:'viertel',t:'Viertel-Abschläge',beats:4,sub:2,sl:'D - D - D - D -',i:'Die Grundlage: nur auf die Zahlen schlagen. Die Hand pendelt trotzdem im Achtel-Takt.'},
+ {id:'achtel',t:'Achtel: ↓↑ im Wechsel',beats:4,sub:2,sl:'D U D U D U D U',i:'Jeder Achtel wird gespielt, immer abwechselnd. Der Anfang aller Schlagmuster.'},
+ {id:'lager',t:'Lagerfeuer (D, DU, UDU)',beats:4,sub:2,sl:'D - D U - U D U',i:'Das bekannteste Muster für Folk und Pop. Beim 2. und 3. Schlag fehlt je ein Abschlag, die Hand schwingt durch.'},
+ {id:'synk',t:'Synkopen-Schwung',beats:4,sub:2,sl:'D U - U D U - U',i:'Die Betonung rutscht auf die „und“. Das gibt Groove, klingt aber erst bei gleichmäßiger Hand gut.'},
+ {id:'reggae',t:'Reggae-Offbeat',beats:4,sub:2,sl:'- U - U - U - U',i:'Nur die Aufschläge auf dem „und“, kurz und trocken. Perfekt, um die Pendelhand zu üben.'},
+ {id:'country',t:'Country: Boom-Chuck',beats:4,sub:2,sl:'B - D - B - D -',i:'B = Basston (Grundton), D = Akkordschlag. Der Wechsel zwischen tiefem Ton und Akkord trägt den Rhythmus.'},
+ {id:'walzer',t:'Walzer im Dreivierteltakt',beats:3,sub:2,sl:'B - D - D -',i:'Eins ist der Basston, zwei und drei sind die Akkorde („Um-ta-ta“).'},
+ {id:'ballade',t:'Ballade: weich ↓ ↓↑',beats:4,sub:2,sl:'D - - U D - D U',i:'Weich und ruhig. Zwei Abschläge mit je einem Aufschlag, dazwischen eine Pause.'},
+ {id:'mute',t:'Achtel gedämpft (Palm Mute)',beats:4,sub:2,sl:'m m m m m m m m',i:'Handballen liegt leicht an den Saiten an der Brücke. Der Klang ist dumpf und druckvoll, typisch für Rock und Metal.'},
+ {id:'galopp',t:'Metal-Galopp',beats:4,sub:4,sl:'m - m m m - m m m - m m m - m m',i:'Pro Schlag: ein Achtel, zwei Sechzehntel. Gedämpft und eng am Metronom, am besten mit Powerchords (E5, A5).'}
+];
+RHY.forEach(function(r){r.sl=r.sl.split(' ')});
+$('#r-pat').innerHTML=RHY.map(function(r,i){return '<option value="'+i+'">'+esc(r.t)+'</option>'}).join('');
+$('#r-ch').innerHTML='<optgroup label="Akkord">'+Object.keys(C).map(function(k){return '<option value="c:'+k+'">'+esc(C[k].n)+'</option>'}).join('')+'</optgroup><optgroup label="Folge (Wechsel pro Takt)">'+PROGS.map(function(p,i){return '<option value="p:'+i+'">'+esc(p.t)+'</option>'}).join('')+'</optgroup>';
+$('#r-ch').value='c:G';
+var rh={on:false,tm:null,i:0,next:0,bar:0,bpm:70};
+function rhyChords(){var v=$('#r-ch').value;return v.charAt(0)==='p'?PROGS[+v.slice(2)].s:[v.slice(2)]}
+function rhyDraw(cur,barIdx){
+  var r=RHY[+$('#r-pat').value],n=r.sl.length,cs=rhyChords(),ck=cs[(barIdx||0)%cs.length];
+  var labs=r.sub===2?['','+']:['','e','+','a'],per=Math.min(n,8),h='<div class="rw" style="--n:'+per+'">';
+  r.sl.forEach(function(x,i){
+    var isBeat=i%r.sub===0,lab=isBeat?String(i/r.sub+1):labs[i%r.sub],ar=x==='D'||x==='m'?'↓':x==='U'?'↑':x==='B'?'B':'·';
+    if(i>0&&i%per===0)h+='</div><div class="rw" style="--n:'+per+'">';
+    h+='<div class="sl'+(i===cur?' on':'')+(x==='-'?' rest':'')+(isBeat?' bt':'')+(x==='m'?' mu':'')+'"><span class="ar">'+ar+'</span><span class="ct">'+lab+'</span></div>';
+  });
+  $('#r-show').innerHTML=h+'</div>';
+  $('#r-chord').innerHTML='<div class="ch"><div class="nm">'+esc(C[ck].n)+'</div>'+diagram(C[ck])+'</div>';
+  $('#r-info').textContent=r.i;
+}
+function rhyStop(){rh.on=false;clearInterval(rh.tm);rh.tm=null;$('#r-go').textContent='Start'}
+function rhyHit(x,k,t){
+  var c=C[k],ms=chordMidis(c);if(!ms.length)return;
+  if(x==='B'){pluck(ms[0],t,.42);return}
+  if(x==='D'){ms.forEach(function(m,i){pluck(m,t+i*.012,.32)});return}
+  if(x==='m'){ms.forEach(function(m,i){pluck(m,t+i*.008,.34,.09)});return}
+  if(x==='U'){var hi=ms.slice(-4).reverse();hi.forEach(function(m,i){pluck(m,t+i*.01,.22)})}
+}
+function rhyStart(){
+  rhyStop();var c=ac(),r=RHY[+$('#r-pat').value],n=r.sl.length,sub=r.sub;
+  rh.on=true;rh.i=-n;rh.bar=0;rh.bpm=bpmOf('#r-bpm',40,200,70);rh.next=c.currentTime+.15;$('#r-go').textContent='Stopp';
+  var cs=rhyChords(),clk=$('#r-clk').checked,snd=$('#r-snd').checked,up=$('#r-up').checked;
+  mark();
+  function plan(){
+    while(rh.next<ac().currentTime+.3){
+      var i=rh.i,slot=((i%n)+n)%n,dur=60/rh.bpm/sub;
+      if(i<0){if(slot%sub===0)click(rh.next,slot===0)}
+      else{
+        var bar=Math.floor(i/n),k=cs[bar%cs.length],x=r.sl[slot];
+        if(clk&&slot%sub===0)click(rh.next,slot===0);
+        if(snd&&x!=='-')try{rhyHit(x,k,rh.next)}catch(e){}
+        (function(s,b,when){setTimeout(function(){if(rh.on)rhyDraw(s,b)},Math.max(0,(when-ac().currentTime)*1000))})(slot,bar,rh.next);
+        if(slot===n-1&&up&&(bar+1)%8===0&&rh.bpm<200){rh.bpm=Math.min(200,rh.bpm+5);$('#r-bpm').value=rh.bpm}
+      }
+      rh.i++;rh.next+=dur;
+    }
+  }
+  plan();rh.tm=setInterval(plan,100);
+}
+$('#r-go').addEventListener('click',function(){if(rh.on)rhyStop();else rhyStart()});
+$('#r-pat').addEventListener('change',function(){rhyStop();rhyDraw(-1,0)});
+$('#r-ch').addEventListener('change',function(){rhyStop();rhyDraw(-1,0)});
+rhyDraw(-1,0);
+function stopAll(){chStop();pgStop();rhyStop()}
 
 /* ───── Quiz ───── */
 var Q=null;
@@ -486,7 +623,7 @@ $('#q-hear').addEventListener('click',function(){quizStart('hear')});
 
 /* Start */
 renderPfad();renderBuch();drawChange(0);pgDraw(-1);stats();setTab('pfad');
-window.__ak={C:C,LES:LES,PROGS:PROGS,PR:function(){return PR},howTo:howTo,diagram:diagram,chordMidis:chordMidis,get Q(){return Q}};
+window.__ak={RHY:RHY,rhyDraw:rhyDraw,rhyStart:rhyStart,C:C,LES:LES,PROGS:PROGS,PR:function(){return PR},howTo:howTo,diagram:diagram,chordMidis:chordMidis,get Q(){return Q}};
 })();
 </script>
 </body>

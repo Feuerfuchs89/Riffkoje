@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1c1e24">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Low Whistle lernen</title>
+<script src="shared.js"></script>
+<style>
+:root{--bg:#f6f4ee;--card:#fff;--ink:#1d1f24;--muted:#656a75;--line:#dcd8cd;--acc:#2848d2;--on:#fff;--ok:#1f8a4c;--bad:#c4452c;--star:#f2a93b;--dot:#1d1f24;--doton:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#14161a;--card:#1d2026;--ink:#ecebe6;--muted:#a1a5ae;--line:#2e323a;--acc:#7b94ff;--on:#10131f;--ok:#4cc27e;--bad:#ff7a5c;--dot:#ecebe6;--doton:#14161a;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#14161a;--card:#1d2026;--ink:#ecebe6;--muted:#a1a5ae;--line:#2e323a;--acc:#7b94ff;--on:#10131f;--ok:#4cc27e;--bad:#ff7a5c;--dot:#ecebe6;--doton:#14161a;color-scheme:dark}
+:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px 16px 80px;display:grid;gap:14px}
+h1{font-size:1.6rem;margin:4px 0 0}h2{font-size:1.15rem;margin:0}h3{margin:0;font-size:1rem}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;cursor:pointer;min-height:42px}
+.btn.primary{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+.btn.sm{min-height:36px;padding:6px 11px;font-size:.9rem}
+.btn[aria-pressed=true]{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+select,input[type=number]{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px}
+.stats{display:flex;gap:18px;flex-wrap:wrap}.stats b{font-size:1.5rem;display:block;line-height:1.1}.stats span{font-size:.8rem;color:var(--muted)}
+#tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#tabs button{text-align:center;padding:10px 6px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+#tabs button b{display:block}#tabs button span{font-size:.75rem;color:var(--muted)}
+#tabs button[aria-selected=true]{border-color:var(--acc);background:var(--acc);color:var(--on)}
+#tabs button[aria-selected=true] span{color:var(--on);opacity:.85}
+@media (max-width:440px){#tabs button span{display:none}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.les{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px;display:grid;gap:4px;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.les .e{font-size:1.8rem;line-height:1}.les .t{font-weight:600}.les .d{font-size:.86rem;color:var(--muted)}.les .k{font-size:.82rem;color:var(--acc);font-weight:600}
+.th p{margin:0 0 .6em}.th ul{margin:0 0 .6em;padding-left:1.2em}
+.tip{border-left:4px solid var(--star);padding:8px 12px;background:var(--bg);border-radius:0 10px 10px 0}
+.chords{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ch{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:8px;display:grid;gap:4px;justify-items:center;text-align:center}
+.ch b{font-size:1.15rem}.ch .n{font-size:.78rem;color:var(--muted)}
+.ch svg{width:100%;max-width:130px;height:auto}
+.ch.known{border-color:var(--ok)}
+.ch .row{justify-content:center;gap:6px}
+.big svg{max-width:240px}
+.chdiag text{fill:var(--ink)}
+.bigchord{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:center}
+.bigchord .ch{border:0;padding:0}
+.bigchord .nm{font-size:2.6rem;font-weight:700;text-align:center;line-height:1}
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.opts .btn{white-space:normal;padding:12px}
+.opts .btn.right{background:var(--ok);border-color:var(--ok);color:#fff}.opts .btn.wrong{border-color:var(--bad);color:var(--bad)}
+.fb{padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.fb.good{border-color:var(--ok)}.fb.bad{border-color:var(--bad)}
+.bar{height:10px;border-radius:5px;background:var(--bg);border:1px solid var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.stars{letter-spacing:2px;color:var(--star)}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:.78rem;color:var(--muted)}
+.pill.ok{border-color:var(--ok);color:var(--ok)}
+.cur{outline:3px solid var(--acc);outline-offset:3px;border-radius:12px}
+.rhy{display:grid;gap:6px;overflow:hidden}
+.rhy .rw{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px}
+.rhy .sl{border:1px solid var(--line);border-radius:8px;background:var(--card);text-align:center;padding:4px 0;min-height:56px;display:grid;align-content:center;gap:2px}
+.rhy .sl .ar{font-size:1.35rem;font-weight:700;line-height:1}
+.rhy .sl .ct{font-size:.72rem;color:var(--muted)}
+.rhy .sl.on{background:var(--acc);border-color:var(--acc);color:var(--on)}.rhy .sl.on .ct{color:var(--on)}
+.rhy .sl.rest .ar{color:var(--muted);font-weight:400}
+.rhy .sl.bt .ct{font-weight:700;color:var(--ink)}
+.rhy .sl.mu .ar{text-decoration:underline dotted}
+.timer{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+<style>
+.wh{width:100%;height:auto}
+.wh .body{fill:var(--bg);stroke:var(--ink);stroke-width:2}
+.wh .hole{stroke:var(--ink);stroke-width:2}
+.wh .on{fill:var(--ink)}.wh .off{fill:var(--card)}
+.wh text{fill:var(--muted);font:11px system-ui,sans-serif}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.fcard{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:8px;display:grid;gap:4px;justify-items:center;text-align:center}
+.fcard b{font-size:1.15rem}.fcard svg{width:56px;height:auto}.fcard.cross{border-style:dashed}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 4px;min-height:38px;text-align:center;font-weight:600;background:var(--card);color:var(--ink);font-size:.9rem;display:grid;align-content:center}
+.chip small{font-weight:400;color:var(--muted);font-size:.7rem;line-height:1}
+.chip.rest{color:var(--muted);background:var(--bg);font-weight:400}
+.chip.cur{outline:3px solid var(--acc);outline-offset:1px;background:var(--acc);color:var(--on)}
+.chip.cur small{color:var(--on)}
+.chip.done{opacity:.45}
+.now{display:flex;gap:18px;align-items:flex-end;justify-content:center}
+.now figure{margin:0;text-align:center}.now svg{width:70px}.now .nm{font-size:2.2rem;font-weight:700;line-height:1}
+.now .nx svg{width:44px;opacity:.6}
+.tuner{display:grid;gap:6px}
+.meter{position:relative;height:14px;border-radius:7px;background:var(--bg);border:1px solid var(--line)}
+.meter i{position:absolute;top:-3px;width:6px;height:20px;border-radius:3px;background:var(--acc);left:50%;transform:translateX(-50%);transition:left .08s}
+.meter u{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--ok)}
+.fi .hole{cursor:pointer}.fi circle[data-h]:focus{outline:none;stroke:var(--acc);stroke-width:4}
+#tabs{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}
+.tbl{border-collapse:collapse;width:100%;font-size:.9rem}.tbl td,.tbl th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+.pat{font-family:ui-monospace,monospace;letter-spacing:2px}
+</style>
+</head>
+<body>
+<main>
+  <div><h1>🪈 Low Whistle</h1><p class="muted" style="margin:4px 0 0">Griffe, Atmung, Tonleitern und irische Tunes für deine Chieftain Low Whistle. Alle Texte und Griffbilder sind eigens für diese App gemacht.</p></div>
+  <div class="card" id="prog"><div class="stats">
+    <div><b id="st-les">0</b><span>Lektionen fertig</span></div>
+    <div><b id="st-tn">0</b><span>Tunes geschafft</span></div>
+    <div><b id="st-best">0</b><span>Quiz-Rekord</span></div>
+    <div><b id="st-days">0</b><span>Tage geübt</span></div></div>
+    <p class="small muted" style="margin:0">Annahme: Deine Chieftain v2 ist eine <b>Low D</b>. Die tiefste Note ist dann D4. Hast du eine andere Stimmung, bleiben alle Griffe gleich, nur die Tonnamen verschieben sich.</p></div>
+  <div id="tabs" role="tablist" aria-label="Bereiche">
+    <button type="button" role="tab" data-t="pfad" aria-selected="true"><b>Lernpfad</b><span>Schritt für Schritt</span></button>
+    <button type="button" role="tab" data-t="griffe" aria-selected="false"><b>Griffe</b><span>Alle Töne</span></button>
+    <button type="button" role="tab" data-t="tunes" aria-selected="false"><b>Tunes</b><span>Üben mit Griffen</span></button>
+    <button type="button" role="tab" data-t="finger" aria-selected="false"><b>Finger</b><span>Griffe trainieren</span></button>
+    <button type="button" role="tab" data-t="quiz" aria-selected="false"><b>Quiz</b><span>Griffe merken</span></button>
+  </div>
+  <section id="v-pfad" class="grid"></section>
+  <section id="v-lesson" class="card" hidden>
+    <div class="row" style="justify-content:space-between"><h2 id="l-title"></h2><button class="btn sm" id="l-close" type="button">Zurück</button></div>
+    <div class="th" id="l-th"></div>
+    <div class="fgrid" id="l-notes"></div>
+    <div class="tip" id="l-tip" hidden></div>
+    <div class="row"><button class="btn" id="l-done" type="button">Lektion abhaken</button></div>
+  </section>
+  <section id="v-griffe" hidden>
+    <div class="card"><h2>Griffbild</h2>
+      <p class="small muted" style="margin:0">Ausgefüllt = Loch zugedeckt. Oben die linke Hand (Zeige-, Mittel-, Ringfinger), unten die rechte. Gestrichelt umrandet sind Kreuzgriffe, bei denen ein Loch offen bleibt, obwohl tiefere zu sind.</p>
+      <h3>1. Oktave</h3><div class="fgrid" id="g-1"></div>
+      <h3>2. Oktave (etwas mehr Luft, gleiche Griffe)</h3><div class="fgrid" id="g-2"></div></div>
+  </section>
+  <section id="v-tunes" hidden style="display:grid;gap:14px">
+    <div class="card" id="t-box">
+      <h2>Tune üben</h2>
+      <div class="row"><select id="t-sel" aria-label="Stück"></select>
+        <label class="small">Tempo <input type="number" id="t-bpm" min="30" max="200" value="70" style="width:5em"></label>
+        <button class="btn primary" id="t-play" type="button">▶ Vorspielen</button>
+        <button class="btn" id="t-wait" type="button">🎤 Warte auf mich</button></div>
+      <p class="small muted" id="t-info" style="margin:0"></p>
+      <div class="now" id="t-now" aria-live="polite"></div>
+      <div class="chips" id="t-chips"></div>
+      <p class="small" id="t-msg" aria-live="polite" style="margin:0"></p>
+      <div class="row"><button class="btn sm" id="t-ok" type="button">Kann ich</button></div>
+    </div>
+    <div class="card tuner" id="t-tuner">
+      <h2>Stimmgerät</h2>
+      <p class="small muted" style="margin:0">Spiele einen Ton lang aus und halte ihn ruhig. Die App zeigt, welcher Ton erkannt wird und wie nah du an der Tonhöhe bist. Das Mikrofon bleibt im Gerät, nichts wird gesendet.</p>
+      <div class="row"><label class="small">Eingang <select id="m-dev" aria-label="Audio-Eingang"><option value="">Standard (internes Mikrofon)</option></select></label></div>
+      <div class="row"><button class="btn" id="m-go" type="button">Mikrofon einschalten</button><span class="pill" id="m-state">aus</span></div>
+      <div class="big" style="font-size:2rem;font-weight:700" id="m-note" aria-live="polite">–</div>
+      <div class="meter" aria-hidden="true"><u></u><i id="m-needle"></i></div>
+      <div class="small muted" id="m-cent">zu tief ◂ ▸ zu hoch</div>
+    </div>
+  </section>
+  <section id="v-finger" hidden class="card">
+    <h2>Finger-Trainer</h2>
+    <p class="small muted" style="margin:0">Du bekommst einen Ton genannt und tippst die Löcher an, die zu sein müssen (ausgefüllt = zu). Passt der Griff, kommt sofort der nächste Ton. Deine Finger starten dort, wo der letzte Griff aufgehört hat, so übst du auch die Wechsel. Zehn Töne pro Runde, die Zeit läuft mit.</p>
+    <div class="row"><label class="small">Töne <select id="f-pool" aria-label="Tonauswahl"><option value="d1">1. Oktave (D-Dur)</option><option value="d2">2. Oktave</option><option value="cross">Mit Kreuzgriffen (C, F)</option><option value="all">Alle Töne</option></select></label>
+      <label class="small"><input type="checkbox" id="f-snd" checked> Ton abspielen</label>
+      <button class="btn primary" id="f-go" type="button">Runde starten</button></div>
+    <div id="f-box" hidden>
+      <div class="row" style="justify-content:space-between"><strong id="f-head"></strong><button class="btn sm" id="f-end" type="button">Beenden</button></div>
+      <div class="bar"><i id="f-bar"></i></div>
+      <div class="now" style="margin-top:10px"><figure><div class="small muted">Greife</div><div class="nm" id="f-target"></div></figure><div id="f-hole" style="width:96px"></div></div>
+      <div class="row" style="justify-content:center"><button class="btn sm" id="f-hint" type="button">Hilfe zeigen</button><button class="btn sm" id="f-clear" type="button">Alle Löcher auf</button></div>
+      <p class="small" id="f-fb" aria-live="polite" style="text-align:center;margin:6px 0 0"></p>
+    </div>
+    <p id="f-res" class="small" aria-live="polite" style="margin:0"></p>
+  </section>
+  <section id="v-quiz" hidden class="card">
+    <h2>Griff-Quiz</h2>
+    <div class="row"><button class="btn primary" id="q-go" type="button">Neue Runde (8 Fragen)</button></div>
+    <div id="q-box" hidden>
+      <div class="row" style="justify-content:space-between"><strong id="q-head"></strong><button class="btn sm" id="q-end" type="button">Beenden</button></div>
+      <div class="bar"><i id="q-bar"></i></div>
+      <p id="q-text" style="font-weight:600;margin:10px 0 6px"></p>
+      <div id="q-show" class="row" style="justify-content:center"></div>
+      <div class="opts" id="q-opts"></div>
+      <div class="fb" id="q-fb" hidden></div>
+      <div class="row"><button class="btn primary" id="q-next" type="button" hidden>Weiter</button></div>
+    </div>
+    <p id="q-res" class="small" aria-live="polite" style="margin:0"></p>
+  </section>
+  <p class="muted small">Die App hört nur Tonhöhen, nicht deine Haltung. Kleine Töne und Quietschen sind am Anfang normal: meist liegt ein Finger nicht ganz dicht oder es kommt zu viel Druck in die Luft.</p>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function toast(t){var e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('on')},2200)}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+
+/* ───── Griffe: 1 = Loch zu, von oben nach unten (links Zeige-, Mittel-, Ringfinger, rechts Zeige-, Mittel-, Ringfinger) ───── */
+var FING={62:'111111',64:'111110',65:'111011',66:'111100',67:'111000',69:'110000',71:'100000',72:'011100',73:'000000',74:'011111',76:'111110',78:'111100',79:'111000',81:'110000',83:'100000'};
+var CROSS={65:1,72:1};
+var NN=['C','Cis','D','Dis','E','F','Fis','G','Gis','A','B','H'];
+function nname(m){return NN[m%12]}
+function nfull(m){return nname(m)+(m>=74?' (hoch)':'')}
+var TUNES=[{"id":"o-tannenbaum","cat":"Weihnachten","title":"O Tannenbaum","bpm":92,"shift":0,"notes":[[62,0.5],[67,0.5],[67,0.5],[67,1.5],[62,0.5],[69,0.5],[69,0.5],[69,1.5],[62,0.5],[71,0.5],[67,0.5],[72,1],[71,1],[69,1],[67,1],[0,0.5],[74,0.5],[74,0.5],[74,0.5],[74,1.5],[76,0.5],[72,0.5],[72,0.5],[72,1.5],[72,0.5],[71,0.5],[71,0.5],[71,1.5],[71,0.5],[69,0.5],[69,0.5],[69,1.5],[62,0.5],[67,0.5],[67,0.5],[67,1.5],[62,0.5],[69,0.5],[69,0.5],[69,1.5],[62,0.5],[71,0.5],[67,0.5],[72,1],[71,1],[69,1],[67,1],[0,0.5]]},{"id":"o-du-froehliche","cat":"Weihnachten","title":"O du fröhliche","bpm":84,"shift":0,"notes":[[74,1],[76,1],[74,0.75],[72,0.25],[71,0.5],[72,0.5],[74,1],[76,1],[74,0.75],[72,0.25],[71,1],[74,1],[74,1],[76,1],[78,0.5],[79,0.5],[78,1],[76,1],[74,2],[69,0.75],[71,0.25],[69,0.5],[71,0.5],[72,0.75],[74,0.25],[72,1],[71,0.75],[72,0.25],[71,0.5],[72,0.5],[74,0.75],[76,0.25],[74,1],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[79,0.5],[76,0.5],[74,0.5],[72,0.5],[71,1],[69,1],[67,2]]},{"id":"haste-to-the-wedding","cat":"Irisch","title":"Haste to the Wedding (Jig)","bpm":96,"shift":0,"notes":[[69,0.5],[69,0.5],[66,0.5],[69,0.5],[69,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[76,0.5],[78,0.5],[74,0.5],[71,0.5],[69,0.5],[66,0.5],[69,0.5],[69,0.5],[74,0.5],[66,0.5],[64,0.5],[66,0.5],[64,0.5],[64,1],[69,0.5],[69,0.5],[66,0.5],[69,0.5],[69,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[76,0.5],[78,0.5],[74,0.5],[71,0.5],[69,1],[79,0.5],[79,0.25],[81,0.75],[79,0.5],[74,0.5],[76,0.5],[74,0.5],[74,1],[69,0.5],[69,0.5],[66,0.5],[69,0.5],[69,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[76,0.5],[78,0.5],[74,0.5],[71,0.5],[69,0.5],[66,0.5],[69,0.5],[69,0.5],[74,0.5],[66,0.5],[64,0.5],[66,0.5],[64,0.5],[64,1],[69,0.5],[69,0.5],[66,0.5],[69,0.5],[69,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[76,0.5],[78,0.5],[74,0.5],[71,0.5],[69,1],[79,0.5],[79,0.25],[81,0.75],[79,0.5],[74,0.5],[76,0.5],[74,0.5],[74,1],[81,0.5],[81,0.5],[78,0.5],[81,0.5],[81,0.5],[78,0.5],[81,0.5],[83,0.5],[79,0.5],[83,0.5],[83,0.5],[78,0.5],[83,0.5],[81,0.5],[78,0.5],[81,0.5],[81,0.5],[79,0.5],[78,0.5],[76,0.5],[78,0.5],[76,0.5],[74,0.5],[78,0.5],[79,0.5],[81,1.5],[78,1.5],[76,0.5],[74,0.5],[76,0.5],[78,0.5],[74,0.5],[71,0.5],[69,1],[79,0.5],[78,0.25],[81,0.75],[79,0.5],[74,0.5],[76,0.5],[74,0.5],[74,1],[81,0.5],[81,0.5],[78,0.5],[81,0.5],[81,0.5],[78,0.5],[81,0.5],[83,0.5],[79,0.5],[83,0.5],[83,0.5],[78,0.5],[83,0.5],[81,0.5],[78,0.5],[81,0.5],[81,0.5],[79,0.5],[78,0.5],[76,0.5],[78,0.5],[76,0.5],[74,0.5],[78,0.5],[79,0.5],[81,1.5],[78,1.5],[76,0.5],[74,0.5],[76,0.5],[78,0.5],[74,0.5],[71,0.5],[69,1],[79,0.5],[78,0.25],[81,0.75],[79,0.5],[74,0.5],[76,0.5],[74,0.5],[74,1]]},{"id":"st-patricks-day","cat":"Irisch","title":"St. Patrick’s Day (Jig)","bpm":96,"shift":0,"notes":[[62,0.5],[67,0.5],[69,0.5],[67,0.5],[67,0.5],[71,0.5],[74,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[71,0.5],[67,0.5],[69,0.5],[67,0.5],[69,0.5],[71,0.5],[67,0.5],[62,0.5],[64,0.5],[66,0.5],[64,0.5],[64,1],[62,0.5],[67,0.5],[69,0.5],[67,0.5],[67,0.5],[71,0.5],[74,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[71,0.5],[67,0.5],[69,0.5],[67,0.5],[69,0.5],[71,0.5],[67,0.5],[62,0.5],[64,1],[66,0.5],[67,1],[62,0.5],[67,0.5],[69,0.5],[67,0.5],[67,0.5],[71,0.5],[74,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[71,0.5],[67,0.5],[69,0.5],[67,0.5],[69,0.5],[71,0.5],[67,0.5],[62,0.5],[64,0.5],[66,0.5],[64,0.5],[64,1],[62,0.5],[67,0.5],[69,0.5],[67,0.5],[67,0.5],[71,0.5],[74,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[71,0.5],[67,0.5],[69,0.5],[67,0.5],[69,0.5],[71,0.5],[67,0.5],[62,0.5],[64,1],[66,0.5],[67,1],[71,0.5],[74,0.5],[76,0.5],[78,0.5],[79,0.5],[81,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[76,0.5],[74,0.5],[71,0.5],[74,0.5],[76,0.5],[78,0.5],[79,0.5],[81,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[76,1],[71,0.5],[74,0.5],[76,0.5],[78,0.5],[79,0.5],[81,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[71,0.5],[67,0.5],[67,0.5],[71,0.5],[74,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[71,0.5],[67,0.5],[69,0.5],[67,0.5],[69,0.5],[71,0.5],[67,0.5],[62,0.5],[64,0.5],[66,0.5],[64,0.5],[64,1],[62,0.5],[67,0.5],[69,0.5],[67,0.5],[67,0.5],[71,0.5],[74,0.5],[79,0.5],[78,0.5],[76,0.5],[74,0.5],[71,0.5],[67,0.5],[69,0.5],[67,0.5],[69,0.5],[71,0.5],[67,0.5],[62,0.5],[64,1],[66,0.5],[67,1]]},{"id":"drowsy-maggie","cat":"Irisch","title":"Drowsy Maggie (Reel)","bpm":84,"shift":0,"notes":[[64,1],[71,0.5],[64,0.5],[74,0.5],[64,0.5],[71,0.5],[64,0.5],[64,1],[71,0.5],[64,0.5],[69,0.5],[66,0.5],[62,0.5],[66,0.5],[64,1],[71,0.5],[64,0.5],[74,0.5],[64,0.5],[71,0.5],[64,0.5],[71,0.5],[69,0.5],[71,0.5],[73,0.5],[74,0.5],[69,0.5],[66,0.5],[62,0.5],[64,1],[71,0.5],[64,0.5],[74,0.5],[64,0.5],[71,0.5],[64,0.5],[64,1],[71,0.5],[64,0.5],[69,0.5],[66,0.5],[62,0.5],[66,0.5],[64,1],[71,0.5],[64,0.5],[74,0.5],[64,0.5],[71,0.5],[64,0.5],[71,0.5],[69,0.5],[71,0.5],[73,0.5],[74,0.5],[69,0.5],[66,0.5],[69,0.5],[64,1],[71,0.5],[64,0.5],[74,0.5],[64,0.5],[71,0.5],[64,0.5],[64,1],[71,0.5],[64,0.5],[69,0.5],[66,0.5],[62,0.5],[66,0.5],[64,1],[71,0.5],[64,0.5],[74,0.5],[64,0.5],[71,0.5],[64,0.5],[71,0.5],[69,0.5],[71,0.5],[73,0.5],[74,0.5],[69,0.5],[66,0.5],[62,0.5],[64,1],[71,0.5],[64,0.5],[74,0.5],[64,0.5],[71,0.5],[64,0.5],[64,1],[71,0.5],[64,0.5],[69,0.5],[66,0.5],[62,0.5],[66,0.5],[64,1],[71,0.5],[64,0.5],[74,0.5],[64,0.5],[71,0.5],[64,0.5],[71,0.5],[69,0.5],[71,0.5],[73,0.5],[74,0.5],[69,0.5],[66,0.5],[69,0.5],[74,1],[78,0.5],[74,0.5],[72,1],[76,0.5],[72,0.5],[74,0.5],[76,0.5],[78,0.5],[79,0.5],[81,0.5],[78,0.5],[79,0.5],[76,0.5],[74,1],[78,0.5],[74,0.5],[72,1],[76,0.5],[72,0.5],[71,0.5],[69,0.5],[71,0.5],[72,0.5],[74,0.5],[69,0.5],[66,0.5],[69,0.5],[74,1],[78,0.5],[74,0.5],[72,1],[76,0.5],[72,0.5],[74,0.5],[76,0.5],[78,0.5],[79,0.5],[81,0.5],[78,0.5],[79,0.5],[76,0.5],[81,0.5],[78,0.5],[79,0.5],[76,0.5],[78,0.5],[74,0.5],[76,0.5],[72,0.5],[71,0.5],[69,0.5],[71,0.5],[72,0.5],[74,0.5],[69,0.5],[66,0.5],[62,0.5],[74,1],[78,0.5],[74,0.5],[72,1],[76,0.5],[72,0.5],[74,0.5],[76,0.5],[78,0.5],[79,0.5],[81,0.5],[78,0.5],[79,0.5],[76,0.5],[74,1],[78,0.5],[74,0.5],[72,1],[76,0.5],[72,0.5],[71,0.5],[69,0.5],[71,0.5],[72,0.5],[74,0.5],[69,0.5],[66,0.5],[69,0.5],[74,1],[78,0.5],[74,0.5],[72,1],[76,0.5],[72,0.5],[74,0.5],[76,0.5],[78,0.5],[79,0.5],[81,0.5],[78,0.5],[79,0.5],[76,0.5],[81,0.5],[78,0.5],[79,0.5],[76,0.5],[78,0.5],[74,0.5],[76,0.5],[72,0.5],[71,0.5],[69,0.5],[71,0.5],[72,0.5],[74,0.5],[69,0.5],[66,0.5],[62,0.5]]}];
+function whSvg(pat,big){
+  var h='<svg class="wh" viewBox="0 0 56 '+(big?170:150)+'" role="img" aria-label="Griffbild '+pat+'"><rect class="body" x="14" y="2" width="28" height="146" rx="8"/>';
+  var ys=[22,44,66,92,114,136];
+  for(var i=0;i<6;i++)h+='<circle class="hole '+(pat[i]==='1'?'on':'off')+'" cx="28" cy="'+ys[i]+'" r="8.5"/>';
+  return h+'</svg>';
+}
+function patText(p){return p.slice(0,3).split('').map(function(c){return c==='1'?'●':'○'}).join('')+' '+p.slice(3).split('').map(function(c){return c==='1'?'●':'○'}).join('')}
+
+/* ───── Klang ───── */
+var AC=null;
+function ac(){if(!AC){var K=window.AudioContext||window.webkitAudioContext;AC=new K()}if(AC.state==='suspended')AC.resume();return AC}
+function tone(m,t,dur,v){
+  var c=ac(),f=440*Math.pow(2,(m-69)/12),o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),g2=c.createGain();
+  o.type='sine';o.frequency.value=f;o2.type='sine';o2.frequency.value=f*2;g2.gain.value=m>=74?.22:.08;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v||.3,t+.04);g.gain.setValueAtTime(v||.3,t+Math.max(.05,dur-.07));g.gain.linearRampToValueAtTime(0,t+dur);
+  o.connect(g);o2.connect(g2);g2.connect(g);g.connect(c.destination);o.start(t);o2.start(t);o.stop(t+dur+.02);o2.stop(t+dur+.02);
+}
+
+/* ───── YIN (Tonhöhenerkennung) ───── */
+var _cm=new Float32Array(2048),_d=new Float32Array(2048);
+function yin(buf,sr,fMin,fMax,thr,W,off){
+  var tauMax=Math.min(Math.floor(sr/fMin),buf.length-off-W-1,_cm.length-1);
+  var tauMin=Math.max(2,Math.floor(sr/fMax)),tau,j,x,s;
+  if(tauMax<=tauMin+2)return null;
+  for(tau=1;tau<=tauMax;tau++){s=0;for(j=0;j<W;j++){x=buf[off+j]-buf[off+j+tau];s+=x*x}_d[tau]=s}
+  var run=0;_cm[0]=1;
+  for(tau=1;tau<=tauMax;tau++){run+=_d[tau];_cm[tau]=run>0?_d[tau]*tau/run:1}
+  var t=-1;
+  for(tau=tauMin;tau<=tauMax;tau++){if(_cm[tau]<thr){while(tau+1<=tauMax&&_cm[tau+1]<_cm[tau])tau++;t=tau;break}}
+  if(t<0)return null;
+  var better=t;
+  if(t>1&&t<tauMax){var s0=_cm[t-1],s1=_cm[t],s2=_cm[t+1],a=s0+s2-2*s1;if(a!==0)better=t+(s0-s2)/(2*a)}
+  return {hz:sr/better,conf:1-_cm[t]};
+}
+
+/* ───── Fortschritt ───── */
+var PR=MK.get('wh',null);
+if(!PR||typeof PR!=='object')PR={les:{},tn:{},best:0,days:{}};
+PR.les=PR.les||{};PR.tn=PR.tn||{};PR.days=PR.days||{};
+function save(){MK.set('wh',PR)}
+function mark(){PR.days[MK.day()]=1;save();stats()}
+function stats(){
+  $('#st-les').textContent=Object.keys(PR.les).length+'/'+LES.length;
+  $('#st-tn').textContent=Object.keys(PR.tn).filter(function(k){return PR.tn[k]}).length+'/'+ALL.length;
+  $('#st-best').textContent=PR.best||0;
+  $('#st-days').textContent=Object.keys(PR.days).length;
+}
+
+/* ───── Übungsstücke ───── */
+function mk(id,title,bpm,info,arr){return {id:id,title:title,cat:'Übung',bpm:bpm,info:info,notes:arr}}
+var SCALE=[62,64,66,67,69,71,73,74,73,71,69,67,66,64,62].map(function(m){return [m,1]});SCALE[SCALE.length-1][1]=2;
+var OCT=[62,74,64,76,66,78,67,79,69,81,71,83].map(function(m){return [m,1]});
+var ODE=[[66,1],[66,1],[67,1],[69,1],[69,1],[67,1],[66,1],[64,1],[62,1],[62,1],[64,1],[66,1],[66,1.5],[64,.5],[64,2]];
+var ENT=[[62,1],[64,1],[66,1],[67,1],[69,2],[69,2],[71,1],[71,1],[71,1],[71,1],[69,4],[71,1],[71,1],[71,1],[71,1],[69,4],[67,1],[67,1],[67,1],[67,1],[66,2],[66,2],[64,1],[64,1],[64,1],[64,1],[62,4]];
+var LONG=[[62,4],[0,1],[69,4],[0,1],[74,4],[0,1],[69,4],[0,1],[62,4]];
+var EX=[
+ mk('ex-lang','Lange Töne (D – A – D)',60,'Je vier Schläge halten, ruhig und gleichmäßig. Nutze das Stimmgerät.',LONG),
+ mk('ex-skala','D-Dur-Tonleiter',80,'Eine Oktave hoch und wieder herunter. Das ist dein Grundgerüst für fast alle Tunes.',SCALE),
+ mk('ex-oktav','Oktavsprünge',72,'Gleicher Griff, unterschiedlich viel Luft: tief – hoch im Wechsel, dabei die Tonleiter hinauf.',OCT),
+ mk('ex-ode','Freude, schöner Götterfunken',84,'Melodie von Beethoven (gemeinfrei), nach D-Dur gesetzt. Nur sieben verschiedene Töne.',ODE),
+ mk('ex-ent','Alle meine Entchen',84,'Kinderlied, gemeinfrei. Zum Mitsingen für die Kinder, du spielst es auf der Whistle.',ENT)
+];
+var ALL=EX.concat(TUNES.map(function(t){return {id:t.id,title:t.title,cat:t.cat,bpm:t.bpm||84,info:'',notes:t.notes}}));
+var INFO={
+ 'o-tannenbaum':'Volkslied, gemeinfrei, in G-Dur. Das C ist ein Kreuzgriff.',
+ 'o-du-froehliche':'Volkslied, gemeinfrei, in G-Dur. Mehrere Kreuzgriffe, geh langsam vor.',
+ 'haste-to-the-wedding':'Irischer Jig in D-Dur, 6/8, aus O’Neill’s Music of Ireland (1903, gemeinfrei). Ohne Kreuzgriffe, ein guter erster Tune.',
+ 'st-patricks-day':'Irischer Jig in G-Dur, 6/8, aus O’Neill’s Music of Ireland (gemeinfrei). Ohne Kreuzgriffe.',
+ 'drowsy-maggie':'Irischer Reel, 4/4, aus O’Neill’s (gemeinfrei). Anspruchsvoll: viele Kreuzgriffe und hohes Tempo, daher erst nach den anderen.'};
+ALL.forEach(function(t){if(INFO[t.id])t.info=INFO[t.id]});
+function tuneById(id){return ALL.filter(function(t){return t.id===id})[0]}
+
+/* ───── Lektionen ───── */
+var LES=[
+ {id:'start',e:'🪈',t:'Das Instrument und die Haltung',d:'Wie man die Low Whistle hält',notes:[],
+  th:'<p>Eine Low Whistle ist eine Blockflöten-ähnliche Längsflöte in tiefer Lage. Sie ist deutlich länger als eine normale Tin Whistle und hat größere, weiter auseinanderliegende Löcher.</p><ul><li><b>Linke Hand oben</b> (Zeige-, Mittel-, Ringfinger auf die oberen drei Löcher), <b>rechte Hand unten</b>. Die Daumen stützen von hinten.</li><li>Decke die Löcher mit den <b>Fingerpolstern</b> ab, also der weichen Mitte des Fingers, nicht mit der Spitze. Bei dieser Größe nennt man das den „Piper’s Grip“.</li><li>Der kleine Finger der rechten Hand ruht frei oder stützt am Rohr.</li><li>Halte die Whistle schräg nach unten, die Schultern locker.</li></ul><p>Die tiefste Note D entsteht, wenn alle sechs Löcher zu sind.</p>',
+  tip:'Wenn Töne zischen oder leise „pfeifen“, ist fast immer ein Loch nicht ganz dicht. Dreh die Finger ein wenig, bis das Polster das Loch vollständig deckt.'},
+ {id:'atem',e:'🌬',t:'Atem und Zungenstoß',d:'Weich blasen statt pusten',notes:[],
+  th:'<p>Eine Low Whistle braucht <b>viel Luftmenge, aber wenig Druck</b>. Stell dir vor, du wärmst dir die Hände mit dem Atem, nicht, als würdest du Kerzen ausblasen.</p><ul><li>Zu viel Druck macht den Ton scharf und springt in die nächste Oktave („Überblasen“).</li><li>Atme tief in den Bauch, nicht in die Schultern.</li><li>Beginne jeden Ton mit der Zunge: „<b>tu</b>“ oder „<b>du</b>“, als würdest du ein Haar von der Zungenspitze pusten.</li><li>Für Töne ohne Pause dazwischen (gebunden) spielst du den Atem durch und wechselst nur die Finger.</li></ul>',
+  tip:'Beginne mit dem Stimmgerät: Halte ein tiefes D vier Schläge lang. Die Anzeige sollte ruhig in der Mitte bleiben.'},
+ {id:'erste',e:'1️⃣',t:'Die ersten Töne: D, E, Fis',d:'Drei Töne, drei Finger',notes:[62,64,66],
+  th:'<p>Beginne mit der <b>linken Hand</b> allein. Alle drei Löcher oben sind für die ersten Töne wichtig.</p><ul><li><b>Fis</b>: die ersten drei Löcher oben und die ersten zwei... nein: oben und unten gedeckt wird schrittweise geöffnet. Entscheidend ist die Regel: <b>Von unten nach oben die Löcher öffnen</b>, so wird der Ton höher.</li></ul><p>Der leichteste Weg: Starte mit allen sechs Fingern auf D und hebe nacheinander den kleinen, dann den Ringfinger der rechten Hand: E und Fis. Hör dir jeden Ton in der App an und gleiche ihn mit deinem ab.</p>',
+  tip:'Spiele D – E – Fis – E – D langsam und zähle dabei die Schläge im Kopf.'},
+ {id:'skala',e:'📈',t:'D-Dur-Tonleiter',d:'Das Grundgerüst',notes:[62,64,66,67,69,71,73,74],
+  th:'<p>Die Tonleiter geht Loch für Loch auf: <b>D E Fis G A H Cis D</b>. Bei jedem Schritt hebst du genau einen weiteren Finger (von unten nach oben). Für das hohe D deckst du danach alle Löcher bis auf das oberste wieder zu.</p><p>Spiele die Leiter erst langsam hinauf, dann hinunter, dann mit Zungenstoß, dann gebunden. Im Bereich „Tunes“ findest du sie mit Griffen und Takt.</p>',
+  tip:'Wenn ein Ton nicht kommt, schau erst auf die Finger, dann auf die Luft.'},
+ {id:'oktave',e:'⬆️',t:'Die zweite Oktave',d:'Dieselben Griffe, mehr Luft',notes:[74,76,78,79,81,83],
+  th:'<p>Die zweite Oktave benutzt <b>fast dieselben Griffe</b> wie die erste. Du bläst nur etwas fester und schmaler. Das hohe D hat einen eigenen Griff (oberes Loch offen, Rest zu).</p><ul><li>Die hohen Töne dürfen nicht kreischen. Führe mit viel Luft, aber ruhigem Druck.</li><li>Auf Low Whistles klingen die hohen Töne generell leiser und gehauchter als auf der Tin Whistle.</li></ul>',
+  tip:'Übe die Oktavsprünge im Bereich „Tunes“: gleicher Griff, unterschiedlich viel Luft.'},
+ {id:'kreuz',e:'✖️',t:'Kreuzgriffe: C und F',d:'Töne außerhalb von D-Dur',notes:[65,72],
+  th:'<p>Mit D-Dur-Griffen kommst du nur durch die Tonart D. Für andere Tonarten und viele irische Melodien (zum Beispiel in G oder E-Moll) brauchst du <b>Kreuzgriffe</b>: ein Loch bleibt offen, obwohl tiefere zu sind.</p><ul><li><b>C</b> (natürlich): oberstes Loch offen, die drei folgenden zu, die untersten zwei offen.</li><li><b>F</b> (natürlich): die oberen drei zu, das vierte offen, die letzten beiden zu.</li></ul><p>Das klingt etwas leiser und weicher. Mit viel Luft und frisch gedeckten Löchern wird es sauber.</p>',
+  tip:'Vergleiche Cis und C direkt hintereinander: ein Halbton Unterschied, aber ganz andere Griffe.'},
+ {id:'zier',e:'✨',t:'Verzierungen: Cut, Tap, Roll',d:'Der irische Klang',notes:[],
+  th:'<p>Irische Musik lebt von kleinen Verzierungen. Weil Zungenstöße auf der Whistle keine Wiederholungen trennen können, nutzt man Fingerverzierungen.</p><table class="tbl"><tr><th>Name</th><th>Was du tust</th></tr><tr><td>Cut</td><td>Ein sehr kurzes Anheben eines Fingers <b>oberhalb</b> des gespielten Tons, so entsteht kurz ein höherer Ton. Trennt zwei gleiche Töne.</td></tr><tr><td>Tap</td><td>Ein kurzes Antippen eines Fingers <b>unterhalb</b> der gedeckten Löcher, so entsteht kurz ein tieferer Ton.</td></tr><tr><td>Roll</td><td>Auf einer langen Note: Hauptton – Cut – Hauptton – Tap – Hauptton, alles in der Zeit einer Viertelnote.</td></tr></table><p>Das braucht Zeit: übe zuerst das <b>schnelle, kurze</b> Anheben mit einem Finger auf einem langen Ton.</p>',
+  tip:'Verzierungen sind Würze, kein Hauptgericht. Lass erst die Melodie sauber sitzen.'},
+ {id:'tunes',e:'🎶',t:'Die ersten Tunes',d:'Von Beethoven bis Haste to the Wedding',notes:[],
+  th:'<p>Im Bereich „Tunes“ siehst du zu jedem Ton den Griff, die Dauer und den nächsten Ton. Zwei Wege:</p><ul><li><b>Vorspielen</b>: Die App spielt mit und zeigt, welcher Griff dran ist. Spiele parallel.</li><li><b>Warte auf mich</b>: Die App hört über das Mikrofon, wann du den richtigen Ton triffst, und geht dann zum nächsten. Perfekt zum langsamen Lernen.</li></ul><p>Fang mit „Freude, schöner Götterfunken“ und „Alle meine Entchen“ an (nur sieben Töne), dann „Haste to the Wedding“.</p>',
+  tip:'Beginne mit der Hälfte des Tempos und erhöhe in Schritten von 5 bis 10.'},
+ {id:'phrase',e:'🫁',t:'Atmen, Phrasen und Üben',d:'Musik statt Töne',notes:[],
+  th:'<ul><li><b>Atempunkte</b> setzt du dort, wo ein Satz endet oder wo ohnehin eine Pause ist. Notiere sie dir im Tune.</li><li>Tägliche Routine in zehn Minuten: lange Töne (2 Min.), Tonleiter (3 Min.), ein Tune in halbem Tempo (5 Min.).</li><li>Spiele zu einem Klick oder zu einer Aufnahme. Das ist anstrengender, aber es macht dich sicher.</li><li>Höre irische Musik so viel wie möglich. Kein Lehrbuch ersetzt, wie ein Tune „atmet“.</li></ul>',
+  tip:'Zwei Mal 10 Minuten bringen mehr als einmal 30.'}
+];
+/* Lektion 3: Text bereinigen (nur Griffregel) */
+LES[2].th='<p>Beginne mit drei Tönen. Die Regel für alle Töne der Tonleiter lautet: <b>Von unten nach oben werden die Löcher geöffnet, der Ton steigt.</b></p><ul><li><b>D</b>: alle sechs Löcher zu.</li><li><b>E</b>: das unterste Loch (rechter Ringfinger) auf.</li><li><b>Fis</b>: die untersten zwei Löcher auf.</li></ul><p>Hör dir jeden Ton in der App an, dann spiele ihn nach. Wenn dein Ton tiefer oder höher klingt als in der App, schau auf die Löcher und auf die Luftstärke.</p>';
+function lesById(id){return LES.filter(function(l){return l.id===id})[0]}
+
+/* ───── Anzeige ───── */
+function fcard(m){
+  var p=FING[m];
+  return '<div class="fcard'+(CROSS[m]?' cross':'')+'"><b>'+esc(nfull(m))+'</b>'+whSvg(p)+'<span class="small pat">'+patText(p)+'</span><button class="btn sm" type="button" data-hear="'+m+'" aria-label="'+esc(nfull(m))+' anhören">▶</button></div>';
+}
+function renderPfad(){
+  $('#v-pfad').innerHTML=LES.map(function(l,i){
+    return '<button class="les" type="button" data-l="'+l.id+'"><span class="e">'+l.e+'</span><span class="t">'+(i+1)+'. '+esc(l.t)+'</span><span class="d">'+esc(l.d)+'</span><span class="k">'+(PR.les[l.id]?'✓ erledigt':l.notes.length?l.notes.length+' Griffe':'Lesen')+'</span></button>';
+  }).join('');
+}
+function renderGriffe(){
+  var ks=Object.keys(FING).map(Number).sort(function(a,b){return a-b});
+  $('#g-1').innerHTML=ks.filter(function(m){return m<74}).map(fcard).join('');
+  $('#g-2').innerHTML=ks.filter(function(m){return m>=74}).map(fcard).join('');
+}
+function show(v){
+  ['pfad','lesson','griffe','tunes','finger','quiz'].forEach(function(k){var el=$('#v-'+k);if(el)el.hidden=(k!==v)});
+  $('#v-tunes').style.display=v==='tunes'?'grid':'none';
+  $('#v-pfad').style.display=v==='pfad'?'grid':'none';
+  $('#tabs').hidden=(v==='lesson');
+}
+function setTab(t){
+  stopTune();micOff();fStop();
+  $$('#tabs button').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.t===t))});
+  if(t==='pfad')renderPfad();if(t==='griffe')renderGriffe();if(t==='tunes')loadTune();
+  show(t);
+}
+$('#tabs').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setTab(b.dataset.t)});
+document.addEventListener('click',function(e){var b=e.target.closest('[data-hear]');if(b){var m=+b.dataset.hear;tone(m,ac().currentTime+.02,1.1,.35)}});
+var curLes=null;
+function openLesson(id){
+  var l=lesById(id);curLes=l;
+  $('#l-title').textContent=l.e+' '+l.t;$('#l-th').innerHTML=l.th;
+  $('#l-notes').innerHTML=l.notes.map(fcard).join('');$('#l-notes').hidden=!l.notes.length;
+  $('#l-tip').hidden=!l.tip;$('#l-tip').innerHTML=l.tip?'<b>Tipp:</b> '+esc(l.tip):'';
+  $('#l-done').textContent=PR.les[l.id]?'Als offen markieren':'Lektion abhaken';
+  show('lesson');window.scrollTo(0,0);
+}
+$('#v-pfad').addEventListener('click',function(e){var b=e.target.closest('button');if(b)openLesson(b.dataset.l)});
+$('#l-close').addEventListener('click',function(){setTab('pfad')});
+$('#l-done').addEventListener('click',function(){
+  if(PR.les[curLes.id])delete PR.les[curLes.id];else{PR.les[curLes.id]=1;toast('Lektion erledigt. Gut gemacht!')}
+  mark();$('#l-done').textContent=PR.les[curLes.id]?'Als offen markieren':'Lektion abhaken';
+});
+
+/* ───── Tune-Trainer ───── */
+var T={tune:null,i:0,timer:0,mode:'',playing:false,gen:0};
+function fillSel(){
+  var cats=['Übung','Irisch','Weihnachten'],h='';
+  cats.forEach(function(c){var xs=ALL.filter(function(t){return t.cat===c});if(xs.length)h+='<optgroup label="'+c+'">'+xs.map(function(t){return '<option value="'+t.id+'">'+esc(t.title)+(PR.tn[t.id]?' ✓':'')+'</option>'}).join('')+'</optgroup>'});
+  var cur=$('#t-sel').value;$('#t-sel').innerHTML=h;if(cur&&tuneById(cur))$('#t-sel').value=cur;
+}
+function loadTune(){
+  stopTune();fillSel();
+  var t=tuneById($('#t-sel').value||ALL[0].id);T.tune=t;T.i=0;
+  $('#t-bpm').value=Math.round(t.bpm*.8/5)*5||60;
+  $('#t-info').textContent=t.info||'';$('#t-msg').textContent='';
+  renderChips();showNow();
+  $('#t-ok').textContent=PR.tn[t.id]?'Als offen markieren':'Kann ich';
+}
+function renderChips(){
+  var t=T.tune;
+  $('#t-chips').innerHTML=t.notes.map(function(n,i){
+    var w=Math.round(Math.max(40,26+n[1]*22));
+    if(!n[0])return '<div class="chip rest" data-i="'+i+'" style="width:'+w+'px">–</div>';
+    return '<div class="chip'+(i<T.i?' done':'')+(i===T.i?' cur':'')+'" data-i="'+i+'" style="width:'+w+'px">'+esc(nname(n[0]))+(n[0]>=74?'<small>hoch</small>':'')+'</div>';
+  }).join('');
+  var c=$('#t-chips .cur');if(c&&c.scrollIntoView&&T.playing)c.scrollIntoView({block:'nearest'});
+}
+function nextNote(i){for(var k=i+1;k<T.tune.notes.length;k++)if(T.tune.notes[k][0])return T.tune.notes[k][0];return 0}
+function showNow(){
+  var n=T.tune.notes[T.i];
+  if(!n){$('#t-now').innerHTML='<div class="nm">Geschafft!</div>';return}
+  var m=n[0],nx=nextNote(T.i),h='';
+  if(m){h='<figure><div class="nm">'+esc(nfull(m))+'</div>'+whSvg(FING[m])+'<div class="small pat">'+patText(FING[m])+'</div></figure>'}
+  else h='<figure><div class="nm">–</div><div class="small muted">Pause</div></figure>';
+  if(nx)h+='<figure class="nx"><div class="small muted">danach</div>'+whSvg(FING[nx])+'<div class="small">'+esc(nname(nx))+'</div></figure>';
+  $('#t-now').innerHTML=h;
+}
+function setI(i){T.i=i;renderChips();showNow()}
+function stopTune(){
+  T.gen++;clearTimeout(T.timer);T.playing=false;T.mode='';
+  var p=$('#t-play'),w=$('#t-wait');if(p){p.textContent='▶ Vorspielen';w.textContent='🎤 Warte auf mich'}
+}
+function finishTune(){
+  var id=T.tune.id;stopTune();setI(T.tune.notes.length);
+  $('#t-msg').textContent='Geschafft. Jetzt etwas schneller oder auswendig.';
+  PR.tn[id]=PR.tn[id]||1;mark();fillSel();$('#t-sel').value=id;$('#t-ok').textContent='Als offen markieren';
+}
+function playTune(){
+  if(T.mode==='play'){stopTune();return}
+  stopTune();T.mode='play';T.playing=true;$('#t-play').textContent='■ Stopp';
+  var bpm=Math.max(30,Math.min(200,+$('#t-bpm').value||70)),q=60/bpm,c=ac(),gen=T.gen;
+  var t0=c.currentTime+.2,acc=0,times=[];
+  T.tune.notes.forEach(function(n,i){times.push(acc);if(n[0])tone(n[0],t0+acc*q,Math.max(.08,n[1]*q*.92),.3);acc+=n[1]});
+  var idx=-1;
+  (function step(){
+    if(gen!==T.gen)return;
+    var now=(c.currentTime-t0)/q,ni=idx;
+    while(ni+1<times.length&&times[ni+1]<=now+1e-6)ni++;
+    if(ni!==idx){idx=ni;if(idx>=0)setI(idx)}
+    if(now>=acc){finishTune();return}
+    T.timer=setTimeout(step,30);
+  })();
+}
+/* Mikrofon */
+var MIC={on:false,stream:null,ctx:null,an:null,buf:null,iv:0};
+var W={armed:true,hold:0,last:null};
+function micOn(cb){
+  if(MIC.on){cb&&cb(true);return}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('Mikrofon nicht verfügbar');cb&&cb(false);return}
+  var dev=$('#m-dev').value,cons={echoCancellation:false,noiseSuppression:false,autoGainControl:false};if(dev)cons.deviceId={ideal:dev};
+  navigator.mediaDevices.getUserMedia({audio:cons}).then(function(st){
+    var K=window.AudioContext||window.webkitAudioContext,c=new K(),src=c.createMediaStreamSource(st),an=c.createAnalyser();an.fftSize=2048;src.connect(an);
+    MIC.on=true;MIC.stream=st;MIC.ctx=c;MIC.an=an;MIC.buf=new Float32Array(2048);
+    MIC.iv=setInterval(micTick,40);setMicUi();devList();cb&&cb(true);
+  }).catch(function(){toast('Mikrofon wurde nicht freigegeben');cb&&cb(false)});
+}
+function micOff(){
+  if(!MIC.on)return;clearInterval(MIC.iv);try{MIC.stream.getTracks().forEach(function(t){t.stop()});MIC.ctx.close()}catch(e){}
+  MIC.on=false;setMicUi();onPitch(null);
+}
+function setMicUi(){$('#m-state').textContent=MIC.on?'an':'aus';$('#m-state').className='pill'+(MIC.on?' ok':'');$('#m-go').textContent=MIC.on?'Mikrofon ausschalten':'Mikrofon einschalten'}
+function micTick(){
+  MIC.an.getFloatTimeDomainData(MIC.buf);
+  var s=0,i;for(i=0;i<1024;i++)s+=MIC.buf[i]*MIC.buf[i];
+  if(Math.sqrt(s/1024)<.01){onPitch(null);return}
+  var r=yin(MIC.buf,MIC.ctx.sampleRate,200,1800,.15,1024,0);
+  if(!r||r.conf<.8){onPitch(null);return}
+  onPitch(69+12*Math.log2(r.hz/440));
+}
+/* Wird vom Mikrofon (oder im Test) mit einer Tonhöhe in MIDI (Dezimal) aufgerufen, null = nichts erkannt. */
+function onPitch(m){
+  var meter=$('#m-needle');
+  if(m===null||m===undefined){$('#m-note').textContent='–';$('#m-cent').textContent='zu tief ◂ ▸ zu hoch';meter.style.left='50%';W.hold=0;W.last=null;W.armed=true;return}
+  var r=Math.round(m),cents=Math.round((m-r)*100);
+  $('#m-note').textContent=nname(((r%12)+12)%12+60)+(r>=74?' (hoch)':'');
+  $('#m-cent').textContent=(cents>0?'+':'')+cents+' Cent '+(Math.abs(cents)<=10?'· sauber':cents>0?'· etwas zu hoch':'· etwas zu tief');
+  meter.style.left=(50+Math.max(-50,Math.min(50,cents)))+'%';
+  if(T.mode==='wait'){
+    var n=T.tune.notes[T.i];
+    if(!n){return}
+    if(!n[0]){setI(T.i+1);return}
+    var pcOk=Math.abs((((m-n[0])%12)+18)%12-6)<.6;
+    if(W.last!==null&&Math.abs(m-W.last)>.7)W.armed=true;
+    W.last=m;
+    if(pcOk&&W.armed){W.hold++;if(W.hold>=3){W.hold=0;W.armed=false;advance()}}else if(!pcOk)W.hold=0;
+  }
+}
+function advance(){
+  var i=T.i+1;
+  while(i<T.tune.notes.length&&!T.tune.notes[i][0])i++;
+  if(i>=T.tune.notes.length){finishTune();return}
+  setI(i);
+}
+function waitTune(){
+  if(T.mode==='wait'){stopTune();return}
+  stopTune();
+  micOn(function(ok){
+    if(!ok){$('#t-msg').textContent='Ohne Mikrofon geht „Warte auf mich“ nicht. Nutze „Vorspielen“.';return}
+    T.mode='wait';T.playing=true;W.armed=true;W.hold=0;W.last=null;T.i=0;
+    var n=T.tune.notes;if(n[0]&&!n[0][0])T.i=1;
+    renderChips();showNow();$('#t-wait').textContent='■ Stopp';$('#t-msg').textContent='Spiele den markierten Ton, die App geht dann weiter.';
+  });
+}
+$('#t-sel').addEventListener('change',loadTune);
+$('#t-play').addEventListener('click',playTune);
+$('#t-wait').addEventListener('click',waitTune);
+$('#t-chips').addEventListener('click',function(e){var c=e.target.closest('.chip');if(c&&!T.playing){setI(+c.dataset.i)}});
+$('#t-ok').addEventListener('click',function(){
+  var id=T.tune.id;if(PR.tn[id])delete PR.tn[id];else{PR.tn[id]=1;toast('Tune geschafft!')}
+  mark();fillSel();$('#t-sel').value=id;$('#t-ok').textContent=PR.tn[id]?'Als offen markieren':'Kann ich';
+});
+
+function devList(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.enumerateDevices)return;
+  navigator.mediaDevices.enumerateDevices().then(function(l){
+    var sel=$('#m-dev'),cur=sel.value,saved=MK.get('wh.dev','');
+    var ins=l.filter(function(d){return d.kind==='audioinput'&&d.deviceId&&d.deviceId!=='default'&&d.deviceId!=='communications'});
+    sel.innerHTML='<option value="">Standard (internes Mikrofon)</option>'+ins.map(function(d,i){return '<option value="'+esc(d.deviceId)+'">'+esc(d.label||('Eingang '+(i+1)))+'</option>'}).join('');
+    var want=cur||saved;sel.value=ins.some(function(d){return d.deviceId===want})?want:'';
+  }).catch(function(){});
+}
+$('#m-dev').addEventListener('change',function(){
+  MK.set('wh.dev',$('#m-dev').value);
+  if(MIC.on){var was=T.mode;micOff();micOn(function(){if(was==='wait')T.mode='wait'})}
+});
+devList();
+$('#m-go').addEventListener('click',function(){if(MIC.on)micOff();else micOn()});
+
+
+/* ───── Finger-Trainer ───── */
+var F={on:false,pool:'d1',list:[],i:0,st:'000000',t0:0,tm:0,hints:0,taps:0,prev:0};
+function fPool(p){
+  var ks=Object.keys(FING).map(Number);
+  if(p==='d1')return ks.filter(function(m){return m<74&&!CROSS[m]});
+  if(p==='d2')return ks.filter(function(m){return m>=74});
+  if(p==='cross')return [65,72,66,73,62,67,71,74];
+  return ks;
+}
+function fHoles(show){
+  var ys=[22,44,66,92,114,136],h='<svg class="wh fi" viewBox="0 0 56 150" role="group" aria-label="Löcher der Whistle"><rect class="body" x="14" y="2" width="28" height="146" rx="8"/>';
+  for(var i=0;i<6;i++){
+    var on=F.st[i]==='1',hint=show&&show[i]==='1';
+    h+='<circle class="hole '+(on?'on':'off')+'" data-h="'+i+'" cx="28" cy="'+ys[i]+'" r="9.5" role="button" tabindex="0" aria-pressed="'+on+'" aria-label="Loch '+(i+1)+(on?', zu':', offen')+'"'+(hint&&!on?' style="stroke:var(--acc);stroke-width:4"':'')+'/>';
+  }
+  return h+'</svg>';
+}
+function fDraw(show){$('#f-hole').innerHTML=fHoles(show)}
+function fNext(){
+  var pool=fPool(F.pool),m,g=0;
+  do{m=pool[Math.floor(Math.random()*pool.length)];g++}while((m===F.prev||FING[m]===F.st)&&g<60);
+  F.cur=m;F.prev=m;$('#f-target').textContent=nfull(m);
+  $('#f-head').textContent='Ton '+(F.i+1)+' von '+F.n;$('#f-bar').style.width=(F.i/F.n*100)+'%';
+  $('#f-fb').textContent='';fDraw();
+}
+function fTime(){var s=(performance.now()-F.t0)/1000;return s.toFixed(1).replace('.',',')}
+function fStop(){F.on=false;clearInterval(F.tm);$('#f-box').hidden=true;$('#f-go').textContent='Runde starten'}
+function fStart(){
+  fStop();F.on=true;F.pool=$('#f-pool').value;F.n=10;F.i=0;F.st='111111';F.prev=0;F.hints=0;F.t0=performance.now();
+  $('#f-box').hidden=false;$('#f-res').textContent='';$('#f-go').textContent='Neu starten';
+  F.tm=setInterval(function(){$('#f-head').textContent='Ton '+(F.i+1)+' von '+F.n+' · '+fTime()+' s'},200);
+  fNext();
+}
+function fCheck(){
+  if(!F.on)return;
+  if(F.st===FING[F.cur]){
+    if($('#f-snd').checked)try{tone(F.cur,ac().currentTime+.02,.5,.3)}catch(e){}
+    $('#f-fb').textContent='Richtig: '+nfull(F.cur);
+    F.i++;
+    if(F.i>=F.n){
+      var t=(performance.now()-F.t0)/1000,key='f.'+F.pool,best=PR.fbest&&PR.fbest[key];
+      PR.fbest=PR.fbest||{};var nb=!best||t<best;if(nb)PR.fbest[key]=t;PR.ftr=(PR.ftr||0)+1;mark();
+      fStop();$('#f-res').textContent=F.n+' Töne in '+t.toFixed(1).replace('.',',')+' s'+(F.hints?' mit '+F.hints+' Hilfe'+(F.hints>1?'n':''):'')+'. '+(nb?'Neue Bestzeit!':'Bestzeit: '+PR.fbest[key].toFixed(1).replace('.',',')+' s.');
+      return;
+    }
+    fNext();
+  }
+}
+function fToggle(i){
+  if(!F.on)return;
+  var a=F.st.split('');a[i]=a[i]==='1'?'0':'1';F.st=a.join('');fDraw();fCheck();
+}
+$('#f-hole').addEventListener('click',function(e){var c=e.target.closest('[data-h]');if(c)fToggle(+c.dataset.h)});
+$('#f-hole').addEventListener('keydown',function(e){if(e.key!==' '&&e.key!=='Enter')return;var c=e.target.closest('[data-h]');if(c){e.preventDefault();var i=+c.dataset.h;fToggle(i);var n=$('#f-hole [data-h="'+i+'"]');if(n)n.focus()}});
+$('#f-hint').addEventListener('click',function(){if(!F.on)return;F.hints++;fDraw(FING[F.cur]);$('#f-fb').textContent='Markiert: diese Löcher musst du zudecken.'});
+$('#f-clear').addEventListener('click',function(){if(!F.on)return;F.st='000000';fDraw();fCheck()});
+$('#f-go').addEventListener('click',fStart);
+$('#f-end').addEventListener('click',fStop);
+
+/* ───── Quiz ───── */
+var Q=null;
+function qMake(){
+  var ks=Object.keys(FING).map(Number),k1=ks.filter(function(m){return m<=74}),list=[],i;
+  for(i=0;i<8;i++){
+    var m=ks[Math.floor(Math.random()*ks.length)],kind=i%3;if(kind===0)m=k1[Math.floor(Math.random()*k1.length)];
+    if(kind===0){ /* Griffbild -> Ton */
+      var right=nfull(m),o=[right];
+      var guard=0;while(o.length<4&&guard++<50){var w=nfull(k1[Math.floor(Math.random()*k1.length)]);if(o.indexOf(w)<0)o.push(w)}
+      list.push({q:'Welcher Ton gehört zu diesem Griff?',show:whSvg(FING[m]),opts:shuffle(o),right:right,why:right+' hat den Griff '+patText(FING[m])+'.'});
+    }else if(kind===1){ /* Ton -> Griff */
+      var right2=patText(FING[m]),o2=[right2];
+      var g2=0;while(o2.length<4&&g2++<50){var w2=patText(FING[ks[Math.floor(Math.random()*ks.length)]]);if(o2.indexOf(w2)<0)o2.push(w2)}
+      list.push({q:'Welcher Griff gehört zu '+nfull(m)+'? (● zu, ○ offen, links oben, rechts unten)',show:'',opts:shuffle(o2),right:right2,why:nfull(m)+' wird so gegriffen: '+right2+'.'});
+    }else{
+      var qs=[['Mit welchem Atem spielst du die zweite Oktave?','Mehr Luft, ruhiger Druck',['Gar nicht, sie braucht andere Griffe','Weniger Luft','Nur mit Zungenstoß'],'Die zweite Oktave nutzt fast dieselben Griffe, du bläst nur etwas fester.'],
+        ['Was ist ein Cut?','Kurzes Anheben eines Fingers oberhalb des Tons',['Ein Atemzeichen','Ein Triller auf drei Tönen','Ein sehr leiser Ton'],'Ein Cut erzeugt kurz einen höheren Ton und trennt gleiche Töne.'],
+        ['Wie decken die Finger bei einer Low Whistle die Löcher?','Mit den Fingerpolstern',['Nur mit den Spitzen','Mit dem Daumen','Mit den Nägeln'],'Wegen der großen Löcher nimmt man die weiche Mitte des Fingers.'],
+        ['Welcher Griff ist ein Kreuzgriff?','C (natürlich)',['D','A','H'],'Bei C bleibt ein Loch offen, obwohl tiefere zu sind.']],
+        pick=qs[Math.floor(Math.random()*qs.length)];
+      list.push({q:pick[0],show:'',opts:shuffle([pick[1]].concat(pick[2])),right:pick[1],why:pick[3]});
+    }
+  }
+  return {list:shuffle(list),i:0,ok:0};
+}
+function qShow(){
+  var q=Q.list[Q.i];
+  $('#q-head').textContent='Frage '+(Q.i+1)+' von '+Q.list.length;$('#q-bar').style.width=(Q.i/Q.list.length*100)+'%';
+  $('#q-text').textContent=q.q;
+  $('#q-show').innerHTML=q.show?'<div style="width:70px">'+q.show+'</div>':'';
+  $('#q-opts').innerHTML=q.opts.map(function(o){return '<button class="btn" type="button" data-o="'+esc(o)+'">'+esc(o)+'</button>'}).join('');
+  $('#q-fb').hidden=true;$('#q-next').hidden=true;
+}
+$('#q-go').addEventListener('click',function(){Q=qMake();$('#q-box').hidden=false;$('#q-res').textContent='';qShow()});
+$('#q-end').addEventListener('click',function(){Q=null;$('#q-box').hidden=true});
+$('#q-opts').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b||!Q||!$('#q-fb').hidden)return;
+  var q=Q.list[Q.i],ok=b.dataset.o===q.right;if(ok)Q.ok++;
+  $$('#q-opts button').forEach(function(x){if(x.dataset.o===q.right)x.classList.add('right');else if(x===b)x.classList.add('wrong')});
+  var fb=$('#q-fb');fb.hidden=false;fb.className='fb '+(ok?'good':'bad');fb.textContent=(ok?'Richtig. ':'Nicht ganz. ')+q.why;
+  $('#q-next').hidden=false;$('#q-next').textContent=Q.i===Q.list.length-1?'Ergebnis':'Weiter';
+});
+$('#q-next').addEventListener('click',function(){
+  if(Q.i<Q.list.length-1){Q.i++;qShow();return}
+  var n=Q.list.length,st=Q.ok>=n?'★★★':Q.ok>=n*.75?'★★☆':Q.ok>=n/2?'★☆☆':'';
+  $('#q-res').textContent=Q.ok+' von '+n+' richtig '+st+(Q.ok>=n?'. Perfekt!':'.');
+  if(Q.ok>(PR.best||0))PR.best=Q.ok;mark();Q=null;$('#q-box').hidden=true;
+});
+
+stats();renderPfad();show('pfad');
+window.addEventListener('pagehide',function(){stopTune();micOff()});
+window.__wh={F:F,fStart:fStart,FING:FING,ALL:ALL,LES:LES,TUNES:TUNES,T:T,onPitch:onPitch,PR:function(){return PR},get Q(){return Q}};
+})();
+</script>
+</body>
+</html>

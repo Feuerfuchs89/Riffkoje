@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1c1e24">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Tabulatur lernen</title>
+<script src="shared.js"></script>
+<style>
+:root{--bg:#f6f4ee;--card:#fff;--ink:#1d1f24;--muted:#656a75;--line:#dcd8cd;--acc:#2848d2;--on:#fff;--ok:#1f8a4c;--bad:#c4452c;--star:#f2a93b;--dot:#1d1f24;--doton:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#14161a;--card:#1d2026;--ink:#ecebe6;--muted:#a1a5ae;--line:#2e323a;--acc:#7b94ff;--on:#10131f;--ok:#4cc27e;--bad:#ff7a5c;--dot:#ecebe6;--doton:#14161a;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#14161a;--card:#1d2026;--ink:#ecebe6;--muted:#a1a5ae;--line:#2e323a;--acc:#7b94ff;--on:#10131f;--ok:#4cc27e;--bad:#ff7a5c;--dot:#ecebe6;--doton:#14161a;color-scheme:dark}
+:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px 16px 80px;display:grid;gap:14px}
+h1{font-size:1.6rem;margin:4px 0 0}h2{font-size:1.15rem;margin:0}h3{margin:0;font-size:1rem}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;cursor:pointer;min-height:42px}
+.btn.primary{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+.btn.sm{min-height:36px;padding:6px 11px;font-size:.9rem}
+.btn[aria-pressed=true]{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+select,input[type=number]{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px}
+.stats{display:flex;gap:18px;flex-wrap:wrap}.stats b{font-size:1.5rem;display:block;line-height:1.1}.stats span{font-size:.8rem;color:var(--muted)}
+#tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#tabs button{text-align:center;padding:10px 6px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+#tabs button b{display:block}#tabs button span{font-size:.75rem;color:var(--muted)}
+#tabs button[aria-selected=true]{border-color:var(--acc);background:var(--acc);color:var(--on)}
+#tabs button[aria-selected=true] span{color:var(--on);opacity:.85}
+@media (max-width:440px){#tabs button span{display:none}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.les{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px;display:grid;gap:4px;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.les .e{font-size:1.8rem;line-height:1}.les .t{font-weight:600}.les .d{font-size:.86rem;color:var(--muted)}.les .k{font-size:.82rem;color:var(--acc);font-weight:600}
+.th p{margin:0 0 .6em}.th ul{margin:0 0 .6em;padding-left:1.2em}
+.tip{border-left:4px solid var(--star);padding:8px 12px;background:var(--bg);border-radius:0 10px 10px 0}
+.chords{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ch{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:8px;display:grid;gap:4px;justify-items:center;text-align:center}
+.ch b{font-size:1.15rem}.ch .n{font-size:.78rem;color:var(--muted)}
+.ch svg{width:100%;max-width:130px;height:auto}
+.ch.known{border-color:var(--ok)}
+.ch .row{justify-content:center;gap:6px}
+.big svg{max-width:240px}
+.chdiag text{fill:var(--ink)}
+.bigchord{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:center}
+.bigchord .ch{border:0;padding:0}
+.bigchord .nm{font-size:2.6rem;font-weight:700;text-align:center;line-height:1}
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.opts .btn{white-space:normal;padding:12px}
+.opts .btn.right{background:var(--ok);border-color:var(--ok);color:#fff}.opts .btn.wrong{border-color:var(--bad);color:var(--bad)}
+.fb{padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.fb.good{border-color:var(--ok)}.fb.bad{border-color:var(--bad)}
+.bar{height:10px;border-radius:5px;background:var(--bg);border:1px solid var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.stars{letter-spacing:2px;color:var(--star)}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:.78rem;color:var(--muted)}
+.pill.ok{border-color:var(--ok);color:var(--ok)}
+.cur{outline:3px solid var(--acc);outline-offset:3px;border-radius:12px}
+.rhy{display:grid;gap:6px;overflow:hidden}
+.rhy .rw{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px}
+.rhy .sl{border:1px solid var(--line);border-radius:8px;background:var(--card);text-align:center;padding:4px 0;min-height:56px;display:grid;align-content:center;gap:2px}
+.rhy .sl .ar{font-size:1.35rem;font-weight:700;line-height:1}
+.rhy .sl .ct{font-size:.72rem;color:var(--muted)}
+.rhy .sl.on{background:var(--acc);border-color:var(--acc);color:var(--on)}.rhy .sl.on .ct{color:var(--on)}
+.rhy .sl.rest .ar{color:var(--muted);font-weight:400}
+.rhy .sl.bt .ct{font-weight:700;color:var(--ink)}
+.rhy .sl.mu .ar{text-decoration:underline dotted}
+.timer{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:99}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+<style>
+.tabsvg{width:100%;height:auto;display:block}
+.tabsvg text{fill:var(--ink);font-family:system-ui,sans-serif}
+.tabsvg .ln{stroke:var(--muted);stroke-width:1}
+.tabsvg .bg{fill:var(--card)}
+.tabsvg .tx{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.tabsvg .tc{font-size:10px;fill:var(--acc);text-anchor:middle;font-weight:700}
+.tabsvg .cursor{fill:var(--acc);opacity:.2}
+.tabsvg .lab{font-size:11px;fill:var(--muted);font-weight:700}
+.player{display:grid;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--bg)}
+.player .sys{background:var(--card);border-radius:8px;padding:2px 4px}
+.tbl{border-collapse:collapse;width:100%;font-size:.9rem}.tbl td,.tbl th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+</style>
+</head>
+<body>
+<main>
+  <div><h1>🎼 Tabulatur lernen</h1><p class="muted" style="margin:4px 0 0">Tabs lesen, hören und nachspielen: von der ersten Leersaite bis zum Metal-Riff. Alle Beispiele sind eigens für diese App geschrieben.</p></div>
+  <div class="card" id="prog"><div class="stats">
+    <div><b id="st-les">0</b><span>Lektionen fertig</span></div>
+    <div><b id="st-ex">0</b><span>Übungen geschafft</span></div>
+    <div><b id="st-best">0</b><span>Quiz-Rekord</span></div>
+    <div><b id="st-days">0</b><span>Tage geübt</span></div></div></div>
+  <div id="tabs" role="tablist" aria-label="Bereiche">
+    <button type="button" role="tab" data-t="pfad" aria-selected="true"><b>Lernpfad</b><span>Lesen lernen</span></button>
+    <button type="button" role="tab" data-t="ueb" aria-selected="false"><b>Übungen</b><span>Hören und spielen</span></button>
+    <button type="button" role="tab" data-t="quiz" aria-selected="false"><b>Quiz</b><span>Tabs erkennen</span></button>
+  </div>
+  <section id="v-pfad" class="grid"></section>
+  <section id="v-lesson" class="card" hidden>
+    <div class="row" style="justify-content:space-between"><h2 id="l-title"></h2><button class="btn sm" id="l-close" type="button">Zurück</button></div>
+    <div class="th" id="l-th"></div>
+    <div id="l-ex" style="display:grid;gap:10px"></div>
+    <div class="tip" id="l-tip" hidden></div>
+    <div class="row"><button class="btn" id="l-done" type="button">Lektion abhaken</button></div>
+  </section>
+  <section id="v-ueb" hidden style="display:grid;gap:14px"></section>
+  <section id="v-quiz" hidden class="card">
+    <h2>Tab-Quiz</h2>
+    <div class="row"><button class="btn primary" id="q-go" type="button">Neue Runde (8 Fragen)</button></div>
+    <div id="q-box" hidden>
+      <div class="row" style="justify-content:space-between"><strong id="q-head"></strong><button class="btn sm" id="q-end" type="button">Beenden</button></div>
+      <div class="bar"><i id="q-bar"></i></div>
+      <p id="q-text" style="font-weight:600;margin:10px 0 6px"></p>
+      <div id="q-show"></div>
+      <div class="opts" id="q-opts"></div>
+      <div class="fb" id="q-fb" hidden></div>
+      <div class="row"><button class="btn primary" id="q-next" type="button" hidden>Weiter</button></div>
+    </div>
+    <p id="q-res" class="small" aria-live="polite" style="margin:0"></p>
+  </section>
+  <p class="muted small">Die App spielt Töne mit einer simulierten gezupften Saite. Hammer-on, Slide und Bending werden in der Notation gezeigt, klingen hier aber nur angedeutet. Das echte Gefühl bekommst du nur an der Gitarre.</p>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function toast(t){var e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('on')},2200)}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+
+/* ───── Klang ───── */
+var OPEN=[40,45,50,55,59,64];             /* tiefe E … hohe e */
+var NN=['C','Cis','D','Dis','E','F','Fis','G','Gis','A','B','H'];
+var SNAME={6:'tiefe E-Saite',5:'A-Saite',4:'D-Saite',3:'G-Saite',2:'H-Saite',1:'hohe e-Saite'};
+function midiOf(s,f){return OPEN[6-s]+f}
+var AC=null,BUF={};
+function ac(){if(!AC){var K=window.AudioContext||window.webkitAudioContext;AC=new K()}if(AC.state==='suspended')AC.resume();return AC}
+function pluckBuf(m){
+  if(BUF[m])return BUF[m];
+  var c=ac(),sr=c.sampleRate,f=440*Math.pow(2,(m-69)/12),N=Math.round(sr/f),len=Math.floor(sr*1.6),b=c.createBuffer(1,len,sr),d=b.getChannelData(0),l=new Float32Array(N),i;
+  var seed=m*7919;for(i=0;i<N;i++){seed=(seed*1664525+1013904223)>>>0;l[i]=(seed/4294967296)*2-1}
+  var p=0,damp=.4985;
+  for(i=0;i<len;i++){var a=l[p],nx=l[(p+1)%N];d[i]=a;l[p]=(a+nx)*damp;p=(p+1)%N}
+  BUF[m]=b;return b;
+}
+function pluck(m,t,v,dur){var c=ac(),s=c.createBufferSource(),g=c.createGain();s.buffer=pluckBuf(m);g.gain.setValueAtTime(v,t);if(dur){g.gain.setValueAtTime(v,t+dur*.7);g.gain.linearRampToValueAtTime(0,t+dur)}s.connect(g);g.connect(c.destination);s.start(t);if(dur)s.stop(t+dur+.02)}
+function click(t,acc){var c=ac(),o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.value=acc?1700:1150;g.gain.setValueAtTime(.1,t);g.gain.exponentialRampToValueAtTime(.001,t+.04);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.05)}
+
+/* ───── Tab-Schreibweise ─────
+   Ein Schritt = eine Achtelnote. Schritte durch Leerzeichen getrennt, gleichzeitige Töne mit +.
+   Ton: Saite.Bund + Technik (1 = hohe e … 6 = tiefe E). Pause: -
+   Technik: h Hammer-on, p Pull-off, / Slide hoch, \ Slide runter, b Bending, ~ Vibrato, m Palm Mute */
+function parse(str){
+  return str.trim().split(/\s+/).map(function(st){
+    if(st==='-')return [];
+    return st.split('+').map(function(n){var m=/^(\d)\.(\d+)([hp\/\\b~m]?)$/.exec(n);if(!m)throw new Error('Tab: '+n);return {s:+m[1],f:+m[2],t:m[3]||''}});
+  });
+}
+var TL={h:'h',p:'p','/':'/','\\':'\\',b:'b','~':'~',m:'PM'};
+function tabSvg(steps,opt){
+  opt=opt||{};var per=opt.per||8,sw=38,L=34,ls=17,rowH=ls*5+46,rows=Math.ceil(steps.length/per),W=L+per*sw+10,H=rows*rowH;
+  var h='<svg class="tabsvg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Tabulatur">';
+  for(var r=0;r<rows;r++){
+    var y0=r*rowH+26;
+    h+='<text class="lab" x="4" y="'+(y0+ls*2.5-8)+'">T</text><text class="lab" x="4" y="'+(y0+ls*2.5+5)+'">A</text><text class="lab" x="4" y="'+(y0+ls*2.5+18)+'">B</text>';
+    for(var s=0;s<6;s++)h+='<line class="ln" x1="'+L+'" x2="'+(L+per*sw)+'" y1="'+(y0+s*ls)+'" y2="'+(y0+s*ls)+'"/>';
+    h+='<line class="ln" x1="'+L+'" x2="'+L+'" y1="'+y0+'" y2="'+(y0+5*ls)+'"/><line class="ln" x1="'+(L+per*sw)+'" x2="'+(L+per*sw)+'" y1="'+y0+'" y2="'+(y0+5*ls)+'"/>';
+    for(var i=0;i<per;i++){
+      var idx=r*per+i;if(idx>=steps.length)break;
+      var x=L+i*sw+sw/2;
+      h+='<rect class="cursor" data-c="'+idx+'" x="'+(x-sw/2+2)+'" y="'+(y0-8)+'" width="'+(sw-4)+'" height="'+(ls*5+16)+'" rx="6" style="display:none"/>';
+      steps[idx].forEach(function(n){
+        var y=y0+(n.s-1)*ls;
+        h+='<rect class="bg" x="'+(x-9)+'" y="'+(y-8)+'" width="18" height="16" rx="3"/><text class="tx" x="'+x+'" y="'+y+'">'+n.f+'</text>';
+        if(n.t)h+='<text class="tc" x="'+x+'" y="'+(y0-12)+'">'+TL[n.t]+'</text>';
+      });
+      if(i%2===0&&!opt.nobeat)h+='<text class="lab" x="'+x+'" y="'+(y0+5*ls+20)+'" text-anchor="middle" style="font-size:9px;font-weight:400">'+(i/2+1)+'</text>';
+    }
+  }
+  return h+'</svg>';
+}
+
+/* ───── Player ───── */
+var PL=null;
+function plStop(){if(PL){PL.stop();PL=null}}
+function mkPlayer(box,ex){
+  var steps=parse(ex.tab);
+  box.innerHTML='<div class="player"><div class="sys">'+tabSvg(steps)+'</div><div class="row"><button class="btn primary sm" data-a="play" type="button">▶ Abspielen</button>'+
+   '<label class="small">Tempo <input type="number" data-a="bpm" min="30" max="200" value="'+(ex.bpm||70)+'" style="width:4.8em"></label>'+
+   '<label class="small"><input type="checkbox" data-a="loop"> Wiederholen</label><label class="small"><input type="checkbox" data-a="click" checked> Klick</label></div></div>';
+  var btn=box.querySelector('[data-a=play]');
+  btn.addEventListener('click',function(){
+    if(PL&&PL.box===box){plStop();return}
+    plStop();
+    var bpm=Math.max(30,Math.min(200,+box.querySelector('[data-a=bpm]').value||70)),d=60/bpm/2,loop=box.querySelector('[data-a=loop]').checked,cl=box.querySelector('[data-a=click]').checked;
+    var c=ac(),t0=c.currentTime+.15+4*d*2,raf=0,stopped=false,cur=-1;
+    for(var k=0;k<4;k++)if(cl)click(c.currentTime+.15+k*d*2,k===0);
+    steps.forEach(function(st,i){
+      var next=0;for(var j=i+1;j<steps.length;j++){if(steps[j].length){next=j;break}}
+      st.forEach(function(n){pluck(midiOf(n.s,n.f),t0+i*d,n.t==='h'||n.t==='p'?.28:.4,n.t==='m'?d*.9:0)});
+      if(cl&&i%2===0)click(t0+i*d,i%8===0);
+    });
+    function frame(){
+      if(stopped)return;
+      var i=Math.floor((c.currentTime-t0)/d);
+      if(i!==cur){
+        var o=box.querySelector('.cursor[data-c="'+cur+'"]');if(o)o.style.display='none';
+        cur=i;
+        if(i>=steps.length){
+          if(loop){PL=null;btn.click();return}
+          finish();return;
+        }
+        var n=box.querySelector('.cursor[data-c="'+i+'"]');if(n)n.style.display='';
+      }
+      raf=requestAnimationFrame(frame);
+    }
+    function finish(){stopped=true;cancelAnimationFrame(raf);btn.textContent='▶ Abspielen';$$('.cursor').forEach(function(o){o.style.display='none'});if(PL&&PL.box===box)PL=null;if(ex.id)markEx(ex.id,true)}
+    PL={box:box,stop:function(){stopped=true;cancelAnimationFrame(raf);btn.textContent='▶ Abspielen';box.querySelectorAll('.cursor').forEach(function(o){o.style.display='none'});try{AC.suspend();setTimeout(function(){AC&&AC.resume()},60)}catch(e){}}};
+    btn.textContent='■ Stopp';raf=requestAnimationFrame(frame);
+  });
+}
+
+/* ───── Fortschritt ───── */
+var PR=MK.get('tabs',null);
+if(!PR||typeof PR!=='object')PR={les:{},played:{},done:{},best:0,days:{}};
+PR.les=PR.les||{};PR.played=PR.played||{};PR.done=PR.done||{};PR.days=PR.days||{};
+function save(){MK.set('tabs',PR)}
+function mark(){PR.days[MK.day()]=1;save();stats()}
+function markEx(id){PR.played[id]=(PR.played[id]||0)+1;mark()}
+function stats(){
+  $('#st-les').textContent=Object.keys(PR.les).length+'/'+LES.length;
+  $('#st-ex').textContent=Object.keys(PR.done).length+'/'+EX.length;
+  $('#st-best').textContent=PR.best||0;
+  $('#st-days').textContent=Object.keys(PR.days).length;
+}
+
+/* ───── Übungen ───── */
+function spider(){var o=[];for(var s=6;s>=1;s--)for(var f=1;f<=4;f++)o.push(s+'.'+f);return o.join(' ')}
+var EX=[
+ {id:'leer',t:'Leersaiten',lv:'Anfänger',d:'Alle sechs Saiten leer, von tief nach hoch und zurück. Zahl 0 heißt: kein Finger.',bpm:60,
+  tab:'6.0 5.0 4.0 3.0 2.0 1.0 1.0 2.0 3.0 4.0 5.0 6.0 - - - -'},
+ {id:'ton',t:'Bundzahlen auf der tiefen E-Saite',lv:'Anfänger',d:'Jede Zahl ist ein Bund, also ein Halbton: E (0), F (1), G (3), A (5). Ein Finger pro Bund, die Hand wandert mit.',bpm:60,
+  tab:'6.0 6.1 6.3 6.5 6.3 6.1 6.0 -'},
+ {id:'spinne',t:'Chromatische Spinne',lv:'Anfänger',d:'Vier Finger, vier Bünde, sechs Saiten. Pro Bund ein Finger (1-2-3-4). Das trainiert Koordination und saubere Töne.',bpm:50,
+  tab:null},
+ {id:'arp-em',t:'Arpeggio Em',lv:'Anfänger',d:'Die Töne eines Akkords einzeln statt gleichzeitig. Greife Em und lass alle Finger unten, während du die Saiten nacheinander zupfst.',bpm:70,
+  tab:'6.0 4.2 3.2 2.0 1.0 2.0 3.2 4.2 6.0 4.2 3.2 2.0 1.0 2.0 3.2 4.2'},
+ {id:'arp-am',t:'Arpeggio Am – C',lv:'Anfänger',d:'Zwei Akkorde, ein Muster. Am im ersten, C im zweiten Takt.',bpm:70,
+  tab:'5.0 3.2 2.1 1.0 2.1 3.2 2.1 3.2 5.3 3.0 2.1 1.0 2.1 3.0 2.1 3.0'},
+ {id:'tech',t:'Hammer-on und Pull-off',lv:'Mittel',d:'h: Finger „hämmert“ auf, ohne neu zu zupfen. p: Finger zieht die Saite beim Abheben an. Nur der erste Ton jeder Gruppe wird gezupft.',bpm:60,
+  tab:'4.0 4.2h 4.0p 4.2h 4.0p 4.2h 4.0p -'},
+ {id:'penta',t:'E-Moll-Pentatonik',lv:'Mittel',d:'Die fünf Töne E G A H D. Das Fundament fast aller Rock- und Blues-Soli. Hoch und wieder herunter.',bpm:70,
+  tab:'6.0 6.3 5.0 5.2 4.0 4.2 3.0 3.2 2.0 2.3 1.0 1.3 1.0 2.3 2.0 3.2'},
+ {id:'gallop',t:'Powerchord-Gallop',lv:'Mittel',d:'Der klassische Metal-Rhythmus: Achtel, Achtel, Sechzehntel-Gefühl. Hier als Achtelfolge mit Palm Mute (PM). Lege die Handkante leicht an die Saiten an der Brücke.',bpm:90,
+  tab:'6.0m 6.0m 6.0m 6.0m 6.0m 6.0m 6.0m+5.2 -'},
+ {id:'riff',t:'Riff in E-phrygisch',lv:'Fortgeschritten',d:'Der Halbtonschritt E–F ist das Markenzeichen finsterer Riffs. Dann der Sprung zur kleinen Terz G und zurück.',bpm:100,
+  tab:'6.0m 6.0m 6.1 6.0m 6.0m 6.3 6.1 6.0 6.0m 6.0m 6.1 6.0m 6.0m 6.3 6.4 6.3'},
+ {id:'power',t:'Powerchords wandern',lv:'Fortgeschritten',d:'Dieselbe Griffform, verschoben: E5 – G5 – A5 – C5. Der Zeigefinger liegt auf der tiefen Saite, der Ringfinger zwei Bünde höher auf der nächsten.',bpm:80,
+  tab:'-'}
+];
+EX[2].tab=spider();
+EX[9].tab=[0,3,5,8].map(function(b){return ['6.'+b+'+5.'+(b+2),'6.'+b+'+5.'+(b+2),'6.'+b+'+5.'+(b+2),'-'].join(' ')}).join(' ');
+EX.forEach(function(e){e.tab=e.tab.replace(/\s+$/,'')});
+EX.forEach(function(e){try{parse(e.tab)}catch(x){console.error(x)}});
+function renderEx(){
+  $('#v-ueb').innerHTML=EX.map(function(e,i){
+    return '<div class="card" data-ex="'+e.id+'"><div class="row" style="justify-content:space-between"><h2>'+(i+1)+'. '+esc(e.t)+'</h2><span class="pill'+(PR.done[e.id]?' ok':'')+'">'+esc(e.lv)+(PR.done[e.id]?' ✓':'')+'</span></div><p class="small muted" style="margin:0">'+esc(e.d)+'</p><div data-pl="'+e.id+'"></div>'+
+     '<div class="row"><button class="btn sm" data-done="'+e.id+'" type="button">'+(PR.done[e.id]?'Als offen markieren':'Kann ich')+'</button></div></div>';
+  }).join('');
+  EX.forEach(function(e){mkPlayer($('#v-ueb [data-pl='+e.id+']'),e)});
+}
+$('#v-ueb').addEventListener('click',function(ev){
+  var b=ev.target.closest('[data-done]');if(!b)return;var id=b.dataset.done;
+  if(PR.done[id])delete PR.done[id];else{PR.done[id]=1;toast('Übung geschafft!')}
+  mark();var y=window.scrollY;renderEx();window.scrollTo(0,y);
+});
+
+/* ───── Lektionen ───── */
+var LES=[
+ {id:'was',e:'📜',t:'Was ist eine Tabulatur?',d:'Sechs Linien, sechs Saiten',
+  th:'<p>Eine <b>Tabulatur</b> („Tab“) sagt dir nicht, <i>welcher Ton</i> erklingt, sondern <i>wo du greifen sollst</i>. Das macht sie für Gitarristen so praktisch: Du musst keine Noten lesen können.</p><ul><li>Die <b>sechs Linien</b> sind die sechs Saiten. Die <b>unterste Linie ist die tiefe E-Saite</b>, die oberste die dünne hohe e-Saite. Das ist wie ein Blick auf die Gitarre von oben, wenn du sie spielst.</li><li>Eine <b>Zahl</b> auf einer Linie ist der <b>Bund</b>, den du auf dieser Saite greifst. <b>0</b> bedeutet leere Saite.</li><li>Zahlen werden von <b>links nach rechts</b> gespielt. <b>Untereinander</b> stehende Zahlen klingen zusammen (ein Akkord).</li></ul><p>Probiere es aus: Dieses Beispiel zupft alle sechs Saiten leer, von der tiefen bis zur hohen und zurück.</p>',
+  ex:['leer'],tip:'Merke dir die Richtung: Je höher die Linie in der Tab, desto höher der Ton. Das passt zum Gefühl.'},
+ {id:'zahlen',e:'🔢',t:'Bundzahlen und Töne',d:'Jeder Bund ist ein Halbton',
+  th:'<p>Jeder Bund erhöht den Ton um einen <b>Halbton</b>. Auf der tiefen E-Saite gilt: leer = E, 1 = F, 2 = Fis, 3 = G, 4 = Gis, 5 = A. Beim 12. Bund ist die Oktave erreicht und alles beginnt von vorn.</p><p>Die leeren Saiten sind <b>E – A – D – G – H – e</b>. Ein praktischer Trick: <b>Bund 5</b> auf einer Saite klingt wie die leere nächsthöhere Saite (nur bei G → H ist es Bund 4).</p><p>Wenn du die Noten auf einer Saite kennst, findest du sie auf allen Saiten.</p>',
+  ex:['ton'],tip:'Lerne zuerst die Töne der tiefen E- und A-Saite bis zum 5. Bund. Das reicht für sehr viele Riffs.'},
+ {id:'finger',e:'🖐',t:'Finger und Spinne',d:'Eine Hand, die sich nicht verkrampft',
+  th:'<p>In der Griffhand zählt man vier Finger: <b>1 Zeige, 2 Mittel, 3 Ring, 4 klein</b>. Regel für den Anfang: <b>ein Finger pro Bund</b>, so liegt die Hand ruhig.</p><ul><li>Greife direkt <b>hinter</b> dem Bundstäbchen, nicht in der Mitte des Bundfelds.</li><li>Daumen hinten am Hals, ungefähr gegenüber dem Mittelfinger.</li><li>Lass nicht benutzte Finger nahe über den Saiten, nicht in der Luft.</li></ul><p>Die „Spinne“ trainiert genau das. Spiele sie langsam und lieber sauber als schnell.</p>',
+  ex:['spinne'],tip:'Zehn Minuten Spinne zum Warmwerden wirken Wunder.'},
+ {id:'arp',e:'🌊',t:'Akkorde in Tabs: Arpeggios',d:'Gleichzeitig oder nacheinander',
+  th:'<p>Stehen Zahlen <b>direkt übereinander</b>, werden die Saiten gleichzeitig angeschlagen: das ist ein Akkord. Stehen sie <b>nacheinander</b>, zupfst du sie einzeln: ein <b>Arpeggio</b> („gebrochener Akkord“).</p><p>Greife den Akkord einmal vollständig und lass die Finger liegen. Dann wandert nur die Zupfhand. Das klingt sofort nach Lied.</p>',
+  ex:['arp-em','arp-am'],tip:'Zupfe mit Daumen für die tiefen Saiten, Zeige-, Mittel- und Ringfinger für G, H, e.'},
+ {id:'rhythmus',e:'⏱',t:'Rhythmus in Tabs',d:'Der Abstand zeigt die Zeit',
+  th:'<p>Tabs enthalten oft <b>keinen genauen Rhythmus</b>. In dieser App steht jeder Schritt für eine Achtelnote, unten stehen die Zählzeiten 1, 2, 3, 4. Zwei Schritte ergeben einen Schlag.</p><ul><li>Eine <b>Pause</b> hat in der Tab einfach keine Zahl.</li><li>In Büchern oder Programmen wie Guitar Pro steht der Rhythmus oft als Notenhälse über der Tab.</li><li>Wenn du einen Song kennst, hilft das Hören mehr als jede Notation: <b>Tab zeigt dir den Weg, das Ohr den Takt.</b></li></ul>',
+  ex:[],tip:'Spiele zu einem Klick. Er deckt jeden Rhythmusfehler gnadenlos auf.'},
+ {id:'tech',e:'✨',t:'Techniken und Zeichen',d:'h, p, /, b, ~ und PM',
+  th:'<table class="tbl"><tr><th>Zeichen</th><th>Bedeutung</th></tr><tr><td>h</td><td><b>Hammer-on</b>: Finger fällt kräftig auf den Bund, der Ton erklingt ohne neues Zupfen</td></tr><tr><td>p</td><td><b>Pull-off</b>: Finger zieht beim Abheben seitlich an der Saite, tieferer Ton klingt</td></tr><tr><td>/ und \\</td><td><b>Slide</b>: Finger gleitet am Hals nach oben (/) oder unten (\\)</td></tr><tr><td>b</td><td><b>Bending</b>: Saite wird seitlich hochgedrückt, Ton wird höher</td></tr><tr><td>~</td><td><b>Vibrato</b>: Ton wird mit kleinen Schwankungen lebendig gemacht</td></tr><tr><td>PM</td><td><b>Palm Mute</b>: Handballen dämpft die Saiten an der Brücke, ein dumpfer, druckvoller Klang</td></tr><tr><td>x</td><td>gedämpfte Saite, nur ein Klacken</td></tr></table>',
+  ex:['tech'],tip:'Bei Hammer-on und Pull-off kommt die Kraft aus dem Finger, nicht aus der Zupfhand. Übe beide Richtungen gleichmäßig laut.'},
+ {id:'penta',e:'📦',t:'Pentatonik: dein erstes Solo-Material',d:'Fünf Töne, unendlich viele Ideen',
+  th:'<p>Die <b>Moll-Pentatonik</b> besteht aus fünf Tönen und passt in Rock, Blues und Metal fast immer. In E-Moll sind das <b>E G A H D</b>. Die Übung zeigt die Form in der offenen Lage. Dasselbe Muster, 12 Bünde höher gespielt, ist die berühmte <b>Box 1</b> am 12. Bund.</p><p>Wichtig ist nicht Tempo, sondern Phrasierung: Spiele die Töne in anderer Reihenfolge, wiederhole einen Ton, lass Pausen.</p>',
+  ex:['penta'],tip:'Improvisiere zu einem E-Moll-Powerchord aus der Akkord-Seite. Drei Töne reichen für ein Motiv.'},
+ {id:'metal',e:'🤘',t:'Metal-Riffs und Powerchords',d:'Gallop, Palm Mute, phrygisch',
+  th:'<p>Ein Riff ist ein kurzes, wiederkehrendes Motiv. Im Metal besteht es oft aus der <b>tiefen E-Saite</b> mit Palm Mute, ein paar Halbtonschritten (F gegen E: <b>phrygisch</b>) und Powerchords an den Taktenden.</p><ul><li><b>Abschlag, Abschlag, Abschlag</b>: gleichmäßige Achtel mit der Pickhand. Die Hand schwingt immer, auch bei Pausen.</li><li>Powerchord-Form: Zeigefinger auf die tiefe Saite, Ringfinger zwei Bünde höher auf die nächste. Die Form wandert einfach den Hals hinauf.</li></ul><p>Du spielst in Riffkoje in Drop C: dort sind alle Zahlen gleich, die Töne aber zwei Ganztöne tiefer.</p>',
+  ex:['gallop','riff','power'],tip:'Spiele erst ohne Verzerrung und mit Klick. Wenn es dort sitzt, sitzt es auch laut.'}
+];
+function lesById(id){return LES.filter(function(l){return l.id===id})[0]}
+function exById(id){return EX.filter(function(e){return e.id===id})[0]}
+var curLes=null;
+function renderPfad(){
+  $('#v-pfad').innerHTML=LES.map(function(l,i){
+    return '<button class="les" type="button" data-l="'+l.id+'"><span class="e">'+l.e+'</span><span class="t">'+(i+1)+'. '+esc(l.t)+'</span><span class="d">'+esc(l.d)+'</span><span class="k">'+(PR.les[l.id]?'✓ erledigt':l.ex.length?l.ex.length+' Hörbeispiel'+(l.ex.length>1?'e':''):'Lesen')+'</span></button>';
+  }).join('');
+}
+function show(v){
+  ['pfad','lesson','ueb','quiz'].forEach(function(k){var el=$('#v-'+k);if(el)el.hidden=(k!==v)});
+  $('#v-ueb').style.display=v==='ueb'?'grid':'none';
+  $('#v-pfad').style.display=v==='pfad'?'grid':'none';
+  $('#tabs').hidden=(v==='lesson');
+}
+function setTab(t){
+  plStop();$$('#tabs button').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.t===t))});
+  if(t==='pfad')renderPfad();if(t==='ueb')renderEx();
+  show(t==='ueb'?'ueb':t);
+}
+$('#tabs').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setTab(b.dataset.t)});
+function openLesson(id){
+  var l=lesById(id);curLes=l;plStop();
+  $('#l-title').textContent=l.e+' '+l.t;$('#l-th').innerHTML=l.th;
+  $('#l-ex').innerHTML=l.ex.map(function(x){return '<div><strong class="small">'+esc(exById(x).t)+'</strong><p class="small muted" style="margin:2px 0 6px">'+esc(exById(x).d)+'</p><div data-pl="'+x+'"></div></div>'}).join('');
+  l.ex.forEach(function(x){mkPlayer($('#l-ex [data-pl='+x+']'),exById(x))});
+  $('#l-tip').hidden=!l.tip;$('#l-tip').innerHTML=l.tip?'<b>Tipp:</b> '+esc(l.tip):'';
+  $('#l-done').textContent=PR.les[l.id]?'Als offen markieren':'Lektion abhaken';
+  show('lesson');window.scrollTo(0,0);
+}
+$('#v-pfad').addEventListener('click',function(e){var b=e.target.closest('button');if(b)openLesson(b.dataset.l)});
+$('#l-close').addEventListener('click',function(){setTab('pfad')});
+$('#l-done').addEventListener('click',function(){
+  if(PR.les[curLes.id])delete PR.les[curLes.id];else{PR.les[curLes.id]=1;toast('Lektion erledigt. Gut gemacht!')}
+  mark();$('#l-done').textContent=PR.les[curLes.id]?'Als offen markieren':'Lektion abhaken';
+});
+
+/* ───── Quiz ───── */
+var Q=null;
+var TECHQ=[['h','Hammer-on'],['p','Pull-off'],['/','Slide'],['b','Bending'],['~','Vibrato'],['PM','Palm Mute']];
+function qMake(){
+  var list=[],i;
+  for(i=0;i<8;i++){
+    var kind=i%4;
+    if(kind===0||kind===1){ /* Tab -> Ton */
+      var s=1+Math.floor(Math.random()*6),f=Math.floor(Math.random()*8),m=midiOf(s,f)%12,right=NN[m];
+      var opts=[right];while(opts.length<4){var w=NN[Math.floor(Math.random()*12)];if(opts.indexOf(w)<0)opts.push(w)}
+      list.push({q:'Welchen Ton spielst du?',tab:s+'.'+f,opts:shuffle(opts),right:right,why:'Saite: '+SNAME[s]+' (leer '+NN[OPEN[6-s]%12]+'), Bund '+f+' = '+f+' Halbtöne höher: '+right+'.'});
+    }else if(kind===2){ /* Ton -> Bund */
+      var s2=2+Math.floor(Math.random()*5),f2=1+Math.floor(Math.random()*7),nm=NN[midiOf(s2,f2)%12];
+      var o2=[String(f2)];while(o2.length<4){var w2=String(Math.floor(Math.random()*9));if(o2.indexOf(w2)<0)o2.push(w2)}
+      list.push({q:'In welchem Bund greifst du '+nm+' auf der '+SNAME[s2]+'? (Leer: '+NN[OPEN[6-s2]%12]+')',tab:null,opts:shuffle(o2),right:String(f2),why:'Von '+NN[OPEN[6-s2]%12]+' bis '+nm+' sind es '+f2+' Halbtöne, also Bund '+f2+'.'});
+    }else{
+      var tq=TECHQ[Math.floor(Math.random()*TECHQ.length)],o3=[tq[1]];
+      while(o3.length<4){var w3=TECHQ[Math.floor(Math.random()*TECHQ.length)][1];if(o3.indexOf(w3)<0)o3.push(w3)}
+      list.push({q:'Was bedeutet „'+tq[0]+'“ in einer Tab?',tab:null,opts:shuffle(o3),right:tq[1],why:'„'+tq[0]+'“ steht für '+tq[1]+'.'});
+    }
+  }
+  return {list:shuffle(list),i:0,ok:0};
+}
+function qShow(){
+  var q=Q.list[Q.i];
+  $('#q-head').textContent='Frage '+(Q.i+1)+' von '+Q.list.length;$('#q-bar').style.width=(Q.i/Q.list.length*100)+'%';
+  $('#q-text').textContent=q.q;
+  $('#q-show').innerHTML=q.tab?'<div class="player" style="max-width:230px"><div class="sys">'+tabSvg(parse('- '+q.tab+' -'),{nobeat:true,per:3})+'</div></div>':'';
+  $('#q-opts').innerHTML=q.opts.map(function(o){return '<button class="btn" type="button" data-o="'+esc(o)+'">'+esc(o)+'</button>'}).join('');
+  $('#q-fb').hidden=true;$('#q-next').hidden=true;
+}
+$('#q-go').addEventListener('click',function(){Q=qMake();$('#q-box').hidden=false;$('#q-res').textContent='';qShow()});
+$('#q-end').addEventListener('click',function(){Q=null;$('#q-box').hidden=true});
+$('#q-opts').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b||!Q||!$('#q-fb').hidden)return;
+  var q=Q.list[Q.i],ok=b.dataset.o===q.right;
+  if(ok)Q.ok++;
+  $$('#q-opts button').forEach(function(x){if(x.dataset.o===q.right)x.classList.add('right');else if(x===b)x.classList.add('wrong')});
+  var fb=$('#q-fb');fb.hidden=false;fb.className='fb '+(ok?'good':'bad');fb.textContent=(ok?'Richtig. ':'Nicht ganz. ')+q.why;
+  $('#q-next').hidden=false;$('#q-next').textContent=Q.i===Q.list.length-1?'Ergebnis':'Weiter';
+});
+$('#q-next').addEventListener('click',function(){
+  if(Q.i<Q.list.length-1){Q.i++;qShow();return}
+  var n=Q.list.length,st=Q.ok>=n?'★★★':Q.ok>=n*.75?'★★☆':Q.ok>=n/2?'★☆☆':'';
+  $('#q-res').textContent=Q.ok+' von '+n+' richtig '+st+(Q.ok>=n?'. Perfekt!':'.');
+  if(Q.ok>(PR.best||0))PR.best=Q.ok;mark();Q=null;$('#q-box').hidden=true;
+});
+
+stats();renderPfad();show('pfad');
+window.addEventListener('pagehide',plStop);
+window.__tb={EX:EX,LES:LES,parse:parse,midiOf:midiOf,PR:function(){return PR},get Q(){return Q}};
+})();
+</script>
+</body>
+</html>

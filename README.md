@@ -1,6 +1,6 @@
 # Musikkoje
 
-Eine App für die Familie: **Geigenpult** (Noten, Mikro, MIDI, Lehrplan), **Riffkoje** (zu YouTube mitspielen, aufnehmen, Tabs) und **Musiktheorie** (drei Stufen: Entdecker, Schulkind, Anfänger).
+Eine App für die Familie: **Geigenpult** (Noten, Mikro, MIDI, Lehrplan), **Riffkoje** (zu YouTube mitspielen, aufnehmen, Tabs), **Akkorde**, **Tabulatur**, **Low Whistle** und **Musiktheorie** (fünf Stufen bis „Musiker-Wissen“).
 Jede Person hat ein eigenes Profil mit eigenem Fortschritt, eigenen Stücken und eigenen Aufnahmen (Wechsel oben rechts). Alles bleibt im Browser des jeweiligen Geräts.
 
 ## Neu in dieser Version
@@ -16,10 +16,28 @@ Jede Person hat ein eigenes Profil mit eigenem Fortschritt, eigenen Stücken und
 - **Xylophon** (Theorie, Entdecker): Farbige Klangstäbe, freies Spiel und vier Lieder zum Nachspielen für die Zwillinge.
 - **Adventskalender** auf der Startseite vom 1. bis 24. Dezember. Zum Ausprobieren: `index.html?advent=12` anhängen.
 
+## Neu: Abgleich zwischen Geräten
+⚙ → „Geräte-Abgleich“ hält den Fortschritt auf Handy, Tablet und Computer gleich, über eine Sync-Datei in einem Cloud-Ordner (Google Drive, iCloud, Nextcloud, Dropbox). Die App hat keinen eigenen Server, deshalb liegt die Datei bei dir.
+- **Chrome/Edge am Computer (und teils Android):** „Neue Sync-Datei anlegen“, Cloud-Ordner wählen, fertig. Danach „Jetzt abgleichen“ (die Startseite erinnert nach 12 Stunden).
+- **Handy und andere Browser:** „Mit Sync-Datei abgleichen“: Datei aus der Cloud wählen, die App führt sie mit dem Gerät zusammen und bietet die neue Datei zum Speichern an. In denselben Ordner speichern und die alte ersetzen. Beim ersten Mal gibt es noch keine Datei: Auswahl abbrechen, die Datei wird erzeugt.
+- **Zusammenführen statt überschreiben:** Zahlen: größerer Wert, Bestzeiten: kleinerer Wert, Tage, Sterne, Lektionen und Listen: Vereinigung. Nichts geht verloren, aber ein „Als offen markieren“ kann durch den anderen Stand zurückkommen.
+- **Freunde:** Jede Person nutzt ihre eigene Sync-Datei. Profile werden über eine zufällige Kennung erkannt, notfalls über den Namen.
+- Nicht enthalten: Gemini-Schlüssel, Pad-Belegung und Riffkoje-Aufnahmen.
+
+## Aufgeräumt
+- Leiste oben: Start, Geige, Riff, **Gitarre** (Akkorde und Tabulatur mit eigener Unterleiste), Whistle, Theorie. Passt auf dem Handy in eine Zeile.
+- Startseite nach Instrumenten gegliedert, mit „Weitermachen“-Karte für die zuletzt geöffnete Seite.
+
+## Neu: mehr Gitarre, Low Whistle, Musiker-Wissen
+- **Akkorde:** jetzt 57 Griffe und 14 Lektionen. Neu: sus2/sus4/7sus4, Maj7 (auch H), Maj9, Moll7, m9, Add9, Sexten, Neuner, Barré (H, Fm, Gm, Cm), vermindert, übermäßig. Dazu ein **Rhythmus-Trainer** (Üben): 10 Schlagmuster mit Auf-/Abschlag-Pfeilen, Einzähl-Takt, Klick, Akkord oder Folge, optional Tempo-Steigerung.
+- **Tabulatur** (`tabs.html`): 8 Lektionen (Tab lesen, Bundzahlen, Finger, Arpeggios, Rhythmus, Techniken h/p/Slide/Bending/PM, Pentatonik, Metal-Riffs), 10 Übungen zum Hören und Mitspielen mit laufendem Cursor, Tempo, Klick und Wiederholen, plus Tab-Quiz.
+- **Low Whistle** (`whistle.html`): Annahme Low D. 9 Lektionen, Griffbilder für 15 Töne, Tune-Trainer mit Griffanzeige (Haste to the Wedding, St. Patrick’s Day, Drowsy Maggie, Weihnachtslieder und Übungen), **Finger-Trainer** (Ton genannt, Löcher antippen, Zeit und Bestzeit), „Warte auf mich“ per Mikrofon, Stimmgerät, Quiz. Das Mikrofon kannst du im Stimmgerät direkt auswählen. Alle Melodien liegen in der Low-D-Lage. Nicht getestet mit deiner echten Whistle.
+- **Theorie:** neue Stufe **Musiker-Wissen** mit 14 Lektionen (Quintenzirkel, Paralleltonarten, Stufenakkorde, Kadenzen, Septakkorde, sus/add9, Intervalle, Pentatonik und Blues, Rhythmus, Transponieren, Vortragszeichen, Form, Gehör, Üben).
+
 ## Akkorde (Gitarre)
 Eigener Bereich „Akkorde“ in der Leiste. Alle Texte und Griffbilder sind eigens für die App geschrieben, nichts stammt aus einem Buch.
-- **Lernpfad** mit 9 Lektionen: Saiten und Griffbilder lesen, Em und Am, E und A, D und Dm, C und G, Siebener-Akkorde, Barré (F, Bm), Powerchords für Rock und Metal (mit Hinweis auf Drop C), Akkordfolgen und Schlagmuster.
-- **Akkordbuch** mit 23 Griffen als Bild, mit Klang (gezupfte Saiten) und Griffbeschreibung. „Ich kann ihn“ merkt sich, was du schon sauber greifst.
+- **Lernpfad** mit 14 Lektionen (inklusive sus, maj7, Farbakkorde, Rhythmus): Saiten und Griffbilder lesen, Em und Am, E und A, D und Dm, C und G, Siebener-Akkorde, Barré (F, Bm), Powerchords für Rock und Metal (mit Hinweis auf Drop C), Akkordfolgen und Schlagmuster.
+- **Akkordbuch** mit 57 Griffen als Bild, mit Klang (gezupfte Saiten) und Griffbeschreibung. „Ich kann ihn“ merkt sich, was du schon sauber greifst.
 - **Üben:** Wechsel-Trainer mit Metronom und Minuten-Zähler (Bestwert), sieben Akkordfolgen zum Mitspielen (unter anderem Andalusisch und ein Powerchord-Riff) und ein Quiz (Griffbild erkennen, Dur oder Moll hören).
 - Nicht enthalten: Erkennung, ob dein Griff sauber klingt (die App hört deine Gitarre dabei nicht ab). Die Griffe gelten für Standardstimmung.
 

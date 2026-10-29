@@ -6,6 +6,8 @@ function ld(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
 var profs=ld(PK,null);
 if(!Array.isArray(profs)||!profs.length){profs=[{id:'p1',name:'Micha',emoji:'🎻',stage:'erw'}];sv(PK,profs)}
+function newUid(){var a='abcdefghijkmnpqrstuvwxyz23456789',o='';try{var r=new Uint8Array(10);crypto.getRandomValues(r);for(var i=0;i<10;i++)o+=a[r[i]%a.length]}catch(e){for(var j=0;j<10;j++)o+=a[Math.floor(Math.random()*a.length)]}return o}
+var uidAdded=false;profs.forEach(function(p){if(!p.uid){p.uid=newUid();uidAdded=true}});if(uidAdded)sv(PK,profs);
 var act=ld(AK,'p1');
 if(!profs.some(function(p){return p.id===act}))act=profs[0].id;
 var STAGES={kita:'Entdecker (Kita)',schule:'Schulkind',erw:'Anfänger (Erwachsene)'};
@@ -44,7 +46,8 @@ applyTheme();
 try{matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyTheme)}catch(e){}
 
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige'],['riffkoje.html','Riffkoje','Riff'],['theorie.html','Theorie','Theorie'],['akkorde.html','Akkorde','Akkorde']];
+var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige'],['riffkoje.html','Riffkoje','Riff'],['akkorde.html','Gitarre','Gitarre',['akkorde.html','tabs.html']],['whistle.html','Low Whistle','Whistle'],['theorie.html','Theorie','Theorie']];
+var SUBS=[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur']];
 function css(){
   var s=document.createElement('style');
   s.textContent=':root{--nb:#1c1e24;--nf:#f2f0ea;--nl:#3b3f4a;--nb2:#2c2f38;--nm:#a9a69d;--na:#f2a93b;--nao:#1a1205}'+
@@ -52,8 +55,9 @@ function css(){
   '#mknav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top));background:var(--nb);color:var(--nf);border-bottom:1px solid var(--nl);font:500 14px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;position:relative;z-index:30}'+
   '#mknav a{color:var(--nf);opacity:.8;text-decoration:none;padding:8px 12px;border-radius:999px}#mknav a:hover{background:var(--nb2);opacity:1}#mknav a[aria-current=page]{background:var(--nf);color:var(--nb);opacity:1}'+
   '#mknav .ls{display:none}#mknav .sp{flex:1}#mknav button{font:inherit;color:var(--nf);background:var(--nb2);border:1px solid var(--nl);border-radius:999px;padding:7px 12px;min-height:36px;cursor:pointer}'+
-  '#mknav button.ic{padding:7px 10px;min-width:36px}@media (max-width:520px){#mknav .ls{display:inline}#mknav{gap:2px;padding-left:8px;padding-right:8px}#mknav a{padding:8px 7px}#mknav .nm{display:none}#mknav .lf{display:none}#mknav button{padding:7px 9px}#mknav #mk-theme{display:none}}'+
-  'body.pult #mknav,body.bigmode #mknav{display:none}'+
+  '#mknav button.ic{padding:7px 10px;min-width:36px}@media (max-width:520px){#mknav .ls{display:inline}#mknav{gap:2px;padding-left:8px;padding-right:8px}#mknav{font-size:13px}#mknav a{padding:8px 5px}#mknav .sp{display:none}#mknav button{min-width:34px}#mknav .nm{display:none}#mknav .lf{display:none}#mknav button{padding:7px 9px}#mknav #mk-theme{display:none}}'+
+  '#mksub{display:flex;gap:6px;padding:8px 12px;background:var(--nb);border-bottom:1px solid var(--nl);font:500 14px/1.2 system-ui,-apple-system,sans-serif}#mksub a{color:var(--nf);opacity:.85;text-decoration:none;padding:7px 12px;border-radius:999px;border:1px solid var(--nl)}#mksub a[aria-current=page]{background:var(--na);color:var(--nao);border-color:var(--na);opacity:1}'+
+  'body.pult #mknav,body.bigmode #mknav,body.pult #mksub,body.bigmode #mksub{display:none}'+
   '#mkdlg{border:1px solid var(--nl);border-radius:14px;padding:18px;max-width:440px;width:calc(100vw - 32px);max-height:88vh;overflow:auto;background:var(--nb);color:var(--nf);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}'+
   '#mkdlg::backdrop{background:rgba(0,0,0,.55)}#mkdlg h2{margin:0 0 10px;font-size:18px}#mkdlg h3{margin:16px 0 6px;font-size:15px}#mkdlg p{margin:6px 0;color:var(--nm);font-size:13px}#mkdlg .pr{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--nl)}'+
   '#mkdlg .pr:first-of-type{border-top:0}#mkdlg .pr .n{flex:1;min-width:0;overflow-wrap:anywhere}#mkdlg .pr .n small{display:block;color:var(--nm)}'+
@@ -85,7 +89,7 @@ function openDlg(){
     else if(b.id==='np-add'){
       var n=d.querySelector('#np-name').value.trim();if(!n){d.querySelector('#np-name').focus();return}
       var ps=MK.profiles(),id='p'+(Math.max.apply(null,ps.map(function(p){return +p.id.slice(1)||1}))+1);
-      ps.push({id:id,name:n,emoji:emo,stage:d.querySelector('#np-st').value});sv(PK,ps);MK.switchTo(id);
+      ps.push({id:id,uid:newUid(),name:n,emoji:emo,stage:d.querySelector('#np-st').value});sv(PK,ps);MK.switchTo(id);
     }
     else if(b.dataset.ed)editDlg(b.dataset.ed);
     else if(b.id==='mk-close')d.close();
@@ -154,9 +158,119 @@ function restoreAll(d){
 }
 function importProfile(d){
   var ps=MK.profiles(),id='p'+(Math.max.apply(null,ps.map(function(p){return +p.id.slice(1)||1}))+1),pr=d.profile||{name:'Importiert',emoji:'🎻',stage:'erw'};
-  ps.push({id:id,name:String(pr.name||'Importiert').slice(0,24),emoji:EMOJIS.indexOf(pr.emoji)>=0?pr.emoji:'🎻',stage:STAGES[pr.stage]?pr.stage:'erw'});sv(PK,ps);
+  ps.push({id:id,uid:newUid(),name:String(pr.name||'Importiert').slice(0,24),emoji:EMOJIS.indexOf(pr.emoji)>=0?pr.emoji:'🎻',stage:STAGES[pr.stage]?pr.stage:'erw'});sv(PK,ps);
   Object.keys(d.ls).forEach(function(k){if(!SKIP.test(k)&&typeof d.ls[k]==='string')try{localStorage.setItem(id+'.'+k,d.ls[k])}catch(e){}});
   MK.switchTo(id);
+}
+
+/* ───── Geräte-Abgleich über eine Sync-Datei im Cloud-Ordner ─────
+   Die Datei enthält alle Profile mit Fortschritt. Beim Abgleich werden beide Seiten zusammengeführt
+   (Zahlen: der größere Wert, Zeiten: der kleinere, Listen und Tage: Vereinigung), dann wird die Datei neu geschrieben.
+   Profile werden über eine zufällige Kennung (uid) erkannt, notfalls über den Namen. */
+var SYNCSKIP=/(^|\.)gp\.pads$/;
+function mv(a,b,low){
+  if(a===null||a===undefined)return b;if(b===null||b===undefined)return a;
+  var ta=typeof a,tb=typeof b;
+  if(Array.isArray(a)&&Array.isArray(b)){var seen={},o=[];a.concat(b).forEach(function(x){var k=JSON.stringify(x);if(!seen[k]){seen[k]=1;o.push(x)}});return o}
+  if(ta==='number'&&tb==='number')return low?Math.min(a,b):Math.max(a,b);
+  if(ta==='boolean'&&tb==='boolean')return a||b;
+  if(ta==='object'&&tb==='object'&&!Array.isArray(a)&&!Array.isArray(b)){
+    var r={};Object.keys(a).concat(Object.keys(b)).forEach(function(k){if(!(k in r))r[k]=mv(a[k],b[k],low||k==='fbest')});return r;
+  }
+  return a;
+}
+function mergeStr(a,b){
+  if(a==null)return b;if(b==null)return a;if(a===b)return a;
+  var x,y;try{x=JSON.parse(a);y=JSON.parse(b)}catch(e){return a}
+  return JSON.stringify(mv(x,y,false));
+}
+MK._mv=mv;
+function syncDoc(){
+  return {app:'musikkoje',v:2,kind:'sync',date:new Date().toISOString(),profiles:MK.profiles().map(function(p){
+    var ls=allLs(true,p.id);Object.keys(ls).forEach(function(k){if(SYNCSKIP.test(k))delete ls[k]});
+    return {uid:p.uid,name:p.name,emoji:p.emoji,stage:p.stage,ls:ls};
+  })};
+}
+MK.syncDoc=syncDoc;
+/* Führt eine Sync-Datei in die lokalen Daten ein. Gibt {changed, added} zurück. */
+MK.syncApply=function(doc){
+  if(!doc||doc.app!=='musikkoje'||doc.kind!=='sync'||!Array.isArray(doc.profiles))throw new Error('format');
+  var ps=MK.profiles(),changed=0,added=0,used={};
+  doc.profiles.forEach(function(rp){
+    if(!rp||!rp.uid||!rp.ls||typeof rp.ls!=='object')return;
+    var lp=ps.find(function(p){return p.uid===rp.uid});
+    if(!lp){
+      lp=ps.find(function(p){return !used[p.id]&&p.name.trim().toLowerCase()===String(rp.name||'').trim().toLowerCase()&&!doc.profiles.some(function(q){return q.uid===p.uid})});
+      if(lp)lp.uid=rp.uid;
+    }
+    if(!lp){
+      var id='p'+(Math.max.apply(null,ps.map(function(p){return +p.id.slice(1)||1}))+1);
+      lp={id:id,uid:rp.uid,name:String(rp.name||'Profil').slice(0,24),emoji:EMOJIS.indexOf(rp.emoji)>=0?rp.emoji:'🎻',stage:STAGES[rp.stage]?rp.stage:'erw'};
+      ps.push(lp);added++;
+    }
+    used[lp.id]=1;
+    Object.keys(rp.ls).forEach(function(k){
+      if(SKIP.test(k)||SYNCSKIP.test(k)||k.indexOf('mk.')===0||typeof rp.ls[k]!=='string')return;
+      var lk=key(k,lp.id),cur=null;try{cur=localStorage.getItem(lk)}catch(e){}
+      var m=mergeStr(cur,rp.ls[k]);
+      if(m!==cur){try{localStorage.setItem(lk,m);changed++}catch(e){}}
+    });
+  });
+  sv(PK,ps);
+  return {changed:changed,added:added};
+};
+MK.lastSync=function(){return ld('mk.lastsync',0)};
+function idb(){return new Promise(function(res,rej){var r=indexedDB.open('mk-sync',1);r.onupgradeneeded=function(){r.result.createObjectStore('h')};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}})}
+function hGet(){return idb().then(function(db){return new Promise(function(res){var q=db.transaction('h').objectStore('h').get('file');q.onsuccess=function(){res(q.result||null)};q.onerror=function(){res(null)}})}).catch(function(){return null})}
+function hSet(h){return idb().then(function(db){return new Promise(function(res){var t=db.transaction('h','readwrite');if(h)t.objectStore('h').put(h,'file');else t.objectStore('h').delete('file');t.oncomplete=function(){res()};t.onerror=function(){res()}})}).catch(function(){})}
+MK.syncSupported=function(){return !!(window.showSaveFilePicker&&window.showOpenFilePicker)};
+MK.syncConnected=function(){return ld('mk.syncon',0)===1};
+/* Datei lesen, zusammenführen, zurückschreiben. Muss durch einen Klick ausgelöst werden (Berechtigung). */
+MK.syncNow=async function(){
+  var h=await hGet();if(!h)throw new Error('nofile');
+  var perm=await h.queryPermission({mode:'readwrite'});
+  if(perm!=='granted')perm=await h.requestPermission({mode:'readwrite'});
+  if(perm!=='granted')throw new Error('perm');
+  var f=await h.getFile(),txt=await f.text(),res={changed:0,added:0};
+  if(txt.trim()){var d;try{d=JSON.parse(txt)}catch(e){throw new Error('format')}res=MK.syncApply(d)}
+  var w=await h.createWritable();await w.write(JSON.stringify(syncDoc()));await w.close();
+  sv('mk.lastsync',Date.now());
+  return res;
+};
+MK.syncAuto=async function(){
+  if(!MK.syncConnected())return null;
+  var h=await hGet();if(!h)return null;
+  if((await h.queryPermission({mode:'readwrite'}))!=='granted')return null;
+  return MK.syncNow();
+};
+MK.syncConnect=async function(create){
+  var h;
+  if(create)h=await window.showSaveFilePicker({suggestedName:'musikkoje-sync.json',types:[{description:'Musikkoje-Sync',accept:{'application/json':['.json']}}]});
+  else{var a=await window.showOpenFilePicker({types:[{description:'Musikkoje-Sync',accept:{'application/json':['.json']}}]});h=a[0]}
+  await hSet(h);sv('mk.syncon',1);
+  return MK.syncNow();
+};
+MK.syncDisconnect=async function(){await hSet(null);sv('mk.syncon',0)};
+/* Ohne Datei-Zugriff (Handy, Firefox, Safari): Datei wählen, zusammenführen, die neue Datei zum Speichern anbieten. */
+MK.syncFile=function(file){
+  return file.text().then(function(txt){
+    var res=MK.syncApply(JSON.parse(txt));sv('mk.lastsync',Date.now());return res;
+  });
+};
+MK.syncDelivery=async function(){
+  var json=JSON.stringify(syncDoc()),fl=new File([json],'musikkoje-sync.json',{type:'application/json'});
+  try{if(navigator.canShare&&navigator.canShare({files:[fl]})){await navigator.share({files:[fl],title:'Musikkoje Sync'});return 'share'}}catch(e){if(e&&e.name==='AbortError')return 'abort'}
+  download('musikkoje-sync.json',JSON.parse(json));return 'download';
+};
+function syncRun(fn){
+  msg('Abgleich läuft …');
+  fn().then(function(r){
+    var t=(r.changed||r.added)?'Abgleich fertig: '+r.changed+' Werte aktualisiert'+(r.added?', '+r.added+' Profil(e) neu':'')+'. Die Seite lädt neu.':'Abgleich fertig, alles war schon aktuell.';
+    msg(t);if(r.changed||r.added)setTimeout(function(){location.reload()},1200);else{var e=document.getElementById('mk-sy-st');if(e)e.textContent='Verbunden mit einer Sync-Datei. Letzter Abgleich: '+new Date().toLocaleString('de-DE')+'.'}
+  }).catch(function(e){
+    var m=e&&e.message;
+    msg(m==='format'?'Diese Datei ist keine Musikkoje-Sync-Datei.':m==='perm'?'Zugriff auf die Datei wurde nicht erlaubt.':e&&e.name==='AbortError'?'Abgebrochen.':'Abgleich fehlgeschlagen: '+(m||e),true);
+  });
 }
 function setDlg(){
   var d=document.getElementById('mkdlg');if(d)d.remove();
@@ -168,6 +282,10 @@ function setDlg(){
    '<h3>Sicherung</h3><p>Alle Daten liegen nur in diesem Browser. Eine Sicherung schützt vor Verlust bei Handywechsel oder gelöschtem Browserspeicher. '+(last?'Letzte Sicherung: '+(ago===0?'heute':ago===1?'gestern':'vor '+ago+' Tagen')+'.':'Es gibt noch keine Sicherung.')+'</p>'+
    '<div class="row"><button class="pri" id="mk-bk" type="button">Alles sichern</button><button id="mk-rs" type="button">Sicherung einspielen</button></div>'+
    '<p>Nicht enthalten: Gemini-Schlüssel (bitte neu eintragen) und die Aufnahmen aus Riffkoje.</p>'+
+   '<h3>Geräte-Abgleich</h3><p id="mk-sy-st">'+(MK.syncConnected()?'Verbunden mit einer Sync-Datei. Letzter Abgleich: '+(MK.lastSync()?new Date(MK.lastSync()).toLocaleString('de-DE'):'noch nie')+'.':'Hält deinen Fortschritt auf Handy, Tablet und Computer gleich. Du legst eine Datei in einen Cloud-Ordner (Google Drive, iCloud, Nextcloud, Dropbox). Jede Person nutzt ihre eigene Datei.')+'</p>'+
+   (MK.syncSupported()?'<div class="row">'+(MK.syncConnected()?'<button class="pri" id="mk-sy-now" type="button">Jetzt abgleichen</button><button id="mk-sy-off" type="button">Trennen</button>':'<button class="pri" id="mk-sy-new" type="button">Neue Sync-Datei anlegen</button><button id="mk-sy-pick" type="button">Vorhandene wählen</button>')+'</div>':'')+
+   '<div class="row"><button id="mk-sy-file" type="button">'+(MK.syncSupported()?'Stattdessen: Datei von Hand abgleichen':'Mit Sync-Datei abgleichen')+'</button></div>'+
+   '<p>Ablauf von Hand: Sync-Datei aus der Cloud wählen, die App führt sie mit diesem Gerät zusammen und bietet die neue Datei zum Speichern an. Speichere sie in denselben Cloud-Ordner und ersetze die alte. Beim ersten Mal gibt es noch keine Datei: einfach abbrechen und die Datei speichern lassen.</p>'+
    '<h3>Einzelnes Profil</h3><p>Zum Übertragen aufs Gerät einer anderen Person: Profile bearbeiten → „Exportieren“. Hier eine Profil-Datei als neues Profil einlesen:</p>'+
    '<div class="row"><button id="mk-ip" type="button">Profil-Datei einlesen</button></div>'+
    '<p id="mk-msg" hidden></p><div class="row"><button id="mk-close" type="button" style="margin-left:auto">Schließen</button></div>';
@@ -179,6 +297,17 @@ function setDlg(){
     else if(b.id==='mk-rs')readFile(function(x){
       if(x.kind==='profile')return msg('Das ist eine Profil-Datei. Bitte unten „Profil-Datei einlesen“ nutzen.',true);
       if(!confirm('Sicherung vom '+(x.date||'?')+' einspielen? Vorhandene Daten mit gleichem Namen werden überschrieben.'))return;restoreAll(x)});
+    else if(b.id==='mk-sy-new'||b.id==='mk-sy-pick'){syncRun(function(){return MK.syncConnect(b.id==='mk-sy-new')})}
+    else if(b.id==='mk-sy-now'){syncRun(function(){return MK.syncNow()})}
+    else if(b.id==='mk-sy-off'){MK.syncDisconnect().then(function(){setDlg()})}
+    else if(b.id==='mk-sy-file'){
+      var i=document.createElement('input');i.type='file';i.accept='.json,application/json';
+      i.onchange=function(){var f=i.files&&i.files[0];
+        if(!f){MK.syncDelivery().then(function(r){msg(r==='abort'?'Abgebrochen.':'Datei bereit. Speichere sie in deinen Cloud-Ordner und ersetze die alte.')});return}
+        syncRun(function(){return MK.syncFile(f).then(function(r){return MK.syncDelivery().then(function(){return r})})})};
+      i.addEventListener('cancel',function(){MK.syncDelivery().then(function(r){msg(r==='abort'?'Abgebrochen.':'Neue Sync-Datei erstellt. Speichere sie in deinen Cloud-Ordner.')})});
+      i.click();
+    }
     else if(b.id==='mk-ip')readFile(function(x){if(x.kind!=='profile')return msg('Das ist eine Gesamt-Sicherung. Bitte „Sicherung einspielen“ nutzen.',true);importProfile(x)});
     else if(b.id==='mk-close')d.close();
   });
@@ -188,8 +317,14 @@ MK.nav=function(){
   css();
   var here=(location.pathname.split('/').pop()||'index.html'),p=MK.profile();
   var n=document.createElement('nav');n.id='mknav';n.setAttribute('aria-label','Bereiche');
-  n.innerHTML=LINKS.map(function(l){return '<a href="'+l[0]+'"'+((here===l[0]||(here===''&&l[0]==='index.html'))?' aria-current="page"':'')+'><span class="lf">'+l[1]+'</span><span class="ls">'+l[2]+'</span></a>'}).join('')+'<span class="sp"></span><button id="mk-theme" class="ic" type="button"></button><button id="mk-set" class="ic" type="button" aria-label="Einstellungen und Sicherung" title="Einstellungen und Sicherung">⚙</button><button id="mk-prof" type="button" aria-haspopup="dialog">'+esc(p.emoji)+'<span class="nm"> '+esc(p.name)+'</span></button>';
+  n.innerHTML=LINKS.map(function(l){var cur=here===l[0]||(here===''&&l[0]==='index.html')||(l[3]&&l[3].indexOf(here)>=0);return '<a href="'+l[0]+'"'+(cur?' aria-current="page"':'')+'><span class="lf">'+l[1]+'</span><span class="ls">'+l[2]+'</span></a>'}).join('')+'<span class="sp"></span><button id="mk-theme" class="ic" type="button"></button><button id="mk-set" class="ic" type="button" aria-label="Einstellungen und Sicherung" title="Einstellungen und Sicherung">⚙</button><button id="mk-prof" type="button" aria-haspopup="dialog">'+esc(p.emoji)+'<span class="nm"> '+esc(p.name)+'</span></button>';
   document.body.insertBefore(n,document.body.firstChild);
+  if(SUBS.some(function(x){return x[0]===here})){
+    var sb=document.createElement('nav');sb.id='mksub';sb.setAttribute('aria-label','Gitarre');
+    sb.innerHTML=SUBS.map(function(x){return '<a href="'+x[0]+'"'+(x[0]===here?' aria-current="page"':'')+'>'+x[1]+'</a>'}).join('');
+    n.parentNode.insertBefore(sb,n.nextSibling);
+  }
+  if(here&&here!=='index.html'&&here!=='')sv('mk.lastpage',{p:here,t:(document.title||here).replace(/\s*·.*$/,''),d:Date.now()});
   document.getElementById('mk-prof').addEventListener('click',openDlg);
   document.getElementById('mk-set').addEventListener('click',setDlg);
   document.getElementById('mk-theme').addEventListener('click',function(){var o=['auto','light','dark'];MK.theme(o[(o.indexOf(themePref())+1)%3])});
