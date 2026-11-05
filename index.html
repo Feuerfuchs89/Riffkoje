@@ -71,7 +71,7 @@ log.forEach(function(e){if(e.d===today)mins+=e.s});
 var stars=0,done=0;Object.keys(th.stars||{}).forEach(function(k){stars+=th.stars[k];if(th.stars[k]>0)done++});
 var lv=Math.floor(Math.sqrt((gp.xp||0)/40))+1;
 $('#stats').innerHTML='<div><b>'+Math.floor(mins/60)+'</b><span>Min. Geige heute</span></div><div><b>'+(gp.xp||0)+'</b><span>XP Geigenpult</span></div><div><b>'+lv+'</b><span>Level Geigenpult</span></div><div><b>'+stars+'</b><span>Sterne Theorie</span></div>';
-$('#k-gp').textContent=Object.keys(gp.lessons||{}).length+' von 21 Lektionen';
+$('#k-gp').textContent=Object.keys(gp.lessons||{}).length+' von 27 Lektionen';
 $('#k-th').textContent=done?done+' Lektionen begonnen':'Jetzt anfangen';
 $('#k-rk').textContent='';
 try{var lp=JSON.parse(localStorage.getItem('mk.lastpage')||'null');if(lp&&lp.p&&lp.d&&Date.now()-lp.d<30*864e5){$('#rs-t').textContent=lp.t;$('#rs-a').href=lp.p;$('#resume').hidden=false}}catch(e){}

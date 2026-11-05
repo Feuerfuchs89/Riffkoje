@@ -82,6 +82,7 @@
   input[type=checkbox],input[type=radio]{width:18px;height:18px;accent-color:var(--accent)}
   .notice{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-size:.9rem;overflow-wrap:anywhere}
   .notice.bad{border-color:var(--bad);color:var(--bad)}
+  .paperbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .exgoal{padding:10px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--surface);display:grid;gap:6px}
   .exgoal .t{font-weight:600}.exgoal .dots{display:flex;gap:6px;flex-wrap:wrap}
   .exgoal .dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.8rem;font-weight:700}
@@ -483,7 +484,6 @@
       <input type="text" id="title" aria-label="Titel des Stücks" value="">
       <button class="btn small" id="btn-save" type="button">Speichern</button>
       <button class="btn small" id="btn-export" type="button">Als Datei sichern</button>
-      <button class="btn small primary" id="btn-pult" type="button">Vollbild-Pult</button>
     </div>
     <div class="seg" id="seg" role="group" aria-label="Übungsart">
       <button class="btn" type="button" data-m="listen" aria-pressed="true">Zuhören</button>
@@ -501,6 +501,7 @@
       <p class="small muted">Erste Lage. „tief“ heißt: Finger dicht an den vorigen. „hoch“: etwas weiter oben. Klebe kleine Markierungen auf das Griffbrett, bis die Finger sitzen.</p>
     </details>
 
+    <div class="paperbar"><button class="btn primary" id="btn-pult" type="button">⛶ Vollbild-Pult</button><span class="small muted">Notenblatt füllt den ganzen Schirm</span></div>
     <div class="paper" id="paper"><div id="stage"><div id="osmd"></div><div id="overlay"><div id="marks"></div><div id="cursor" hidden></div><div id="livebub" class="livebub" hidden></div><div class="flag" id="flagA" hidden>A</div><div class="flag" id="flagB" hidden>B</div></div></div></div>
     <p class="hint">Tippe auf eine Stelle im Notenblatt, um dort zu starten. Mit A und B legst du eine Übe-Schleife fest. Leertaste startet und pausiert. Mit „Vollbild-Pult“ füllt das Notenblatt den Schirm.</p>
 
@@ -650,11 +651,11 @@ function matchExp(exp,mf,tol,oct){
   return best;
 }
 function gateOf(sens){return 0.03*Math.pow(0.02,sens/100)}
-function newWait(){return {hold:0,wrong:0,wrongFlag:false,armed:true,gap:0,peak:0,lastT:0}}
+function newWait(){return {seen:false,hold:0,wrong:0,wrongFlag:false,armed:true,gap:0,peak:0,lastT:0}}
 function waitReset(w,prevExp,nextExp,now){
   var same=false,i;
   for(i=0;i<prevExp.length;i++)if(nextExp.indexOf(prevExp[i])>=0)same=true;
-  w.hold=0;w.wrong=0;w.wrongFlag=false;w.gap=0;w.peak=0;w.lastT=now;w.armed=!same;
+  w.hold=0;w.seen=false;w.wrong=0;w.wrongFlag=false;w.gap=0;w.peak=0;w.lastT=now;w.armed=!same;
 }
 /* Ein Schritt im Warte-Modus. Gibt 'advance' zurück, wenn der Soll-Ton lange genug gehalten wurde. */
 function waitStep(w,det,now,exp,cfg){
@@ -666,8 +667,8 @@ function waitStep(w,det,now,exp,cfg){
     if(w.gap>=40){w.armed=true;w.hold=0}
     return null;
   }
-  if(m!==null){w.hold+=dt;w.wrong=0}
-  else if(det.valid){w.wrong+=dt;w.hold=Math.max(0,w.hold-dt);if(w.wrong>=cfg.wrongMs)w.wrongFlag=true}
+  if(m!==null){w.hold+=dt;w.wrong=0;w.seen=true}
+  else if(det.valid){w.wrong+=dt;w.hold=Math.max(0,w.hold-dt);if(w.wrong>=cfg.wrongMs&&!w.seen)w.wrongFlag=true}
   else{w.hold=Math.max(0,w.hold-dt*0.5);w.wrong=0}
   return w.hold>=cfg.holdMs?'advance':null;
 }
@@ -1612,7 +1613,7 @@ function finalizeEvent(e){
   if(!e||e.fin||!e.exp.length)return;
   e.fin=true;
   if(e.fr<2){e.res=null;return}
-  e.res=(e.ok/e.fr>=0.35)?'hit':'miss';
+  e.res=(e.ok/e.fr>=0.25)?'hit':'miss';
   S.stat.total++;
   if(e.res==='hit'){S.stat.hit++;S.stat.cs+=e.cs;S.stat.csn+=e.csn;S.stat.sc+=e.sc;e.dev=devClass(e.sc,e.csn,12)}
   mark(e);updateScoreUi();
@@ -1687,7 +1688,7 @@ function startWait(){
 }
 function waitFrame(det,now){
   var ev=S.events[S.waitIdx];if(!ev)return;
-  var r=waitStep(S.w,det,now,ev.exp,{tol:CFG.tol,oct:CFG.oct,holdMs:120,wrongMs:160});
+  var r=waitStep(S.w,det,now,ev.exp,{tol:CFG.tol,oct:CFG.oct,holdMs:120,wrongMs:450});
   if(r!=='advance')return;
   ev.wrong=S.w.wrongFlag;ev.res=ev.wrong?'retry':'hit';ev.fin=true;mark(ev);if(typeof pnRecord==='function')pnRecord(ev);
   S.stat.n++;if(!ev.wrong)S.stat.first++;
@@ -2397,6 +2398,9 @@ var LESSONS=[
   th:'<p>Die Länge einer Note zeigt ihr Aussehen. Wir zählen in <b>Vierteln</b>:</p><ul><li>Ganze Note: 4 Zählzeiten</li><li>Halbe Note: 2</li><li>Viertelnote: 1</li><li>Achtelnote: ½ (zwei Achtel pro Zählzeit, „1 und 2 und“)</li></ul><p>Die <b>Taktart 4/4</b> bedeutet: vier Viertel pro Takt. Senkrechte Taktstriche trennen die Takte.</p><p>Pausen haben dieselben Längen wie Noten, nur ohne Ton.</p>',
   gens:['dur','dur','dur'],st:[mk('Was bedeutet die 4/4 am Anfang?','Vier Viertel pro Takt',['Vier Takte pro Zeile','Vier Achtel pro Takt','Vier Töne pro Saite'],'Oben steht die Anzahl, unten die Notenart: vier Viertel.')],
   ex:{gen:'rhythm',preset:'viertel'}},
+ {id:'dur-bauplan',t:'Dur-Tonleiter: der Bauplan',d:'Ganz- und Halbtonschritte verstehen',
+  th:'<p>Eine <b>Tonleiter</b> ist eine Treppe aus acht Tönen. Zwischen den Stufen gibt es zwei Schrittgrößen: den <b>Halbtonschritt</b> (kleinster Abstand, ein Fingerbreit auf dem Griffbrett) und den <b>Ganztonschritt</b> (zwei Halbtöne).</p><p>Jede <b>Dur-Tonleiter</b> folgt demselben Bauplan, egal wo sie beginnt:</p><p><b>Ganz – Ganz – Halb – Ganz – Ganz – Ganz – Halb</b></p><p>Beispiel C-Dur: C–D (ganz), D–E (ganz), E–F (halb), F–G, G–A, A–H (je ganz), H–C (halb). Deshalb braucht C-Dur keine Vorzeichen. Beginnst du auf einem anderen Ton, müssen ♯ oder ♭ die Schritte zurechtrücken. Das erklärt, warum D-Dur zwei Kreuze hat.</p><h4>Auf der Geige</h4><ul><li>Ein Halbtonschritt heißt: Finger dicht aneinander.</li><li>Ein Ganztonschritt heißt: eine Fingerbreite Platz dazwischen.</li><li>Spiele langsam und achte darauf, dass die beiden Halbtonstellen (3→4 und 7→8) eng liegen.</li></ul>',
+  gens:['sig','note','iv'],st:[mk('Wie lautet der Bauplan einer Dur-Tonleiter?','Ganz-Ganz-Halb-Ganz-Ganz-Ganz-Halb',['Ganz-Halb-Ganz-Ganz-Halb-Ganz-Ganz','Halb-Ganz-Ganz-Halb-Ganz-Ganz-Ganz','Ganz-Ganz-Ganz-Halb-Ganz-Ganz-Halb'],'Die Halbtonschritte liegen zwischen Stufe 3 und 4 sowie 7 und 8.'),mk('Wie viele Halbtöne hat ein Ganzton?','Zwei',['Einen','Drei','Vier'],'Ein Ganzton besteht aus zwei Halbtönen.'),mk('Zwischen welchen Stufen liegen in Dur die Halbtonschritte?','3–4 und 7–8',['2–3 und 6–7','1–2 und 5–6','4–5 und 7–8'],'Merke: Halbton bei 3–4 und 7–8.')],ex:{gen:'scale',key:'C',octaves:1,bpm:60}},
  {id:'dur-d',t:'D-Dur',d:'Deine erste Tonleiter, zwei Kreuze',
   th:'<p>Eine Dur-Tonleiter folgt dem Muster <b>Ganz – Ganz – Halb – Ganz – Ganz – Ganz – Halb</b>.</p><p>D-Dur hat zwei Vorzeichen: <b>F♯ und C♯</b>. Du spielst D, E, F♯, G, A, H, C♯, D.</p><p>Auf der Geige liegen die Töne einer Tonleiter pro Saite oft in derselben Fingerstellung. Ein Kreuz (♯) macht den Ton einen Halbton höher und gilt für alle Töne dieses Namens im Takt.</p>',
   gens:['sig','noteAcc','note'],st:[],ex:{gen:'scale',key:'D',octaves:1,bpm:60}},
@@ -2406,18 +2410,34 @@ var LESSONS=[
  {id:'dur-g',t:'G-Dur',d:'Ein Kreuz, die tiefe Lage',
   th:'<p>G-Dur hat nur ein Vorzeichen: <b>F♯</b>. Tonleiter: G, A, H, C, D, E, F♯, G.</p><p>Sie beginnt auf der tiefsten Saite. Achte auf einen gleichmäßigen Bogen beim Saitenwechsel.</p>',
   gens:['sig','note'],st:[],ex:{gen:'scale',key:'G',octaves:1,bpm:60}},
+ {id:'lagen1',t:'Lagen: die erste Lage',d:'Wo deine linke Hand auf dem Griffbrett sitzt',
+  th:'<p>Eine <b>Lage</b> (englisch: Position) ist die Stelle auf dem Griffbrett, an der deine linke Hand sitzt. Die Finger liegen dort nebeneinander, jeder in seiner festen Reihenfolge der Töne. Wandert die Hand ein Stück Richtung Geigenkörper, sind das höhere Lagen.</p><h4>Die erste Lage</h4><p>In der <b>ersten Lage</b> sitzt der Zeigefinger (1. Finger) einen Ganzton über der leeren Saite und die Hand ist nah am Wirbelkasten. Dort spielst du alle Anfänger-Stücke.</p><ul><li>G-Saite: G (leer), A, H, C, D (4. Finger)</li><li>D-Saite: D (leer), E, F♯, G, A (4. Finger)</li><li>A-Saite: A (leer), H, C♯, D, E (4. Finger)</li><li>E-Saite: E (leer), F♯, G♯, A, H (4. Finger)</li></ul><p>Der <b>4. Finger</b> trifft in der ersten Lage denselben Ton wie die nächste leere Saite. Daran kannst du deine Stimmung prüfen.</p><p>Tipp: Daumen locker an der Halskehle, Handgelenk gerade, Finger rund. Das Griffbrett unten im Pult zeigt dir die erste Lage.</p>',
+  gens:['note','note','noteAcc'],st:[mk('Was ist eine Lage?','Die Stelle der linken Hand auf dem Griffbrett',['Die Haltung des Bogens','Eine Saite der Geige','Die Lautstärke'],'Eine Lage beschreibt, wo die linke Hand am Hals sitzt.'),mk('Welchen Ton trifft der 4. Finger auf der D-Saite in der ersten Lage?','A',['G','E','H'],'Er trifft die nächste leere Saite, die A-Saite.'),mk('Wo sitzt der Zeigefinger in der ersten Lage?','Einen Ganzton über der leeren Saite',['Auf der leeren Saite','Eine Quarte darüber','Direkt am Steg'],'Erste Lage: 1. Finger = Ganzton über der leeren Saite (z. B. H auf der A-Saite).')],ex:{gen:'scale',key:'G',octaves:1,bpm:60}},
  {id:'intervalle',t:'Intervalle',d:'Der Abstand zwischen zwei Tönen',
   th:'<p>Ein <b>Intervall</b> ist der Abstand zweier Töne. Gezählt wird mit dem Anfangston als 1:</p><p>C–D Sekunde, C–E Terz, C–F Quarte, C–G Quinte, C–A Sexte, C–H Septime, C–C Oktave.</p><p>Auf der Geige sind Quinten besonders wichtig: Zwei benachbarte Leersaiten bilden eine reine Quinte. Wenn sie sauber klingen, schwingt es richtig.</p>',
   gens:['iv','iv','iv'],st:[mk('Wie viele Töne umfasst eine Quinte (Anfangston mitgezählt)?','Fünf',['Vier','Sechs','Drei'],'Quinte kommt von lateinisch „quintus“, der fünfte.')],ex:{gen:'intervals',key:'G',interval:3}},
+
  {id:'dreiklang',t:'Dreiklänge',d:'Grundton, Terz, Quinte',
   th:'<p>Ein <b>Dreiklang</b> besteht aus Grundton, Terz und Quinte. Beim D-Dur-Dreiklang: D, F♯, A.</p><p>Die Terz entscheidet über Dur oder Moll: Eine <b>große Terz</b> (4 Halbtöne) klingt hell, eine <b>kleine Terz</b> (3 Halbtöne) dunkel.</p><p>Gebrochene Dreiklänge nennt man <b>Arpeggio</b>.</p>',
   gens:['triad','triad','sig'],st:[],ex:{gen:'arpeggio',key:'D',octaves:1,bpm:60}},
+ {id:'moll-bauplan',t:'Moll-Tonleiter: Bauplan und Parallele',d:'Warum Moll anders klingt, e-Moll spielen',
+  th:'<p>Die <b>natürliche Moll-Tonleiter</b> hat den Bauplan <b>Ganz – Halb – Ganz – Ganz – Halb – Ganz – Ganz</b>. Der Halbtonschritt liegt schon zwischen Stufe 2 und 3. Dadurch ist die <b>Terz klein</b>, und das macht den dunklen Klang.</p><h4>Parallele Tonarten</h4><p>Jede Dur-Tonart hat eine Moll-Schwester mit denselben Vorzeichen, die <b>Parallele</b>. Sie beginnt auf der <b>sechsten Stufe</b> der Dur-Tonleiter, oder anders gesagt: eine kleine Terz (drei Halbtöne) unter dem Dur-Grundton.</p><ul><li>C-Dur ↔ a-Moll (keine Vorzeichen)</li><li>G-Dur ↔ e-Moll (F♯)</li><li>D-Dur ↔ h-Moll (F♯, C♯)</li><li>F-Dur ↔ d-Moll (B)</li></ul><p>e-Moll beginnt auf der leeren E-Saite. Dort klingt der Grundton besonders offen.</p>',
+  gens:['sig','triad','note'],st:[mk('Wo liegt in natürlichem Moll der erste Halbtonschritt?','Zwischen Stufe 2 und 3',['Zwischen Stufe 3 und 4','Zwischen Stufe 1 und 2','Zwischen Stufe 4 und 5'],'Ganz-Halb-Ganz-Ganz-Halb-Ganz-Ganz.'),mk('Welche ist die Parallele zu G-Dur?','e-Moll',['g-Moll','a-Moll','d-Moll'],'Sechste Stufe von G-Dur ist E.'),mk('Welche Terz hat Moll?','Eine kleine Terz',['Eine große Terz','Eine Quarte','Keine'],'Die kleine Terz (drei Halbtöne) macht den Moll-Klang.')],ex:{gen:'scale',key:'e',form:'natural',octaves:1,bpm:60}},
  {id:'moll',t:'Moll-Tonleitern',d:'a-Moll in drei Formen',
   th:'<p>Moll klingt dunkler, weil der dritte Ton tiefer liegt. a-Moll hat keine Vorzeichen und ist die „Parallele“ zu C-Dur.</p><ul><li><b>Natürlich</b>: A H C D E F G A</li><li><b>Harmonisch</b>: die siebte Stufe wird erhöht (G♯)</li><li><b>Melodisch</b>: aufwärts sechste und siebte Stufe erhöht (F♯, G♯), abwärts wie natürlich</li></ul>',
   gens:['triad','dir','note'],st:[mk('Wie viele Vorzeichen hat a-Moll?','Keine',['Ein ♯','Ein ♭','Drei ♯'],'a-Moll teilt sich die Vorzeichen mit C-Dur, also keine.')],ex:{gen:'scale',key:'a',form:'harmonic',octaves:1,bpm:60}},
+ {id:'moll-d',t:'d-Moll und h-Moll',d:'Zwei weitere Moll-Tonleitern auf der Geige',
+  th:'<p>d-Moll hat ein <b>B</b> als Vorzeichen (Töne: D E F G A B C D) und ist die Parallele zu F-Dur. Auf der Geige beginnt sie auf der leeren D-Saite, das B spielst du auf der A-Saite mit tiefem 1. Finger.</p><p>h-Moll hat <b>F♯ und C♯</b> und ist die Parallele zu D-Dur. Sie ist bei Folk und Barock sehr beliebt.</p><p>Spiele jede Tonleiter zuerst <b>natürlich</b>, dann <b>harmonisch</b> (siebte Stufe erhöht, hier C♯ in d-Moll). Hör auf den Unterschied: Der Abstand zwischen Stufe 6 und 7 klingt in der harmonischen Form fremd und spannend.</p>',
+  gens:['sig','triad','dir'],st:[mk('Welches Vorzeichen hat d-Moll?','Ein ♭ (B)',['Ein ♯','Zwei ♯','Kein Vorzeichen'],'d-Moll ist die Parallele zu F-Dur: ein B.'),mk('Welche Parallele hat D-Dur?','h-Moll',['d-Moll','e-Moll','a-Moll'],'Sechste Stufe von D-Dur ist H.'),mk('Was ändert sich in der harmonischen Form?','Die siebte Stufe wird erhöht',['Die dritte Stufe wird erhöht','Die Quinte fällt weg','Alles klingt eine Oktave höher'],'Harmonisch heißt: erhöhte siebte Stufe.')],ex:{gen:'scale',key:'d',form:'natural',octaves:1,bpm:60}},
  {id:'tonarten',t:'Vorzeichen und Tonarten',d:'Quintenzirkel in Kürze',
   th:'<p>Jede Tonart hat feste Vorzeichen am Zeilenanfang. Von C aus eine Quinte aufwärts kommt jeweils ein ♯ dazu: G (1), D (2), A (3), E (4).</p><p>Die Reihenfolge der Kreuze: <b>F – C – G – D – A – E – H</b>. Abwärts kommen ♭ dazu: F (1), B (2), Es (3).</p><p>Die Reihenfolge der Bs ist die umgekehrte: <b>H – E – A – D – G – C – F</b>.</p>',
   gens:['sig','sig','sig'],st:[mk('Welches Kreuz kommt als erstes dazu?','F♯',['C♯','G♯','H♯'],'Die Reihenfolge beginnt F, C, G, D …')],ex:{gen:'scale',key:'E',octaves:1,bpm:55}},
+ {id:'lagen2',t:'Lagen: die dritte Lage',d:'Höher hinauf, Lagenwechsel mit Gleitfinger',
+  th:'<p>In der <b>dritten Lage</b> springt die Hand ein Stück am Hals nach oben. Dein 1. Finger sitzt dann dort, wo in der ersten Lage der 3. Finger saß. Auf der A-Saite also auf dem D, der 1. Finger spielt D, der 2. E, der 3. F♯, der 4. G.</p><p>Warum Lagen? Mit der ersten Lage kommst du auf der E-Saite nur bis H. Mit höheren Lagen spielst du alle Töne bis zu den höchsten der Geige. Außerdem klingen gleiche Töne auf verschiedenen Saiten unterschiedlich.</p><h4>Lagenwechsel</h4><ul><li>Beim Wechsel <b>gleitet</b> der Finger, der den letzten Ton gespielt hat, die Saite entlang nach oben (Gleitfinger). Erst am Ziel kommt der neue Finger.</li><li>Der Daumen wandert mit und bleibt locker.</li><li>Lass die Hand beim Gleiten fast ohne Druck, damit es nicht kratzt.</li><li>Übe zuerst langsam: Ton, Gleiten, Ton.</li></ul><p>Die Griffbrett-Anzeige im Pult kennt nur die erste Lage. Für höhere Töne musst du auf Hand und Gehör achten.</p>',
+  gens:['note','noteAcc','dir'],st:[mk('Welcher Finger sitzt in der dritten Lage dort, wo vorher der 3. Finger saß?','Der 1. Finger',['Der 4. Finger','Der Daumen','Der 2. Finger'],'In der dritten Lage übernimmt der 1. Finger die Position des früheren 3. Fingers.'),mk('Was ist ein Gleitfinger?','Der Finger, der beim Lagenwechsel die Saite entlang rutscht',['Ein Finger, der nicht benutzt wird','Der Finger am Bogen','Ein Finger, der zwei Saiten greift'],'Der Gleitfinger verbindet die alte mit der neuen Lage.'),mk('Wie bleibt der Lagenwechsel sauber?','Wenig Druck beim Gleiten',['Fester drücken','Bogen wechseln','Schneller streichen'],'Wenig Druck, dann kratzt nichts.')],goal:2,ex:{gen:'scale',key:'D',octaves:2,bpm:50}},
+ {id:'lagen3',t:'Lagen: Tonleitern über zwei Oktaven',d:'Erste und dritte Lage verbinden',
+  th:'<p>Zwei Oktaven brauchen mehr Platz als die erste Lage bietet. So gehst du vor:</p><ul><li>Beginne in der ersten Lage und spiele Saite für Saite hinauf.</li><li>Auf der A- oder E-Saite wechselst du in die dritte Lage, am besten dort, wo ein Halbtonschritt liegt.</li><li>Wechsle auf einem <b>Gleitfinger-Schritt</b>: Du rutschst auf dem Ton, den du schon spielst, in die höhere Lage.</li></ul><p>D-Dur über zwei Oktaven (D4 bis D6): Die erste Oktave und die ersten Töne der zweiten liegen in der ersten Lage, bis zum H auf der E-Saite (4. Finger). Die höchsten Töne C♯ und D spielst du auf der E-Saite in der dritten Lage. Spiele die Tonleiter hinauf und wieder herunter. Hör auf gleichmäßigen Klang und saubere Intonation.</p><p>Wichtig: Langsam üben. Lieber ein Tempo, in dem du die Wechsel hörst und kontrollierst.</p>',
+  gens:['sig','note','dir'],st:[mk('Wie viele Oktaven hat eine Zwei-Oktaven-Tonleiter?','Zwei',['Eine','Drei','Vier'],'Zwei Oktaven bedeuten sechzehn Töne mit Wiederholung des Grundtons.'),mk('Wo ist ein guter Moment für den Lagenwechsel?','Auf einem Ton, den du schon spielst',['Mitten im Ton ohne Gleiten','Nur bei leeren Saiten','Nie'],'Du gleitest mit dem Finger, der den Ton schon hält.'),mk('Wie übst du Lagenwechsel am besten?','Langsam und hörbar',['So schnell wie möglich','Ohne Bogen','Nur im Kopf'],'Langsam, damit die Wechsel sauber sitzen.')],goal:2,ex:{gen:'scale',key:'D',octaves:2,rhythm:'e',bpm:50}},
  {id:'stricharten',t:'Bogen und Stricharten',d:'Abstrich, Aufstrich, Legato',
   th:'<p><b>Abstrich</b> (Zeichen ⊓): vom Frosch zur Spitze. <b>Aufstrich</b> (Zeichen ∨): von der Spitze zum Frosch.</p><ul><li><b>Détaché</b>: jeder Ton bekommt einen eigenen Strich, ohne Pause.</li><li><b>Legato</b>: mehrere Töne unter einem Bogen, durch einen Bindebogen markiert.</li><li><b>Staccato</b>: kurze, abgesetzte Töne, Punkt über der Note.</li></ul><p>Der Bogen liegt etwa in der Mitte zwischen Steg und Griffbrett, parallel zum Steg.</p>',
   gens:['dur','note'],st:[mk('Was zeigt ein Bindebogen an?','Mehrere Töne in einem Strich',['Eine Pause','Lauter spielen','Den Ton wiederholen'],'Legato heißt gebunden: ein Strich, mehrere Töne.'),mk('Wo beginnt ein Abstrich?','Am Frosch',['An der Spitze','In der Mitte','Am Steg'],'Der Abstrich läuft vom Frosch zur Spitze.')],ex:{gen:'open',kind:'q'}},

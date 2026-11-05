@@ -12,9 +12,17 @@ Jede Person hat ein eigenes Profil mit eigenem Fortschritt, eigenen Stücken und
 - **„Takt üben“:** Ein Knopf legt eine Schleife über den aktuellen und den nächsten Takt und startet den Tempo-Trainer bei 60 %.
 - **Pads und Regler frei belegbar** (MIDI-Karte): Funktion wählen, „Zuweisen“, Pad drücken. Ein Drehregler kann das Tempo steuern. Ob die Vorgabe zu deinem Akai passt, siehst du an der „Letzten Meldung“.
 - **Stücke:** Stille Nacht liegt jetzt klar gekennzeichnet als Urfassung von 1818 vor. Mit „Stimmt?“ markierst du Stücke, die du gegengehört hast. Eigene Noten (Foto) bleiben der sichere Weg für die Fassung, die ihr zuhause singt.
-- **Neue Lektionen:** Metal-Galopp, Tritonus-Riff, Jig, Reel, Weihnachtslied (jetzt 21).
+- **Neue Lektionen:** Metal-Galopp, Tritonus-Riff, Jig, Reel, Weihnachtslied (jetzt 27).
 - **Xylophon** (Theorie, Entdecker): Farbige Klangstäbe, freies Spiel und vier Lieder zum Nachspielen für die Zwillinge.
 - **Adventskalender** auf der Startseite vom 1. bis 24. Dezember. Zum Ausprobieren: `index.html?advent=12` anhängen.
+
+## Neu: Lektionen zu Tonleitern und Lagen
+- **Dur- und Moll-Bauplan:** „Dur-Tonleiter: der Bauplan“ (Ganz-/Halbtonschritte, C-Dur), „Moll-Tonleiter: Bauplan und Parallele“ (e-Moll) und „d-Moll und h-Moll“.
+- **Lagen:** „die erste Lage“ (G-Dur), „die dritte Lage“ (D-Dur über zwei Oktaven, Gleitfinger) und „Tonleitern über zwei Oktaven“ (in Achteln).
+- **Vollbild-Pult:** Der Knopf sitzt jetzt direkt über dem Notenblatt.
+
+## Neu: faireres Bewerten beim langsamen Spielen
+Im Modus „Warten auf mich“ gilt ein Ton nur noch als Fehlversuch, wenn du dauerhaft (über eine halbe Sekunde) daneben liegst und den Ton noch nicht getroffen hattest. Das Suchen und Reinrutschen beim langsamen Spielen zählt nicht mehr dagegen. Beim Mitspielen reicht jetzt ein Viertel der Zeit auf dem richtigen Ton.
 
 ## Neu: Lektionen mit Ziel, Vollbild-Pult repariert
 - **Ziel pro Übung:** Jede Lektions-Übung zeigt jetzt „Aufgabe: … 1 2 3“. Ein Durchgang zählt, wenn mindestens die Hälfte der Töne gleich beim ersten Mal richtig ist. Nach 3 gezählten Durchgängen ist die Lektion geschafft, dann erscheint der Knopf „Nächste Lektion“. Das Quiz ist freiwillig.
