@@ -651,15 +651,15 @@ function matchExp(exp,mf,tol,oct){
   return best;
 }
 function gateOf(sens){return 0.03*Math.pow(0.02,sens/100)}
-function newWait(){return {seen:false,hold:0,wrong:0,wrongFlag:false,armed:true,gap:0,peak:0,lastT:0}}
+function newWait(){return {prev:[],age:0,seen:false,hold:0,wrong:0,wrongFlag:false,armed:true,gap:0,peak:0,lastT:0}}
 function waitReset(w,prevExp,nextExp,now){
   var same=false,i;
   for(i=0;i<prevExp.length;i++)if(nextExp.indexOf(prevExp[i])>=0)same=true;
-  w.hold=0;w.seen=false;w.wrong=0;w.wrongFlag=false;w.gap=0;w.peak=0;w.lastT=now;w.armed=!same;
+  w.prev=prevExp||[];w.age=0;w.hold=0;w.seen=false;w.wrong=0;w.wrongFlag=false;w.gap=0;w.peak=0;w.lastT=now;w.armed=!same;
 }
 /* Ein Schritt im Warte-Modus. Gibt 'advance' zurück, wenn der Soll-Ton lange genug gehalten wurde. */
 function waitStep(w,det,now,exp,cfg){
-  var dt=now-w.lastT;if(dt<0)dt=0;if(dt>100)dt=100;w.lastT=now;
+  var dt=now-w.lastT;if(dt<0)dt=0;if(dt>100)dt=100;w.lastT=now;w.age+=dt;
   var m=det.valid?matchExp(exp,det.midiF,cfg.tol,cfg.oct):null;
   if(!w.armed){
     if(det.level>w.peak)w.peak=det.level;
@@ -668,6 +668,7 @@ function waitStep(w,det,now,exp,cfg){
     return null;
   }
   if(m!==null){w.hold+=dt;w.wrong=0;w.seen=true}
+  else if(det.valid&&(w.age<300||(w.prev.length&&matchExp(w.prev,det.midiF,cfg.tol,cfg.oct)!==null))){w.hold=Math.max(0,w.hold-dt);w.wrong=0}
   else if(det.valid){w.wrong+=dt;w.hold=Math.max(0,w.hold-dt);if(w.wrong>=cfg.wrongMs&&!w.seen)w.wrongFlag=true}
   else{w.hold=Math.max(0,w.hold-dt*0.5);w.wrong=0}
   return w.hold>=cfg.holdMs?'advance':null;

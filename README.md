@@ -22,7 +22,7 @@ Jede Person hat ein eigenes Profil mit eigenem Fortschritt, eigenen Stücken und
 - **Vollbild-Pult:** Der Knopf sitzt jetzt direkt über dem Notenblatt.
 
 ## Neu: faireres Bewerten beim langsamen Spielen
-Im Modus „Warten auf mich“ gilt ein Ton nur noch als Fehlversuch, wenn du dauerhaft (über eine halbe Sekunde) daneben liegst und den Ton noch nicht getroffen hattest. Das Suchen und Reinrutschen beim langsamen Spielen zählt nicht mehr dagegen. Beim Mitspielen reicht jetzt ein Viertel der Zeit auf dem richtigen Ton.
+Der Nachklang des vorigen Tons und die ersten 0,3 Sekunden nach einem Tonwechsel zählen nicht mehr als Fehler (vorher waren die ersten Töne nach einem Saitenwechsel oft orange). Im Modus „Warten auf mich“ gilt ein Ton nur noch als Fehlversuch, wenn du dauerhaft (über eine halbe Sekunde) daneben liegst und den Ton noch nicht getroffen hattest. Das Suchen und Reinrutschen beim langsamen Spielen zählt nicht mehr dagegen. Beim Mitspielen reicht jetzt ein Viertel der Zeit auf dem richtigen Ton.
 
 ## Neu: Lektionen mit Ziel, Vollbild-Pult repariert
 - **Ziel pro Übung:** Jede Lektions-Übung zeigt jetzt „Aufgabe: … 1 2 3“. Ein Durchgang zählt, wenn mindestens die Hälfte der Töne gleich beim ersten Mal richtig ist. Nach 3 gezählten Durchgängen ist die Lektion geschafft, dann erscheint der Knopf „Nächste Lektion“. Das Quiz ist freiwillig.
