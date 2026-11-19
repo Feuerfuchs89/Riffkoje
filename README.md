@@ -16,6 +16,15 @@ Jede Person hat ein eigenes Profil mit eigenem Fortschritt, eigenen Stücken und
 - **Xylophon** (Theorie, Entdecker): Farbige Klangstäbe, freies Spiel und vier Lieder zum Nachspielen für die Zwillinge.
 - **Adventskalender** auf der Startseite vom 1. bis 24. Dezember. Zum Ausprobieren: `index.html?advent=12` anhängen.
 
+## Neu: Noten lernen (Geige)
+Neue Seite `noten.html` (Geige → „Noten lernen“, auch als Kachel auf der Startseite). Sie stammt aus deinem Notenlern-Programm und ist jetzt Teil der App:
+- **Üben:** Eine Note erscheint im Notensystem, du findest sie auf dem Griffbrett (Klick) oder spielst sie auf der Geige (Mikrofon).
+- **Entdecken:** Tippe auf das Griffbrett und sieh Note und Notenname. **Tonleitern:** zwölf Tonleitern, vorspielen oder selbst spielen.
+- **Lagen:** erste bis dritte Lage; Saiten und Schreibweise (♯ oder ♭) wählbar.
+- **Mikrofon:** Es nutzt dieselbe Erkennung und dieselben Einstellungen wie die übrige App (Eingang, Empfindlichkeit, Kammerton). Es zeigt, welche Quelle benutzt wird, und ob du zu hoch oder zu tief bist. „Oktavfehler erlauben“ ist standardmäßig an, weil Mikrofone bei Geigentönen manchmal eine Oktave daneben liegen. Fehlt die Freigabe (z. B. in einer Vorschau), steht eine verständliche Meldung dort.
+- Treffer, Serie und Übetage werden pro Profil gespeichert und mit dem Geräte-Abgleich synchronisiert.
+- Das Notensystem mit Hinweis und Mikrofon-Anzeige bleibt beim Scrollen oben stehen, damit du Note und Griffbrett gleichzeitig siehst.
+
 ## Neu: Lektionen zu Tonleitern und Lagen
 - **Dur- und Moll-Bauplan:** „Dur-Tonleiter: der Bauplan“ (Ganz-/Halbtonschritte, C-Dur), „Moll-Tonleiter: Bauplan und Parallele“ (e-Moll) und „d-Moll und h-Moll“.
 - **Lagen:** „die erste Lage“ (G-Dur), „die dritte Lage“ (D-Dur über zwei Oktaven, Gleitfinger) und „Tonleitern über zwei Oktaven“ (in Achteln).
@@ -44,6 +53,13 @@ Alle Bereiche und die Navigationsleiste nutzen jetzt die Farben der Praxis-App: 
 - **Zusammenführen statt überschreiben:** Zahlen: größerer Wert, Bestzeiten: kleinerer Wert, Tage, Sterne, Lektionen und Listen: Vereinigung. Nichts geht verloren, aber ein „Als offen markieren“ kann durch den anderen Stand zurückkommen.
 - **Freunde:** Jede Person nutzt ihre eigene Sync-Datei. Profile werden über eine zufällige Kennung erkannt, notfalls über den Namen.
 - Nicht enthalten: Gemini-Schlüssel, Pad-Belegung und Riffkoje-Aufnahmen.
+
+## Einheitliche Optik, Wischen, 10-Minuten-Plan, Schwächen (Stand v18)
+- Alle Seiten haben jetzt dieselbe Schrift (Systemschrift), dieselben Überschriften mit Symbol, gleiche Kartenrundung (14 px) und gleiche Knopfformen (10 px). Die Geigenpult-Seite lädt keine Google-Schriften mehr, sie funktioniert also auch offline gleich.
+- Geigenpult, Vollbild-Pult: mit dem Finger nach links wischen = nächste Seite, nach rechts = zurück. Kurze oder schräge Wischer zählen nicht, damit Tippen auf eine Note weiter funktioniert.
+- Tagesplan: neuer Knopf „⏱ 10-Minuten-Plan“ (Aufwärmen, Tonleiter oder neue Lektion, Noten lernen, ein Stück). Der normale Plan enthält jetzt auch „Noten lernen: schwache Töne“, das die Seite „Noten lernen“ öffnet.
+- Noten lernen merkt sich pro Ton Treffer und Fehler. Fehler verblassen mit jedem Treffer. Schwache Töne werden öfter gefragt (abschaltbar mit „Schwache Töne öfter fragen“). Im Griffbrett zeigen Ringe, was wackelt (rot), fast sitzt (gelb) und sitzt (grün). Unter dem Griffbrett steht die Liste „Deine Schwächen“ mit Zurücksetzen. Bei Mikrofon-Übungen zählt ein Ton, der länger als 12 Sekunden dauert, als halber Fehler.
+- Fehler behoben: Ab dem 15. November stürzte das Geigenpult beim ersten Öffnen eines neuen Tages ab, weil der Tagesplan die Liederliste noch nicht kannte. Der Plan wird jetzt erst nach der Liederliste aufgebaut.
 
 ## Aufgeräumt
 - Leiste oben: Start, Geige, Riff, **Gitarre** (Akkorde und Tabulatur mit eigener Unterleiste), Whistle, Theorie. Passt auf dem Handy in eine Zeile.

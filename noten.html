@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B1520">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Noten lernen</title>
+<script src="shared.js"></script>
+<style>
+:root{--bg:#F5F1EA;--card:#fff;--ink:#14283B;--muted:#4D5F70;--line:#DDD5C8;--acc:#17466E;--on:#fff;--ok:#3F5F45;--bad:#A3352B;--star:#f2a93b}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0F1A24;--card:#172633;--ink:#E7EDF2;--muted:#A3B3C2;--line:#2B3D4E;--acc:#8CBBEA;--on:#0B1520;--ok:#86B08D;--bad:#E08A80;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0F1A24;--card:#172633;--ink:#E7EDF2;--muted:#A3B3C2;--line:#2B3D4E;--acc:#8CBBEA;--on:#0B1520;--ok:#86B08D;--bad:#E08A80;color-scheme:dark}
+:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:620px;margin:0 auto;padding:16px 16px 80px;display:grid;gap:14px}
+h1{font-size:1.6rem;margin:4px 0 0}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 10px 6px;display:grid;gap:8px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn,.chip{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;min-height:44px;cursor:pointer}
+.btn.primary{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+.btn[aria-pressed=true],.chip[aria-pressed=true]{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.btn:focus-visible,.chip:focus-visible,select:focus-visible,input:focus-visible,.cell:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+select{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px;max-width:100%}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stats{display:flex;gap:18px;flex-wrap:wrap}.stats b{font-size:1.4rem;display:block;line-height:1.1}.stats span{font-size:.8rem;color:var(--muted)}
+svg.staff{display:block;width:100%;height:auto;color:var(--ink)}
+#msg{min-height:3em;font-size:1.05rem;margin:0 2px}
+#msg.ok{color:var(--ok)}#msg.bad{color:var(--bad)}
+.stick{position:sticky;top:0;z-index:20;background:var(--bg);padding:6px 0 4px;margin:0 -16px;padding-left:16px;padding-right:16px;display:grid;gap:6px;border-bottom:1px solid var(--line);box-shadow:0 4px 8px -6px rgba(0,0,0,.35)}
+.stick .card{padding:4px 8px}
+svg.staff{max-height:22vh;margin:0 auto}
+.stick #msg{min-height:1.6em;margin:0}
+.stick #m-live{display:grid;gap:4px}
+.stick .score{margin:0}
+.score{color:var(--muted);font-size:.9rem;margin:0 2px}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:.78rem;color:var(--muted)}
+.pill.ok{border-color:var(--ok);color:var(--ok)}
+.group p{margin:0 0 6px;color:var(--muted);font-size:.9rem}
+.group>div{display:flex;gap:6px;flex-wrap:wrap}
+.board{background:#221E1C;border-radius:10px 10px 18px 18px;padding:8px 8px 10px;display:grid;grid-template-columns:78px repeat(4,1fr);color:#EDE6D8}
+.board .h{text-align:center;font:600 .95rem Georgia,serif;padding:4px 0 6px;color:#CBBF9E}
+.board .r{display:flex;align-items:center;font-size:.72rem;line-height:1.2;color:#A59E92;height:44px}
+.cell{position:relative;height:44px;border:0;background:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:inherit;font:inherit}
+.cell::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:var(--w);transform:translateX(-50%);background:#B9B3A6}
+.cell.nut{border-bottom:4px solid #EDE6D8}
+.dot{position:relative;z-index:1;width:36px;height:36px;border-radius:50%;background:#3B3430;display:flex;align-items:center;justify-content:center;font:600 1rem Georgia,serif;transition:background .15s;color:#EDE6D8}
+.cell.ok .dot{background:#3F7F57;color:#fff}.cell.bad .dot{background:#B23A48;color:#fff}.cell.on .dot{background:#6FB5D6;color:#0E1A1E}.cell.hot .dot{background:#3F7F57;color:#fff;transform:scale(1.18)}
+.cell[data-lv="1"] .dot{box-shadow:0 0 0 3px var(--ok)}
+.cell[data-lv="2"] .dot{box-shadow:0 0 0 3px var(--star)}
+.cell[data-lv="3"] .dot{box-shadow:0 0 0 3px var(--bad)}
+.weak h2{font-size:1.1rem;margin:0}
+.weak ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.weak li{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:6px 10px;min-height:40px}
+.weak li b{font-size:1.05rem}
+.bar{flex:0 0 70px;height:8px;border-radius:5px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--bad)}
+.lg{display:flex;gap:12px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
+.lg i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-2px;margin-right:4px}
+.opts{display:flex;flex-wrap:wrap;gap:6px 14px}
+.opts label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.92rem;min-height:40px}
+.mic{display:grid;gap:8px}
+.mic .row>label.small{display:grid;gap:4px;min-width:0;flex:1 1 220px}.mic select{width:100%;min-width:0}
+.row{min-width:0}
+.meter{position:relative;height:14px;border-radius:7px;background:var(--bg);border:1px solid var(--line)}
+.meter i{position:absolute;top:-3px;width:6px;height:20px;border-radius:3px;background:var(--acc);left:50%;transform:translateX(-50%);transition:left .08s}
+.meter u{position:absolute;left:30%;width:40%;top:0;bottom:0;background:var(--ok);opacity:.25;border-radius:7px}
+#m-heard{font-size:1.05rem;min-height:1.6em}
+#m-info{color:var(--muted);font-size:.86rem}
+.err{border-left:4px solid var(--bad);padding:8px 12px;background:var(--bg);border-radius:0 10px 10px 0;font-size:.92rem}
+@media (prefers-reduced-motion:reduce){.dot,.meter i{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>🎼 Noten lernen</h1>
+<div class="stats" aria-label="Fortschritt"><div><b id="st-hit">0</b><span>Treffer</span></div><div><b id="st-run">0</b><span>aktuelle Serie</span></div><div><b id="st-best">0</b><span>beste Serie</span></div><div><b id="st-days">0</b><span>Übetage</span></div></div>
+<div class="tabs" role="group" aria-label="Modus">
+<button class="btn" id="m-u" type="button" aria-pressed="true">Üben</button>
+<button class="btn" id="m-e" type="button" aria-pressed="false">Entdecken</button>
+<button class="btn" id="m-s" type="button" aria-pressed="false">Tonleitern</button>
+</div>
+<div class="stick">
+<div class="card"><svg class="staff" id="staff" viewBox="0 0 320 200" role="img" aria-label="Notenzeile"></svg></div>
+<div id="msg" aria-live="polite"></div>
+<div id="m-live" hidden>
+    <div id="m-heard">Ich höre zu …</div>
+    <div class="meter" aria-hidden="true"><u></u><i id="m-needle"></i></div>
+    <div class="row small muted" style="justify-content:space-between"><span>zu tief</span><span>sauber</span><span>zu hoch</span></div>
+  </div>
+<p class="score" id="score"></p>
+</div>
+
+<section class="card mic" id="micbox" aria-label="Mikrofon">
+  <div class="row"><label class="opts" style="min-height:0"><span><input type="checkbox" id="mic"> <b>Mit Mikrofon üben:</b> Ton auf der Geige spielen</span></label><span class="pill" id="m-state">aus</span></div>
+  <div class="row"><label class="small">Eingang <select id="m-dev" aria-label="Audio-Eingang"><option value="">Standard des Geräts</option></select></label><a class="small" href="einstellungen.html">Mikrofon-Einstellungen und Test</a></div>
+  <div id="m-info"></div>
+  <div class="err" id="m-err" role="alert" hidden></div>
+</section>
+
+<div class="group"><p>Lage</p><div id="posbox"></div></div>
+<div class="group" id="scalebox" hidden><p>Tonleiter, eine Oktave aufwärts</p><div id="scales"></div><div style="margin-top:10px" class="row"><button class="btn" id="play" type="button">▶ Vorspielen</button><button class="btn" id="mine" type="button">🎤 Selbst spielen</button></div></div>
+<div class="board" id="board"></div>
+<div class="group" id="strbox"><p>Saiten zum Üben</p><div id="strings"></div></div>
+<div class="group" id="spellbox"><p>Schreibweise der Halbtöne</p><div id="spell"></div></div>
+<div class="opts">
+<label><input type="checkbox" id="names"> Namen im Griffbrett zeigen</label>
+<label><input type="checkbox" id="sound" checked> Ton</label>
+<label><input type="checkbox" id="octok" checked> Oktavfehler erlauben</label>
+<label><input type="checkbox" id="wk" checked> Schwache Töne öfter fragen</label>
+</div>
+<section class="card weak" id="weakbox" aria-label="Deine Schwächen">
+<h2>Deine Schwächen</h2>
+<div id="weaklist" class="small muted">Noch keine Daten. Übe ein paar Töne, dann zeigt sich hier, welche noch wackeln.</div>
+<div class="lg" id="weaklg" hidden><span><i style="background:var(--bad)"></i>wackelt</span><span><i style="background:var(--star)"></i>fast</span><span><i style="background:var(--ok)"></i>sitzt</span><span>Ringe im Griffbrett</span></div>
+<div class="row"><button class="btn" id="weakreset" type="button" hidden>Zurücksetzen</button></div>
+</section>
+<p class="small muted">Tipp: Die Geige hat keine Bünde. Die Punkte im Griffbrett zeigen die Fingerstellung in der gewählten Lage. „tief“ heißt: Finger dicht an den vorigen. „hoch“: etwas weiter oben.</p>
+</main>
+<script>
+(function(){
+'use strict';
+var L=['C','D','E','F','G','A','B'],S=[0,2,4,5,7,9,11];
+var STR=['G','D','A','E'],OPEN=[55,62,69,76];
+var pos=1;
+function off(){return 2*(pos-1)}
+function semi(s,f){return OPEN[s]+(f?f+off():0)}
+var ROWS=['leer','1. Finger tief','1. Finger hoch','2. Finger tief','2. Finger hoch','3. Finger tief','3. Finger hoch','4. Finger'];
+var NAT={0:0,2:1,4:2,5:3,7:4,9:5,11:6},DL=['C','D','E','F','G','A','H'];
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var mode='u',target=null,last=null,run=0,goal=null,cb=null,okc=0,pref='s',shown=null,force=null,ctx=null,sc=null;
+var on=new Set([0,1,2,3]),t0=0;
+
+/* Fortschritt pro Profil */
+var PR=MK.get('nt',null);
+if(!PR||typeof PR!=='object')PR={hit:0,miss:0,run:0,best:0,days:{},mic:false};
+PR.days=PR.days||{};PR.w=PR.w||{};
+function save(){try{MK.set('nt',PR)}catch(e){}}
+function stats(){$('st-hit').textContent=PR.hit;$('st-run').textContent=PR.run;$('st-best').textContent=PR.best;$('st-days').textContent=Object.keys(PR.days).length}
+/* Schwächen pro Ton: h = Treffer, m = gewichtete Fehler (verblassen mit jedem Treffer) */
+function wk(m){var e=PR.w[m];return e||{h:0,m:0}}
+function weakScore(m){var e=wk(m);return e.m/(e.m+e.h*0.5+1)}
+function level(m){var e=PR.w[m];if(!e||e.h+e.m<2)return 0;var w=weakScore(m);return w>=.3?3:w>=.12?2:1}
+function rec(m,ok,half){
+  if(m==null)return;
+  var e=PR.w[m]||(PR.w[m]={h:0,m:0,t:0});
+  if(ok){e.h++;e.m=Math.max(0,e.m*0.8-0.1)}else e.m+=half?0.5:1;
+  e.t=Date.now();
+}
+function count(ok,m,half){
+  rec(m,ok,half);
+  PR.days[MK.day()]=1;
+  if(ok){PR.hit++;PR.run++;if(PR.run>PR.best)PR.best=PR.run}else{PR.miss++;PR.run=0}
+  save();stats();weakUI();
+}
+
+function info(m){
+  var pc=((m%12)+12)%12,o=Math.floor(m/12)-1,li,acc=0,p=force||pref;
+  if(pc in NAT)li=NAT[pc];else if(p==='s'){li=NAT[pc-1];acc=1}else{li=NAT[pc+1];acc=-1}
+  var b=DL[li];
+  var name=acc===0?b:acc>0?b+'is':b==='H'?'B':b==='E'?'Es':b==='A'?'As':b+'es';
+  return {idx:(o-4)*7+li,acc:acc,name:name};
+}
+
+/* Griffbrett */
+var board=$('board');
+board.appendChild(Object.assign(document.createElement('div'),{className:'h'}));
+STR.forEach(function(s){board.appendChild(Object.assign(document.createElement('div'),{className:'h',textContent:s}))});
+var cells=[];
+for(var f=0;f<8;f++){
+  board.appendChild(Object.assign(document.createElement('div'),{className:'r',textContent:ROWS[f]}));
+  for(var s=0;s<4;s++){
+    (function(s,f){
+      var b=document.createElement('button');
+      b.type='button';b.className='cell'+(f===0?' nut':'');
+      b.style.setProperty('--w',(3.2-s*0.7)+'px');
+      b.setAttribute('aria-label',STR[s]+'-Saite, '+ROWS[f]);
+      b.innerHTML='<span class="dot"></span>';
+      b.onclick=function(){tap(s,f,b)};
+      board.appendChild(b);cells.push({b:b,s:s,f:f});
+    })(s,f);
+  }
+}
+function labels(){
+  if(mode==='s')return;
+  var show=$('names').checked;
+  cells.forEach(function(c){c.b.firstChild.textContent=show?info(semi(c.s,c.f)).name:''});
+}
+$('names').onchange=labels;
+
+/* Notenzeile */
+function ledger(yy){return '<line x1="146" x2="194" y1="'+yy+'" y2="'+yy+'" stroke="currentColor" stroke-width="1.5"/>'}
+function staff(m){
+  shown=m;var y=function(i){return 134-(i-2)*8};var n=m===null?null:info(m),idx=n?n.idx:null;
+  var h='',k,i;
+  for(k=0;k<5;k++)h+='<line x1="10" x2="310" y1="'+(70+k*16)+'" y2="'+(70+k*16)+'" stroke="currentColor" stroke-width="1.2"/>';
+  h+='<text x="16" y="136" font-size="92" fill="currentColor" font-family="\'Noto Music\',\'Segoe UI Symbol\',\'Apple Symbols\',Bravura,serif">\u{1D11E}</text>';
+  if(idx!==null){
+    var cy=y(idx);
+    for(i=0;i>=idx;i-=2)h+=ledger(y(i));
+    for(i=12;i<=idx;i+=2)h+=ledger(y(i));
+    if(n.acc)h+='<text x="126" y="'+(cy+10)+'" font-size="30" fill="currentColor" font-family="\'Noto Music\',\'Segoe UI Symbol\',\'Apple Symbols\',serif">'+(n.acc>0?'♯':'♭')+'</text>';
+    h+='<ellipse cx="170" cy="'+cy+'" rx="10" ry="7" transform="rotate(-18 170 '+cy+')" fill="currentColor"/>';
+    var up=idx<6;
+    h+=up?'<line x1="179" x2="179" y1="'+(cy-2)+'" y2="'+(cy-46)+'" stroke="currentColor" stroke-width="2"/>'
+         :'<line x1="161" x2="161" y1="'+(cy+2)+'" y2="'+(cy+46)+'" stroke="currentColor" stroke-width="2"/>';
+  }
+  $('staff').innerHTML=h;
+}
+
+/* Ton */
+function play(m){
+  if(!$('sound').checked||goal!==null)return;
+  try{
+    ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.resume)ctx.resume();
+    var f=440*Math.pow(2,(m-69)/12);
+    var osc=ctx.createOscillator(),lp=ctx.createBiquadFilter(),g=ctx.createGain(),t=ctx.currentTime;
+    osc.type='sawtooth';osc.frequency.value=f;lp.type='lowpass';lp.frequency.value=2200;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+1.1);
+    osc.connect(lp);lp.connect(g);g.connect(ctx.destination);osc.start(t);osc.stop(t+1.2);
+  }catch(e){}
+}
+
+/* Ablauf */
+function flash(b,cls){b.classList.add(cls);setTimeout(function(){b.classList.remove(cls)},650)}
+function where(s,f){return f?STR[s]+'-Saite, '+ROWS[f]:STR[s]+'-Saite leer'}
+function msg(t,c){var m=$('msg');m.textContent=t;m.className=c||''}
+function score(){$('score').textContent=mode==='u'?('Treffer '+PR.hit+' · Fehler '+PR.miss):''}
+function next(){
+  var pool=[],seen={};
+  cells.forEach(function(c){if(on.has(c.s)){var m=semi(c.s,c.f);if(!seen[m]){seen[m]=1;pool.push(m)}}});
+  var n,useW=$('wk').checked;
+  function draw(){
+    if(!useW)return pool[Math.floor(Math.random()*pool.length)];
+    var tot=0,ws=pool.map(function(m){var w=1+8*weakScore(m);tot+=w;return w}),r=Math.random()*tot,i;
+    for(i=0;i<pool.length;i++){r-=ws[i];if(r<=0)return pool[i]}
+    return pool[pool.length-1];
+  }
+  do{n=draw()}while(pool.length>1&&n===last);
+  target=last=n;t0=Date.now();staff(n);msg('Wo liegt dieser Ton?');
+  if($('mic').checked){msg('Spiel diesen Ton auf deiner Geige.');listen(n,hitU)}else{cb=null;goal=null;showLive(false)}
+}
+function tap(s,f,b){
+  var m=semi(s,f);
+  if(mode==='s'){play(m);msg(info(m).name+' · '+where(s,f));return}
+  if(mode==='u'&&$('mic').checked){flash(b,'on');msg(info(m).name+' · '+where(s,f)+' (Hinweis, zählt nicht)');return}
+  if(mode==='e'){
+    cells.forEach(function(c){c.b.classList.remove('on')});b.classList.add('on');
+    staff(m);play(m);msg(info(m).name+' · '+where(s,f));return;
+  }
+  play(m);
+  if(m===target){
+    count(true,m);flash(b,'ok');msg('Richtig: '+info(m).name+' · '+where(s,f),'ok');score();
+    setTimeout(function(){if(mode==='u')next()},1100);
+  }else{
+    count(false,target);flash(b,'bad');msg('Das war '+info(m).name+'. Such nochmal.','bad');score();
+  }
+}
+function setMode(m){
+  mode=m;run++;goal=null;cb=null;showLive(false);
+  if(m!=='u'||!$('mic').checked)micOff();
+  force=m==='s'&&sc?sc.p:null;
+  ['u','e','s'].forEach(function(k){$('m-'+k).setAttribute('aria-pressed',k===m)});
+  cells.forEach(function(c){c.b.classList.remove('on','hot')});
+  $('strbox').hidden=m!=='u';
+  $('spellbox').hidden=m==='s';
+  $('scalebox').hidden=m!=='s';
+  $('micbox').hidden=(m==='e');
+  score();labels();weakUI();
+  if(m==='u')next();else if(m==='s')showScale();else{target=null;staff(null);msg('Tippe auf eine Stelle im Griffbrett.')}
+}
+$('m-u').onclick=function(){setMode('u')};$('m-e').onclick=function(){setMode('e')};$('m-s').onclick=function(){setMode('s')};
+
+/* Übersicht der Schwächen */
+function weakUI(){
+  var ks=Object.keys(PR.w).filter(function(k){return level(+k)>0}),has=Object.keys(PR.w).length>0;
+  cells.forEach(function(c){var l=level(semi(c.s,c.f));if(l&&mode!=='s')c.b.setAttribute('data-lv',l);else c.b.removeAttribute('data-lv')});
+  var rows=Object.keys(PR.w).map(function(k){return +k}).filter(function(m){return PR.w[m].m>0.3}).sort(function(a,b){return weakScore(b)-weakScore(a)}).slice(0,5);
+  var box=$('weaklist');
+  if(!has){box.className='small muted';box.textContent='Noch keine Daten. Übe ein paar Töne, dann zeigt sich hier, welche noch wackeln.'}
+  else if(!rows.length){box.className='small';box.textContent='Alles sitzt bisher. Bleib dran, ich merke mir jeden Fehler.'}
+  else{
+    box.className='';
+    box.innerHTML='<ul>'+rows.map(function(m){
+      var e=PR.w[m],c=cells.filter(function(x){return semi(x.s,x.f)===m})[0];
+      return '<li><span><b>'+esc(info(m).name)+'</b> <span class="muted small">'+(c?esc(where(c.s,c.f)):'')+'</span></span><span class="muted small">'+Math.round(e.m)+' Fehler · '+e.h+' Treffer</span><span class="bar" aria-hidden="true"><i style="width:'+Math.round(weakScore(m)*100)+'%"></i></span></li>';
+    }).join('')+'</ul>';
+  }
+  $('weaklg').hidden=!has;$('weakreset').hidden=!has;
+}
+$('weakreset').onclick=function(){
+  var b=this;
+  if(!b.dataset.sure){b.dataset.sure='1';b.textContent='Wirklich löschen?';setTimeout(function(){delete b.dataset.sure;b.textContent='Zurücksetzen'},3000);return}
+  delete b.dataset.sure;b.textContent='Zurücksetzen';PR.w={};save();weakUI();
+};
+$('wk').onchange=function(){PR.wk=this.checked;save()};
+
+/* Saiten-Auswahl und Schreibweise */
+STR.forEach(function(s,i){
+  var b=Object.assign(document.createElement('button'),{className:'chip',type:'button',textContent:s+'-Saite'});
+  b.setAttribute('aria-pressed','true');
+  b.onclick=function(){
+    if(on.has(i)){if(on.size===1)return;on.delete(i)}else on.add(i);
+    b.setAttribute('aria-pressed',on.has(i));next();
+  };
+  $('strings').appendChild(b);
+});
+[['s','♯ Kreuze (Cis, Dis …)'],['b','♭ Bes (Des, Es …)']].forEach(function(a){
+  var b=Object.assign(document.createElement('button'),{className:'chip',type:'button',textContent:a[1]});
+  b.setAttribute('aria-pressed',a[0]===pref);
+  b.onclick=function(){pref=a[0];Array.prototype.forEach.call($('spell').children,function(x){x.setAttribute('aria-pressed',x===b)});labels();staff(shown)};
+  $('spell').appendChild(b);
+});
+
+/* Tonleitern */
+var MAJ=[0,2,4,5,7,9,11,12],MIN=[0,2,3,5,7,8,10,12],FN=[0,1,1,2,2,3,3,4];
+var DOR=[0,2,3,5,7,9,10,12],PHR=[0,1,3,5,7,8,10,12],HAR=[0,2,3,5,7,8,11,12];
+function cellOf(m){
+  var o=OPEN.indexOf(m),s,f;if(o>=0)return [o,0];
+  for(s=0;s<4;s++){f=m-OPEN[s]-off();if(f>=1&&f<=6)return [s,f]}
+  for(s=0;s<4;s++)if(m-OPEN[s]-off()===7)return [s,7];
+  return null;
+}
+function rootFor(iv,pc,r1){for(var m=55;m<=72;m++)if(m%12===pc&&iv.every(function(i){return cellOf(m+i)}))return m;return r1}
+var SC=[['G-Dur',55,MAJ,'s'],['D-Dur',62,MAJ,'s'],['A-Dur',69,MAJ,'s'],['C-Dur',60,MAJ,'s'],['a-Moll',69,MIN,'s'],['d-Moll',62,MIN,'b'],['g-Moll',55,MIN,'b'],['e-Moll',64,MIN,'s'],['D-dorisch',62,DOR,'s'],['A-dorisch',69,DOR,'s'],['E-phrygisch',64,PHR,'s'],['a-Moll harmonisch',69,HAR,'s']].map(function(a){
+  return {n:a[0],p:a[3],r1:a[1],iv:a[2],notes:function(){var b=pos===1?this.r1:rootFor(this.iv,this.r1%12,this.r1);return this.iv.map(function(i){return b+i})}};
+});
+sc=SC[0];
+function ledg(x,yy){return "<line x1='"+(x-15)+"' x2='"+(x+15)+"' y1='"+yy+"' y2='"+yy+"' stroke='currentColor' stroke-width='1.5'/>"}
+function staffScale(ms){
+  shown=null;var y=function(i){return 134-(i-2)*8};var h='',k;
+  for(k=0;k<5;k++)h+="<line x1='10' x2='310' y1='"+(70+k*16)+"' y2='"+(70+k*16)+"' stroke='currentColor' stroke-width='1.2'/>";
+  h+="<text x='16' y='136' font-size='92' fill='currentColor' font-family='Noto Music,Segoe UI Symbol,Apple Symbols,Bravura,serif'>\u{1D11E}</text>";
+  ms.forEach(function(m,j){
+    var n=info(m),x=90+j*31,cy=y(n.idx),i;h+="<g class='n' data-j='"+j+"'>";
+    for(i=0;i>=n.idx;i-=2)h+=ledg(x,y(i));
+    for(i=12;i<=n.idx;i+=2)h+=ledg(x,y(i));
+    if(n.acc)h+="<text x='"+(x-12)+"' y='"+(cy+8)+"' font-size='22' text-anchor='end' fill='currentColor' font-family='Noto Music,Segoe UI Symbol,Apple Symbols,serif'>"+(n.acc>0?'♯':'♭')+'</text>';
+    h+="<ellipse cx='"+x+"' cy='"+cy+"' rx='9' ry='6.5' transform='rotate(-18 "+x+' '+cy+")' fill='currentColor'/><text x='"+x+"' y='198' font-size='11' text-anchor='middle' fill='currentColor'>"+n.name+'</text>';h+='</g>';
+  });
+  $('staff').innerHTML=h;
+}
+function showScale(){
+  run++;force=sc.p;
+  cells.forEach(function(c){c.b.classList.remove('on','hot');c.b.firstChild.textContent=''});
+  var ms=sc.notes();
+  ms.forEach(function(m){var a=cellOf(m);if(!a)return;var c=cells[a[1]*4+a[0]];c.b.classList.add('on');c.b.firstChild.textContent=FN[a[1]]});
+  staffScale(ms);
+  msg(ms.map(function(m){return info(m).name}).join(' – '));
+}
+function hot(j,c){
+  cells.forEach(function(x){x.b.classList.remove('hot')});
+  if(c)c.b.classList.add('hot');
+  Array.prototype.forEach.call($('staff').querySelectorAll('g.n'),function(g){g.style.color=+g.dataset.j===j?'var(--ok)':''});
+}
+var IX=[0,1,2,3,4,5,6,7,6,5,4,3,2,1,0];
+function playScale(){
+  goal=null;cb=null;showLive(false);micOff();
+  var id=++run,ms=IX.map(function(i){return sc.notes()[i]});
+  ms.forEach(function(m,j){setTimeout(function(){
+    if(id!==run||mode!=='s')return;
+    var a=cellOf(m);if(!a)return;hot(IX[j],cells[a[1]*4+a[0]]);play(m);msg(info(m).name+' · '+where(a[0],a[1]));
+  },j*600)});
+  setTimeout(function(){if(id===run)hot(-1,null)},ms.length*600);
+}
+SC.forEach(function(x,i){
+  var b=Object.assign(document.createElement('button'),{className:'chip',type:'button',textContent:x.n});
+  b.setAttribute('aria-pressed',i===0);
+  b.onclick=function(){sc=x;force=x.p;Array.prototype.forEach.call($('scales').children,function(y){y.setAttribute('aria-pressed',y===b)});run++;micOff();showLive(false);showScale()};
+  $('scales').appendChild(b);
+});
+[1,2,3].forEach(function(p){
+  var b=Object.assign(document.createElement('button'),{className:'chip',type:'button',textContent:p+'. Lage'});
+  b.setAttribute('aria-pressed',p===pos);
+  b.onclick=function(){pos=p;Array.prototype.forEach.call($('posbox').children,function(x){x.setAttribute('aria-pressed',x===b)});setMode(mode)};
+  $('posbox').appendChild(b);
+});
+
+/* ───── Mikrofon (gleiche Erkennung und Einstellungen wie im Rest der App) ───── */
+var _cm=new Float32Array(4096),_d=new Float32Array(4096);
+function yin(buf,sr,fMin,fMax,thr,W,offs){
+  var tauMax=Math.min(Math.floor(sr/fMin),buf.length-offs-W-1,_cm.length-1);
+  var tauMin=Math.max(2,Math.floor(sr/fMax)),tau,j,x,s;
+  if(tauMax<=tauMin+2)return null;
+  for(tau=1;tau<=tauMax;tau++){s=0;for(j=0;j<W;j++){x=buf[offs+j]-buf[offs+j+tau];s+=x*x}_d[tau]=s}
+  var rn=0;_cm[0]=1;
+  for(tau=1;tau<=tauMax;tau++){rn+=_d[tau];_cm[tau]=rn>0?_d[tau]*tau/rn:1}
+  var t=-1;
+  for(tau=tauMin;tau<=tauMax;tau++){if(_cm[tau]<thr){while(tau+1<=tauMax&&_cm[tau+1]<_cm[tau])tau++;t=tau;break}}
+  if(t<0)return null;
+  var better=t;
+  if(t>1&&t<tauMax){var s0=_cm[t-1],s1=_cm[t],s2=_cm[t+1],a=s0+s2-2*s1;if(a!==0)better=t+(s0-s2)/(2*a)}
+  return {hz:sr/better,conf:1-_cm[t]};
+}
+function gateOf(sens){return 0.03*Math.pow(0.02,sens/100)}
+var MC={on:false,stream:null,ctx:null,an:null,buf:null,iv:0,starting:false,q:[]};
+function flushQ(ok){var q=MC.q;MC.q=[];q.forEach(function(f){f(ok)})}
+function cfg(){var m=MK.mic();return {dev:m.dev||'',sens:'sens' in m?m.sens:55,a4:'a4' in m?m.a4:440}}
+function showLive(v){$('m-live').hidden=!v}
+function setState(){$('m-state').textContent=MC.on?'an':'aus';$('m-state').className='pill'+(MC.on?' ok':'')}
+function showErr(t){var e=$('m-err');if(t){e.textContent=t;e.hidden=false}else{e.hidden=true}}
+function errText(e){
+  var n=e&&e.name||'';
+  if(!window.isSecureContext)return 'Das Mikrofon geht nur auf einer sicheren Seite (https, z. B. GitHub Pages, oder als lokale Datei). In einer Vorschau oder eingebetteten Ansicht ist es gesperrt. Öffne die App direkt im Browser.';
+  if(n==='NotAllowedError'||n==='SecurityError')return 'Der Browser hat das Mikrofon nicht freigegeben. Tippe in der Adressleiste auf das Schloss-Symbol, erlaube dort das Mikrofon und lade die Seite neu. In einer Vorschau oder eingebetteten Ansicht ist es oft gesperrt: dann die App direkt im Browser öffnen.';
+  if(n==='NotFoundError'||n==='OverconstrainedError')return 'Der gewählte Eingang wurde nicht gefunden. Wähle oben „Standard des Geräts“.';
+  if(n==='NotReadableError')return 'Das Mikrofon wird gerade von einer anderen App benutzt. Schließe die andere App und versuche es nochmal.';
+  return 'Das Mikrofon konnte nicht gestartet werden ('+(n||'unbekannter Fehler')+').';
+}
+function devList(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.enumerateDevices)return;
+  navigator.mediaDevices.enumerateDevices().then(function(l){
+    var ins=l.filter(function(d){return d.kind==='audioinput'&&d.deviceId&&d.deviceId!=='default'&&d.deviceId!=='communications'});
+    var sel=$('m-dev'),c=cfg().dev;
+    sel.innerHTML='<option value="">Standard des Geräts (empfohlen für das eingebaute Mikrofon)</option>'+ins.map(function(d,i){return '<option value="'+esc(d.deviceId)+'">'+esc(d.label||('Eingang '+(i+1)))+'</option>'}).join('');
+    sel.value=ins.some(function(d){return d.deviceId===c})?c:'';
+  }).catch(function(){});
+}
+$('m-dev').addEventListener('change',function(){MK.micSet({dev:this.value});if(MC.on){micOff();if(mode==='u'&&$('mic').checked)next()}});
+function micOn(done){
+  if(MC.on){done(true);return}
+  if(MC.starting){MC.q.push(done);return}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){showErr(errText({name:'SecurityError'}));done(false);return}
+  MC.starting=true;showErr('');
+  var c=cfg(),cons={echoCancellation:false,noiseSuppression:false,autoGainControl:false};
+  if(c.dev)cons.deviceId={ideal:c.dev};
+  navigator.mediaDevices.getUserMedia({audio:cons}).then(function(st){
+    var K=window.AudioContext||window.webkitAudioContext,x=new K();
+    if(x.resume)x.resume();
+    var an=x.createAnalyser();an.fftSize=4096;x.createMediaStreamSource(st).connect(an);
+    MC.on=true;MC.starting=false;MC.stream=st;MC.ctx=x;MC.an=an;MC.buf=new Float32Array(4096);
+    MC.iv=setInterval(tick,40);setState();devList();
+    var tr=st.getAudioTracks&&st.getAudioTracks()[0];
+    $('m-info').textContent='Quelle: '+((tr&&tr.label)||'Standard des Geräts')+' · '+Math.round(x.sampleRate/100)/10+' kHz';
+    done(true);flushQ(true);
+  }).catch(function(e){
+    MC.starting=false;$('mic').checked=false;PR.mic=false;save();showErr(errText(e));done(false);flushQ(false);
+  });
+}
+function micOff(){
+  goal=null;
+  if(!MC.on)return;
+  clearInterval(MC.iv);
+  try{MC.stream.getTracks().forEach(function(t){t.stop()});MC.ctx.close()}catch(e){}
+  MC.on=false;setState();
+}
+function listen(m,f){
+  cb=f;okc=0;goal=null;
+  micOn(function(ok){
+    if(!ok){cb=null;return}
+    if(cb!==f)return;
+    goal=m;showLive(true);$('m-heard').textContent='Ich höre zu …';$('m-needle').style.left='50%';
+  });
+}
+function tick(){
+  if(!MC.on)return;
+  MC.an.getFloatTimeDomainData(MC.buf);
+  var c=cfg(),s=0,i;for(i=0;i<2048;i++)s+=MC.buf[i]*MC.buf[i];
+  if(Math.sqrt(s/2048)<gateOf(c.sens)){heard(null);return}
+  var r=yin(MC.buf,MC.ctx.sampleRate,170,1500,.22,2048,0);
+  if(!r||r.conf<.7){heard(null);return}
+  heard(69+12*Math.log2(r.hz/c.a4));
+}
+function heard(m){
+  if(goal===null)return;
+  if(m===null){okc=0;$('m-heard').textContent='Ich höre zu …';$('m-needle').style.left='50%';return}
+  var near=Math.round(m),cts=Math.round((m-near)*100),d=(m-goal)*100;
+  if($('octok').checked){while(d>600)d-=1200;while(d<-600)d+=1200}
+  $('m-needle').style.left=(50+Math.max(-100,Math.min(100,d))/2)+'%';
+  var hint=Math.abs(d)<=40?' ✓ sauber':Math.abs(d)<=150?(d<0?' · etwas zu tief':' · etwas zu hoch'):' · anderer Ton';
+  $('m-heard').textContent='Ich höre '+info(near).name+' ('+(cts>0?'+':'')+cts+' ct)'+hint;
+  if(Math.abs(d)<=40){
+    if(++okc>=4){var g=goal,f2=cb;goal=null;okc=0;showLive(false);if(f2)f2(g)}
+  }else okc=0;
+}
+function hitU(g){
+  var slow=Date.now()-t0>12000;
+  if(slow){rec(g,false,true)}
+  count(true,g);
+  var c=cells.filter(function(x){return semi(x.s,x.f)===g})[0];
+  msg('Richtig: '+info(g).name+(c?' · '+where(c.s,c.f):''),'ok');score();
+  setTimeout(function(){if(mode==='u')next()},1100);
+}
+function mySteps(id,k){
+  if(id!==run||mode!=='s')return;
+  if(k>=IX.length){hot(-1,null);msg('Geschafft! Die Tonleiter ist durch.','ok');PR.days[MK.day()]=1;save();stats();micOff();showLive(false);return}
+  var m=sc.notes()[IX[k]],a=cellOf(m);if(!a){mySteps(id,k+1);return}
+  hot(IX[k],cells[a[1]*4+a[0]]);
+  msg('Spiel: '+info(m).name+' · '+where(a[0],a[1]));
+  listen(m,function(){msg(info(m).name+' ✓','ok');setTimeout(function(){mySteps(id,k+1)},450)});
+}
+$('mine').onclick=function(){goal=null;cb=null;mySteps(++run,0)};
+$('play').onclick=playScale;
+$('mic').onchange=function(){
+  PR.mic=this.checked;save();
+  if(this.checked){if(mode==='u')next();else showErr('')}
+  else{micOff();showLive(false);showErr('');if(mode==='u')next()}
+};
+window.addEventListener('pagehide',micOff);
+document.addEventListener('visibilitychange',function(){if(document.hidden){micOff();showLive(false)}else if(mode==='u'&&$('mic').checked)next()});
+
+stats();devList();
+$('wk').checked=PR.wk!==false;
+labels();setMode('u');
+window.__nt={setMode:setMode,heard:heard,listen:listen,info:info,cells:cells,get goal(){return goal},get target(){return target},PR:PR};
+})();
+</script>
+</body>
+</html>

@@ -13,17 +13,14 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Geigenpult</title>
 <script src="shared.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&display=swap" rel="stylesheet">
 <style>
   /* Layout: ein schmaler Pult-Streifen. Oben Titel mit vier Saiten, dann Laden und Eingang, dann das Notenblatt auf weißem Papier, unten die feste Spielleiste. Im Vollbild füllt das Papier den Schirm und die Leiste schwebt klein darüber. */
   :root{
     --bg:#F5F1EA; --surface:#FFFFFF; --ink:#14283B; --muted:#4D5F70; --line:#DDD5C8;
     --accent:#17466E; --on-accent:#ffffff; --cursor:#e5432a; --ok:#3F5F45; --warn:#7A4E33; --bad:#A3352B;
     --paper:#fdfdfc; --paper-ink:#14181c;
-    --f-display:'Newsreader',Georgia,'Times New Roman',serif;
-    --f-ui:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --f-display:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --f-ui:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     color-scheme:light;
   }
   @media (prefers-color-scheme: dark){
@@ -41,11 +38,11 @@
   *{box-sizing:border-box}
   [hidden]{display:none!important}
   html{-webkit-text-size-adjust:100%}
-  body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;margin:0;padding-inline:16px}
+  body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5;margin:0;padding-inline:16px}
   .wrap{max-width:1000px;margin-inline:auto;padding-block:20px 8px;display:flex;flex-direction:column;gap:22px}
   h1,h2,h3{margin:0;font-weight:500;text-wrap:balance}
-  h1{font-family:var(--f-display);font-size:clamp(2rem,6vw,2.8rem);line-height:1.05;letter-spacing:-.01em}
-  h2{font-family:var(--f-display);font-size:1.45rem;overflow-wrap:anywhere}
+  h1{font-family:var(--f-display);font-size:1.6rem;font-weight:700;line-height:1.2;letter-spacing:0}
+  h2{font-family:var(--f-display);font-size:1.25rem;font-weight:700;overflow-wrap:anywhere}
   h3{font-size:1rem;font-weight:600}
   p{margin:0}
   .muted,.hint{color:var(--muted)}
@@ -61,11 +58,11 @@
   .string b{width:1em;text-align:center;font-weight:600}
 
   section{display:flex;flex-direction:column;gap:12px;min-width:0}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:14px;min-width:0}
   details.card>summary{cursor:pointer;font-weight:500}
   details.card[open]>summary{margin-bottom:6px}
 
-  .btn{font:inherit;font-weight:500;min-height:42px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+  .btn{font:inherit;font-weight:500;min-height:42px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
   .btn:hover{border-color:var(--muted)}
   .btn:disabled{opacity:.45;cursor:not-allowed}
   .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
@@ -96,7 +93,7 @@
 
   /* Laden */
   .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
-  .tile{font:inherit;text-align:left;cursor:pointer;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:4px}
+  .tile{font:inherit;text-align:left;cursor:pointer;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px}
   .tile:hover{border-color:var(--accent)}
   .tile strong{font-weight:600}
   .tile span{color:var(--muted);font-size:.86rem}
@@ -264,7 +261,7 @@
 <body>
 <div class="wrap">
   <header class="head">
-    <h1>Geigenpult</h1>
+    <h1>🎻 Geigenpult</h1>
     <p>Notenblatt fotografieren oder laden, anhören, mit mitlaufendem Strich üben und mit Mikro, Aux-Kabel oder Audio-Interface mitspielen.</p>
     <div class="strings" aria-hidden="true">
       <div class="string"><b>G</b><i></i></div><div class="string"><b>D</b><i></i></div><div class="string"><b>A</b><i></i></div><div class="string"><b>E</b><i></i></div>
@@ -299,7 +296,7 @@
     </div>
 
     <div class="card" id="plan">
-      <div class="row" style="justify-content:space-between"><h3>Dein Tagesplan</h3><button class="btn small" id="plan-ai" type="button">Mit KI neu vorschlagen</button></div>
+      <div class="row" style="justify-content:space-between"><h3>Dein Tagesplan</h3><span class="row" style="gap:6px"><button class="btn small" id="plan-short" type="button">⏱ 10-Minuten-Plan</button><button class="btn small" id="plan-ai" type="button">Mit KI neu vorschlagen</button></span></div>
       <p class="small muted" id="plan-tip"></p>
       <div id="plan-msg" class="notice" hidden></div>
       <div id="plan-list"></div>
@@ -501,7 +498,7 @@
       <p class="small muted">Erste Lage. „tief“ heißt: Finger dicht an den vorigen. „hoch“: etwas weiter oben. Klebe kleine Markierungen auf das Griffbrett, bis die Finger sitzen.</p>
     </details>
 
-    <div class="paperbar"><button class="btn primary" id="btn-pult" type="button">⛶ Vollbild-Pult</button><span class="small muted">Notenblatt füllt den ganzen Schirm</span></div>
+    <div class="paperbar"><button class="btn primary" id="btn-pult" type="button">⛶ Vollbild-Pult</button><span class="small muted">Füllt den ganzen Schirm · mit dem Finger wischen blättert</span></div>
     <div class="paper" id="paper"><div id="stage"><div id="osmd"></div><div id="overlay"><div id="marks"></div><div id="cursor" hidden></div><div id="livebub" class="livebub" hidden></div><div class="flag" id="flagA" hidden>A</div><div class="flag" id="flagB" hidden>B</div></div></div></div>
     <p class="hint">Tippe auf eine Stelle im Notenblatt, um dort zu starten. Mit A und B legst du eine Übe-Schleife fest. Leertaste startet und pausiert. Mit „Vollbild-Pult“ füllt das Notenblatt den Schirm.</p>
 
@@ -1413,7 +1410,24 @@ function mark(e){
   var d=document.createElement('i');d.className=e.res+(e.dev?' '+e.dev:'');d.style.left=e.x+'px';d.style.top=(e.y+e.h+3)+'px';
   $('#marks').appendChild(d);e.markEl=d;
 }
+/* Wischen: im Vollbild-Pult mit dem Finger nach links = weiter, nach rechts = zurück */
+var SW={x:0,y:0,t:0,on:false,last:0};
+window.__gp={S:S};
+(function(){
+  var p=$('#paper');
+  p.addEventListener('touchstart',function(e){
+    if(!S.pult||e.touches.length!==1){SW.on=false;return}
+    SW.x=e.touches[0].clientX;SW.y=e.touches[0].clientY;SW.t=Date.now();SW.on=true;
+  },{passive:true});
+  p.addEventListener('touchend',function(e){
+    if(!SW.on)return;SW.on=false;
+    var t=e.changedTouches[0],dx=t.clientX-SW.x,dy=t.clientY-SW.y;
+    if(Date.now()-SW.t>800||Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return;
+    SW.last=Date.now();(window.__gpSpy||pageStep)(dx<0?1:-1);
+  },{passive:true});
+})();
 $('#stage').addEventListener('click',function(ev){
+  if(Date.now()-SW.last<400)return;
   if(!S.events.length)return;
   var r=$('#stage').getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top,best=-1,bd=1e9;
   S.events.forEach(function(e,i){
@@ -2651,24 +2665,40 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
 $('#lesson-list').addEventListener('click',function(e){var b=e.target.closest('button');if(b)openLesson(b.dataset.l)});
 
 /* ── Tagesplan ── */
-function planRules(){
+function planRules(short){
+  if(short)return planShort();
   var items=[],nl=nextLesson(),done=Object.keys(P.lessons),i;
   items.push({title:'Aufwärmen: Leersaiten in Vierteln',minutes:3,why:'Ruhige Bogenführung vor allem anderen.',action:{type:'exercise',spec:{gen:'open',kind:'q',bpm:60}}});
+  items.push({title:'Noten lernen: schwache Töne',minutes:3,why:'Die Seite merkt sich, welche Töne noch wackeln, und fragt sie öfter.',action:{type:'noten'}});
   if(nl)items.push({title:'Neu: '+nl.t,minutes:6,why:nl.d+'.',action:{type:'lesson',id:nl.id}});
   var keys=['D','A','G'].filter(function(k){return done.indexOf('dur-'+k.toLowerCase())>=0});
   if(keys.length){var k=keys[dayNo()%keys.length];items.push({title:'Tonleiter des Tages: '+KEYS[k].name,minutes:5,why:'Tonleitern festigen Griffe und Gehör.',action:{type:'exercise',spec:{gen:'scale',key:k,octaves:1,bpm:60}}})}
   var nowD=new Date(),xm=(nowD.getMonth()===10&&nowD.getDate()>=15)||nowD.getMonth()===11;
-  if(xm){var cs=SONGS.filter(function(x){return x.cat==='Weihnachten'}),c1=cs[dayNo()%cs.length];items.push({title:'Weihnachtslied: '+c1.title,minutes:6,why:'Bald ist Weihnachten, übe ein Stück langsam bis es fließt.',action:{type:'song',id:c1.id}})}
+  if(xm){var cs=(SONGS||[]).filter(function(x){return x.cat==='Weihnachten'}),c1=cs[dayNo()%(cs.length||1)];if(c1)items.push({title:'Weihnachtslied: '+c1.title,minutes:6,why:'Bald ist Weihnachten, übe ein Stück langsam bis es fließt.',action:{type:'song',id:c1.id}})}
   var lib=libLoad();
   if(lib.length){var it=lib[dayNo()%lib.length];items.push({title:'Stück üben: '+it.title,minutes:6,why:'Wende an, was du gelernt hast.',action:{type:'piece',id:it.id}})}
   items.push({title:'Tagesquiz',minutes:2,why:'Sechs kurze Fragen zu Noten, Rhythmus und Gehör.',action:{type:'quiz'}});
   return {day:today(),src:'regel',tip:'Kurz und täglich bringt mehr als selten und lang. Entspannte Schultern, lockere Bogenhand.',items:items};
 }
+/* Kurzer Plan für wenig Zeit: etwa 10 Minuten */
+function planShort(){
+  var items=[],nl=nextLesson(),done=Object.keys(P.lessons);
+  items.push({title:'Aufwärmen: Leersaiten in Vierteln',minutes:2,why:'Ruhige Bogenführung zuerst.',action:{type:'exercise',spec:{gen:'open',kind:'q',bpm:60}}});
+  var keys=['D','A','G'].filter(function(k){return done.indexOf('dur-'+k.toLowerCase())>=0});
+  if(keys.length){var k=keys[dayNo()%keys.length];items.push({title:'Tonleiter: '+KEYS[k].name,minutes:3,why:'Festigt Griffe und Gehör.',action:{type:'exercise',spec:{gen:'scale',key:k,octaves:1,bpm:60}}})}
+  else if(nl)items.push({title:'Neu: '+nl.t,minutes:3,why:nl.d+'.',action:{type:'lesson',id:nl.id}});
+  items.push({title:'Noten lernen: schwache Töne',minutes:2,why:'Kurze Runde, die Schwächen kommen öfter dran.',action:{type:'noten'}});
+  var lib=libLoad(),nowD=new Date(),xm=(nowD.getMonth()===10&&nowD.getDate()>=15)||nowD.getMonth()===11;
+  if(xm){var cs=(SONGS||[]).filter(function(x){return x.cat==='Weihnachten'}),c1=cs[dayNo()%(cs.length||1)];if(c1)items.push({title:'Weihnachtslied: '+c1.title,minutes:3,why:'Ein Stück langsam, bis es fließt.',action:{type:'song',id:c1.id}})}
+  else if(lib.length){var it=lib[dayNo()%lib.length];items.push({title:'Stück: '+it.title,minutes:3,why:'Anwenden, was du gelernt hast.',action:{type:'piece',id:it.id}})}
+  return {day:today(),src:'kurz',tip:'Zehn Minuten am Tag reichen, wenn sie regelmäßig sind. Schultern locker, Bogenhand weich.',items:items};
+}
 function getPlan(){if(!P.plan||P.plan.day!==today()){P.plan=planRules();saveP()}return P.plan}
-function actionLabel(a){return a.type==='quiz'?'Quiz':a.type==='lesson'?'Lesen':(a.type==='piece'||a.type==='song')?'Öffnen':'Spielen'}
+function actionLabel(a){return a.type==='quiz'?'Quiz':a.type==='noten'?'Öffnen':a.type==='lesson'?'Lesen':(a.type==='piece'||a.type==='song')?'Öffnen':'Spielen'}
 function runAction(idx){
   var it=P.plan.items[idx],a=it.action;
   if(a.type==='quiz')startQuiz({});
+  else if(a.type==='noten'){location.href='noten.html?plan=1'}
   else if(a.type==='lesson')openLesson(a.id);
   else if(a.type==='song')loadSong(a.id);
   else if(a.type==='piece'){var p=libLoad().find(function(x){return x.id===a.id});if(p){if(typeof showCompare==='function'&&S.parts){S.parts=[];S.pageImgs=[];showCompare()}showPiece(p.xml,p.title,p.id).then(function(){$('#sec-player').scrollIntoView({behavior:'smooth',block:'start'})})}}
@@ -2718,6 +2748,7 @@ async function planAi(){
 }
 function copyFor(e){return (e&&e.message)||'Unbekannter Fehler.'}
 $('#plan-ai').addEventListener('click',planAi);
+$('#plan-short').addEventListener('click',function(){P.plan=planRules(true);saveP();render()});
 
 /* ── Coach ── */
 $('#coach-go').addEventListener('click',async function(){
@@ -2741,7 +2772,7 @@ function render(){
   var gm=Math.min(100,Math.round(st.today/(P.goal*60)*100));
   $('#goal-fill').style.width=gm+'%';$('#goal-t').textContent='Tagesziel: '+Math.floor(st.today/60)+' von '+P.goal+' Min.'+(P.goalDone[today()]?' ✓':'');
   $('#goal-sel').value=String(P.goal);
-  var pl=getPlan();$('#plan-tip').textContent=(pl.src==='ki'?'KI-Plan. ':'Regelplan. ')+pl.tip;
+  var pl=getPlan();$('#plan-tip').textContent=(pl.src==='ki'?'KI-Plan. ':pl.src==='kurz'?'10-Minuten-Plan. ':'Regelplan. ')+pl.tip;
   $('#plan-list').innerHTML=pl.items.map(function(it,i){
     return '<div class="planitem'+(it.done?' done':'')+'"><button class="btn small" type="button" data-k="chk" data-i="'+i+'" aria-label="'+(it.done?'Als offen markieren':'Als erledigt markieren')+'">'+(it.done?'✓':'○')+'</button><div><div class="t">'+esc(it.title)+' <span class="muted small">· '+it.minutes+' Min.</span></div><div class="w">'+esc(it.why)+'</div></div><button class="btn small primary" type="button" data-k="go" data-i="'+i+'">'+actionLabel(it.action)+'</button></div>';
   }).join('');
@@ -2754,7 +2785,7 @@ function render(){
   $('#records').textContent='Persönliche Bestwerte: längste Serie '+(P.rec.streak||0)+' Tage · bester Durchgang '+(P.rec.hit||0)+' % · längster Tag '+(P.rec.daymin||0)+' Min. Es gibt kein Ranking mit anderen, nur dich gegen dich.';
 }
 $('#goal-sel').addEventListener('change',function(e){P.goal=+e.target.value||15;saveP();render()});
-aiChanged();checkBadges();render();
+aiChanged();checkBadges();/* render() läuft nach der Liederliste, siehe unten */
 
 /* ───────── Bereiche, Griffbrett, Problemtöne (app) ───────── */
 var TABS=['ueben','spielen','werkzeuge'];
@@ -2983,6 +3014,7 @@ var SONGS=[{"id":"stille-nacht","cat":"Weihnachten","title":"Stille Nacht (Urfas
 
 /* ───────── Stücke zum Üben (app) ───────── */
 function songById(id){return SONGS.find(function(x){return x.id===id})}
+render();
 var SRC={'stille-nacht':['Urfassung 1818, weicht von der gesungenen Fassung ab',1],'o-tannenbaum':['Essener Sammlung, bitte gegenhören',1],'o-du-froehliche':['Essener Sammlung, bitte gegenhören',1],'haste-to-the-wedding':['O’Neill’s, 1903',0],'st-patricks-day':['O’Neill’s, 1903',0],'drowsy-maggie':['O’Neill’s, 1903',0]};
 var SOK=lsGet('gp.songok',{});
 function songRender(){

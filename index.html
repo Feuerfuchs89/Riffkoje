@@ -36,6 +36,7 @@ a.tile:hover{border-color:var(--acc)}.tile .e{font-size:2.2rem;line-height:1}.ti
   <h2 class="gh">🎻 Geige</h2>
   <div class="grid">
     <a class="tile" href="geigenpult.html"><span class="e">🎻</span><span class="t">Geigenpult</span><span class="s">Noten als Foto oder MusicXML laden, mit Cursor üben, Mikro und MIDI-Keyboard, Lehrplan, Tagesplan, Bordun.</span><span class="k" id="k-gp"></span></a>
+    <a class="tile" href="noten.html"><span class="e">🎼</span><span class="t">Noten lernen</span><span class="s">Noten auf dem Griffbrett finden, Lagen und Tonleitern, mit Mikrofon: Ton spielen und sehen, ob er sauber ist.</span><span class="k" id="k-nt"></span></a>
   </div>
   <h2 class="gh">🎸 Gitarre</h2>
   <div class="grid">
@@ -72,6 +73,7 @@ var stars=0,done=0;Object.keys(th.stars||{}).forEach(function(k){stars+=th.stars
 var lv=Math.floor(Math.sqrt((gp.xp||0)/40))+1;
 $('#stats').innerHTML='<div><b>'+Math.floor(mins/60)+'</b><span>Min. Geige heute</span></div><div><b>'+(gp.xp||0)+'</b><span>XP Geigenpult</span></div><div><b>'+lv+'</b><span>Level Geigenpult</span></div><div><b>'+stars+'</b><span>Sterne Theorie</span></div>';
 $('#k-gp').textContent=Object.keys(gp.lessons||{}).length+' von 27 Lektionen';
+try{var nt=MK.get('nt',null);$('#k-nt').textContent=nt&&nt.hit?nt.hit+' Treffer · beste Serie '+nt.best:'Jetzt anfangen'}catch(e){}
 $('#k-th').textContent=done?done+' Lektionen begonnen':'Jetzt anfangen';
 $('#k-rk').textContent='';
 try{var lp=JSON.parse(localStorage.getItem('mk.lastpage')||'null');if(lp&&lp.p&&lp.d&&Date.now()-lp.d<30*864e5){$('#rs-t').textContent=lp.t;$('#rs-a').href=lp.p;$('#resume').hidden=false}}catch(e){}

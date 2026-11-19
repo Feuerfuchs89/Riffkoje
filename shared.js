@@ -46,8 +46,8 @@ applyTheme();
 try{matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyTheme)}catch(e){}
 
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige'],['riffkoje.html','Riffkoje','Riff'],['akkorde.html','Gitarre','Gitarre',['akkorde.html','tabs.html']],['whistle.html','Low Whistle','Whistle'],['theorie.html','Theorie','Theorie']];
-var SUBS=[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur']];
+var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige',['geigenpult.html','noten.html']],['riffkoje.html','Riffkoje','Riff'],['akkorde.html','Gitarre','Gitarre',['akkorde.html','tabs.html']],['whistle.html','Low Whistle','Whistle'],['theorie.html','Theorie','Theorie']];
+var SUBG=[['Geige',[['geigenpult.html','🎻 Geigenpult'],['noten.html','🎼 Noten lernen']]],['Gitarre',[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur']]]];
 function css(){
   var s=document.createElement('style');
   s.textContent=':root{--nb:#0B1520;--nf:#E7EDF2;--nl:#3A5068;--nb2:#1E3346;--nm:#A3B3C2;--na:#8CBBEA;--nao:#0B1520}'+
@@ -324,8 +324,9 @@ MK.nav=function(){
   var n=document.createElement('nav');n.id='mknav';n.setAttribute('aria-label','Bereiche');
   n.innerHTML=LINKS.map(function(l){var cur=here===l[0]||(here===''&&l[0]==='index.html')||(l[3]&&l[3].indexOf(here)>=0);return '<a href="'+l[0]+'"'+(cur?' aria-current="page"':'')+'><span class="lf">'+l[1]+'</span><span class="ls">'+l[2]+'</span></a>'}).join('')+'<span class="sp"></span><button id="mk-theme" class="ic" type="button"></button><button id="mk-set" class="ic" type="button" aria-label="Einstellungen" title="Einstellungen">⚙</button><button id="mk-prof" type="button" aria-haspopup="dialog">'+esc(p.emoji)+'<span class="nm"> '+esc(p.name)+'</span></button>';
   document.body.insertBefore(n,document.body.firstChild);
-  if(SUBS.some(function(x){return x[0]===here})){
-    var sb=document.createElement('nav');sb.id='mksub';sb.setAttribute('aria-label','Gitarre');
+  var SUBS=null,SUBL='';SUBG.forEach(function(g){if(g[1].some(function(x){return x[0]===here})){SUBS=g[1];SUBL=g[0]}});
+  if(SUBS){
+    var sb=document.createElement('nav');sb.id='mksub';sb.setAttribute('aria-label',SUBL);
     sb.innerHTML=SUBS.map(function(x){return '<a href="'+x[0]+'"'+(x[0]===here?' aria-current="page"':'')+'>'+x[1]+'</a>'}).join('');
     n.parentNode.insertBefore(sb,n.nextSibling);
   }
