@@ -54,6 +54,22 @@ Alle Bereiche und die Navigationsleiste nutzen jetzt die Farben der Praxis-App: 
 - **Freunde:** Jede Person nutzt ihre eigene Sync-Datei. Profile werden über eine zufällige Kennung erkannt, notfalls über den Namen.
 - Nicht enthalten: Gemini-Schlüssel, Pad-Belegung und Riffkoje-Aufnahmen.
 
+## Stand v21: Aufnahme auswerten, Heute üben, Wochenverlauf, Verknüpfungen
+- **Aufnahme auswerten (analyse.html, Geige → 🎙):** Du nimmst dein Spiel mit dem Mikrofon auf (Eingang wie in den Einstellungen) oder lädst eine Audiodatei. Die Seite zeigt pro Ton die Abweichung in Cent (gerechnet ab deiner eigenen Grundstimmung), die Schwankung, Tempo, Gleichmäßigkeit, Pausen und ein Tonhöhen-Diagramm. Dazu kurze Hinweise. Der Verlauf der letzten Auswertungen vergleicht mit dem letzten Mal. Aufnahmezeit zählt wie Übungszeit. Alles läuft auf dem Gerät.
+  - Erkennung: Autokorrelation mit Oktavprüfung über die Obertöne (Handy-Mikrofone haben oft kaum Grundton). Wiederholte gleiche Töne werden über Lautstärkeeinbrüche getrennt. Die Werte sind Schätzungen mit wenigen Cent Unsicherheit.
+- **Heute üben:** Neue Karte oben auf der Startseite. „Los geht’s“ öffnet den 10-Minuten-Plan im Geigenpult.
+- **Diese Woche:** Balken der Übeminuten der letzten sieben Tage, geübte Tage und Trefferquote aus Noten lernen.
+- **Verknüpfungen:** Die Lektionen „Lagen“ (1–3) und „Tonleitern“ haben einen Knopf „In Noten lernen üben“ (springt mit der passenden Lage). In Noten lernen führt ein Link zurück zur Lektion. Übungszeit aus Noten lernen zählt im Geigen-Protokoll (Min. Geige heute, Serie).
+- **Noten lernen merkt sich:** Lage, Namen, Ton, Oktavfehler, Saiten, Schreibweise und Tonleiter. Mit `?lage=2` oder `?mode=s` lässt sich die Seite direkt in eine Lage oder Tonleiter-Ansicht öffnen.
+- Tippflächen: Knöpfe und Auswahlfelder sind mindestens 44 px hoch (kleine Knöpfe 40 px).
+- Bibliotheken für die Notenanzeige (Tone, OSMD) werden nach dem ersten Laden im Zwischenspeicher gehalten und funktionieren danach auch ohne Netz.
+
+## Alle Lagen in „Noten lernen“ (Stand v20)
+- Beim Start zeigt die Seite die 1. bis 5. Lage auf einem Griffbrett (16 Halbtonschritte, bis zum hohen G auf der E-Saite). Gestrichelte Linien zeigen, wo die jeweilige Lage endet. Die Zeilenbeschriftung nennt die Lage. Höher als die 5. Lage kommen die meisten Hobby-Geiger selten.
+- Oben lassen sich einzelne Lagen wählen (1. bis 5. Lage).
+- Tonleitern: Bei einer einzelnen Lage siehst du die Tonleiter mit Fingernummern genau in dieser Lage. Bei „Alle Lagen“ leuchten alle Stellen der Tonleiter auf dem ganzen Griffbrett mit dem Notennamen auf.
+- Übungen, Entdecken, Mikrofon und die Schwächen-Ringe arbeiten mit der gewählten Auswahl.
+
 ## Einheitliche Optik, Wischen, 10-Minuten-Plan, Schwächen (Stand v18)
 - Alle Seiten haben jetzt dieselbe Schrift (Systemschrift), dieselben Überschriften mit Symbol, gleiche Kartenrundung (14 px) und gleiche Knopfformen (10 px). Die Geigenpult-Seite lädt keine Google-Schriften mehr, sie funktioniert also auch offline gleich.
 - Geigenpult, Vollbild-Pult: mit dem Finger nach links wischen = nächste Seite, nach rechts = zurück. Kurze oder schräge Wischer zählen nicht, damit Tippen auf eine Note weiter funktioniert.

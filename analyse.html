@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B1520">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Aufnahme auswerten</title>
+<script src="shared.js"></script>
+<style>
+:root{--bg:#F5F1EA;--card:#fff;--ink:#14283B;--muted:#4D5F70;--line:#DDD5C8;--acc:#17466E;--on:#fff;--ok:#3F5F45;--warn:#9A6200;--bad:#A3352B}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0F1A24;--card:#172633;--ink:#E7EDF2;--muted:#A3B3C2;--line:#2B3D4E;--acc:#8CBBEA;--on:#0B1520;--ok:#86B08D;--warn:#E3B25C;--bad:#E08A80;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0F1A24;--card:#172633;--ink:#E7EDF2;--muted:#A3B3C2;--line:#2B3D4E;--acc:#8CBBEA;--on:#0B1520;--ok:#86B08D;--warn:#E3B25C;--bad:#E08A80;color-scheme:dark}
+:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:620px;margin:0 auto;padding:16px 16px 80px;display:grid;gap:14px}
+h1{font-size:1.6rem;margin:4px 0 0}
+h2{font-size:1.1rem;margin:0}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;min-height:44px;cursor:pointer}
+.btn.primary{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+input[type=file]{font:inherit;max-width:100%}
+.stats{display:flex;gap:18px;flex-wrap:wrap}.stats b{font-size:1.4rem;display:block;line-height:1.1}.stats span{font-size:.8rem;color:var(--muted)}
+.err{border-left:4px solid var(--bad);padding:8px 12px;background:var(--bg);border-radius:0 10px 10px 0;font-size:.92rem}
+.meter{position:relative;height:14px;border-radius:7px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.meter i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--acc);transition:width .08s}
+.chartwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+canvas{display:block}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:6px 6px;border-top:1px solid var(--line)}th{color:var(--muted);font-weight:600;border-top:0;font-size:.8rem}
+td.n{font-weight:700}
+.dev{display:inline-block;height:8px;border-radius:4px;vertical-align:middle;min-width:3px}
+.tag{font-size:.78rem;padding:1px 8px;border-radius:999px;border:1px solid var(--line)}
+.tag.ok{border-color:var(--ok);color:var(--ok)}.tag.warn{border-color:var(--warn);color:var(--warn)}.tag.bad{border-color:var(--bad);color:var(--bad)}
+ul.hints{margin:0;padding-left:1.1rem;display:grid;gap:6px}
+.lg{display:flex;gap:12px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
+.lg i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-2px;margin-right:4px}
+progress{width:100%;height:10px;accent-color:var(--acc)}
+</style>
+</head>
+<body>
+<main>
+<h1>🎙 Aufnahme auswerten</h1>
+<p class="muted" style="margin:0">Spiel ein Stück vor, oder lade eine Aufnahme. Die Seite zeigt dir pro Ton, wie sauber er war, und wie gleichmäßig dein Tempo ist. Alles bleibt auf deinem Gerät.</p>
+
+<section class="card" aria-label="Aufnahme">
+  <div class="row">
+    <button class="btn primary" id="rec" type="button">● Aufnehmen</button>
+    <button class="btn" id="stop" type="button" hidden>■ Fertig</button>
+    <span class="small muted" id="timer"></span>
+  </div>
+  <div class="meter" id="lvlw" hidden><i id="lvl"></i></div>
+  <div class="row"><label class="small">oder Datei laden: <input type="file" id="file" accept="audio/*,video/mp4,.m4a,.wav,.mp3,.ogg,.webm"></label></div>
+  <p class="small muted" style="margin:0">Mikrofon und Eingang stellst du unter <a href="einstellungen.html">Einstellungen</a> ein. Spiel am besten ein kurzes Stück (1 bis 3 Minuten) in einer ruhigen Umgebung.</p>
+  <div class="err" id="err" role="alert" hidden></div>
+  <progress id="prog" max="100" value="0" hidden aria-label="Auswertung läuft"></progress>
+</section>
+
+<section id="out" hidden>
+  <div class="card" aria-label="Ergebnis">
+    <h2>Ergebnis</h2>
+    <div class="stats" id="sum"></div>
+    <ul class="hints" id="hints"></ul>
+  </div>
+  <div class="card">
+    <h2>Tonhöhe über die Zeit</h2>
+    <div class="chartwrap" id="cw"><canvas id="cv" role="img" aria-label="Tonhöhenverlauf der Aufnahme"></canvas></div>
+    <p class="small muted" id="scrollhint" style="margin:0" hidden>Bei längeren Aufnahmen wischst du das Diagramm seitwärts.</p>
+    <div class="lg"><span><i style="background:var(--ok)"></i>sauber (bis 15 Cent)</span><span><i style="background:var(--warn)"></i>leicht daneben (bis 30)</span><span><i style="background:var(--bad)"></i>deutlich daneben</span></div>
+  </div>
+  <div class="card">
+    <h2>Pro Ton</h2>
+    <table id="tbl"><thead><tr><th>Ton</th><th>Noten</th><th>Abweichung</th><th>Schwankung</th></tr></thead><tbody></tbody></table>
+    <p class="small muted" style="margin:0">Abweichung: wie weit der Ton im Mittel über (+) oder unter (−) dem Sollton liegt, gerechnet ab deiner eigenen Grundstimmung. 100 Cent sind ein Halbton. Schwankung: wie unruhig der Ton gehalten wurde.</p>
+  </div>
+  <div class="card" id="histc" hidden>
+    <h2>Verlauf</h2>
+    <div id="hist" class="small"></div>
+  </div>
+</section>
+</main>
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+var NAMES=['C','Cis','D','Dis','E','F','Fis','G','Gis','A','B','H'];
+function nm(m){return NAMES[((m%12)+12)%12]+(Math.floor(m/12)-1)}
+var OPEN=[55,62,69,76];
+
+/* ───── Tonhöhe: normalisierte Autokorrelation (wie McLeod), mit Zwischenwert ───── */
+var THR=0.9;
+function pitchFrame(x,i0,N,sr){
+  var tmin=Math.max(8,Math.floor(sr/1500)),tmax=Math.ceil(sr/180),W=N-tmax,j,t;
+  var r=new Float32Array(tmax+2),m0=0,mt=0;
+  for(j=0;j<W;j++){m0+=x[i0+j]*x[i0+j];mt+=x[i0+tmin-1+j]*x[i0+tmin-1+j]}
+  for(t=tmin-1;t<=tmax;t++){
+    var s=0;for(j=0;j<W;j++)s+=x[i0+j]*x[i0+t+j];
+    r[t]=(m0+mt)>0?2*s/(m0+mt):0;
+    mt+=x[i0+t+W]*x[i0+t+W]-x[i0+t]*x[i0+t];
+  }
+  /* erst nach dem ersten Nulldurchgang nach Spitzen suchen */
+  t=tmin;while(t<tmax&&r[t]>0)t++;
+  var best=0,peaks=[];
+  for(;t<tmax;t++){
+    if(r[t]>0&&r[t]>r[t-1]&&r[t]>=r[t+1]){peaks.push(t);if(r[t]>best)best=r[t]}
+  }
+  if(!peaks.length||best<0.5)return [0,0];
+  var k=peaks[0];for(var q=0;q<peaks.length;q++){if(r[peaks[q]]>=THR*best){k=peaks[q];break}}
+  var a=r[k-1],b=r[k],c=r[k+1],d=(a-2*b+c),sh=d!==0?0.5*(a-c)/d:0;
+  var hz=sr/(k+sh);
+  /* Oktavfehler prüfen: Bei Handy-Mikrofonen fehlt oft die Grundschwingung, deshalb vergleiche ich die Obertöne.
+     Liegt bei den ungeraden Vielfachen der halben Frequenz viel Energie, ist die halbe Frequenz die wahre.
+     Fehlen bei der gefundenen Frequenz die ungeraden Vielfachen fast ganz, liegt der Ton eine Oktave höher. */
+  function sum(f,ks){var t=0;ks.forEach(function(k){if(f*k<sr/2*0.9)t+=amp(x,i0,N,f*k,sr)});return t}
+  var evenCur=sum(hz,[2,4,6]),oddCur=sum(hz,[1,3,5]);
+  if(hz/2>=180&&sum(hz/2,[1,3,5])>0.35*evenCur)hz/=2;
+  else if(oddCur<0.12*evenCur&&hz*2<=1500)hz*=2;
+  return [hz,b];
+}
+function amp(x,i0,N,f,sr){
+  var w=2*Math.PI*f/sr,c=2*Math.cos(w),s1=0,s2=0,i,v,h;
+  for(i=0;i<N;i++){h=0.5-0.5*Math.cos(2*Math.PI*i/(N-1));v=x[i0+i]*h+c*s1-s2;s2=s1;s1=v}
+  return Math.sqrt(Math.max(0,s1*s1+s2*s2-c*s1*s2));
+}
+
+/* ───── Auswertung ───── */
+function median(a){if(!a.length)return 0;var b=a.slice().sort(function(x,y){return x-y});var m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2}
+function pct(a,p){if(!a.length)return 0;var b=a.slice().sort(function(x,y){return x-y});return b[Math.min(b.length-1,Math.floor(p*(b.length-1)+.5))]}
+function iqr(a){return pct(a,.75)-pct(a,.25)}
+
+function downmix(chs,sr){
+  var f=Math.max(1,Math.round(sr/22050)),n=Math.floor(chs[0].length/f),out=new Float32Array(n),i,j,c,s;
+  for(i=0;i<n;i++){s=0;for(c=0;c<chs.length;c++)for(j=0;j<f;j++)s+=chs[c][i*f+j];out[i]=s/(f*chs.length)}
+  return {x:out,sr:sr/f};
+}
+
+function analyze(x,sr,progress){
+  var N=2048,H=512,frames=[],i,nF=Math.max(0,Math.floor((x.length-N)/H)),rms=new Float32Array(nF);
+  for(i=0;i<nF;i++){var s=0;for(var j=0;j<N;j++){var v=x[i*H+j];s+=v*v}rms[i]=Math.sqrt(s/N)}
+  var gate=Math.max(0.004,0.22*pct(Array.prototype.slice.call(rms),.9));
+  return {N:N,H:H,sr:sr,nF:nF,rms:rms,gate:gate,step:function(from,to){
+    for(var i=from;i<to&&i<nF;i++){
+      var p=[0,0];if(rms[i]>gate)p=pitchFrame(x,i*H,N,sr);
+      frames[i]=p;
+    }
+  },frames:frames};
+}
+
+function finish(A,durSec){
+  var H=A.H,sr=A.sr,dt=H/sr,fr=A.frames,midi=new Float32Array(A.nF),i;
+  for(i=0;i<A.nF;i++){var p=fr[i];midi[i]=(p&&p[0]>0&&p[1]>0.8)?12*Math.log2(p[0]/440)+69:NaN}
+  /* Töne: gleichbleibende Tonhöhe über mindestens 5 Frames */
+  var notes=[],cur=null;
+  function close(){if(cur&&cur.m.length>=5)notes.push(cur);cur=null}
+  for(i=0;i<A.nF;i++){
+    var m=midi[i];
+    if(isNaN(m)){close();continue}
+    var rv=A.rms[i];
+    if(cur){
+      var ref=median(cur.m.slice(-5));
+      /* gleicher Ton, aber Lautstärke ist eingebrochen und wieder angestiegen: neuer Strich */
+      if(rv<0.4*cur.peak)cur.dip=true;
+      if(cur.dip){cur.low=Math.min(cur.low,rv);if(rv>1.6*cur.low&&rv>0.6*cur.peak){close();cur={t0:i,t1:i,m:[m],peak:rv,low:rv,dip:false};continue}}
+      if(Math.abs(m-ref)<0.6){cur.m.push(m);cur.t1=i;if(rv>cur.peak)cur.peak=rv;if(!cur.dip)cur.low=rv;continue}
+      close();
+    }
+    cur={t0:i,t1:i,m:[m],peak:rv,low:rv,dip:false};
+  }
+  close();
+  var all=[];notes.forEach(function(n){n.m.forEach(function(v){all.push((v-Math.round(v))*100)})});
+  var tune=median(all);
+  notes.forEach(function(n){
+    var md=median(n.m),r=Math.round(md);
+    n.midi=r;n.dev=(md-r)*100-tune;n.spread=iqr(n.m.map(function(v){return v*100}));
+    n.t=n.t0*dt;n.len=(n.t1-n.t0+1)*dt;
+  });
+  /* Treffsicherheit nach Dauer gewichtet */
+  var w=0,wok=0;notes.forEach(function(n){w+=n.len;if(Math.abs(n.dev)<=15)wok+=n.len});
+  var w15=w?Math.round(100*wok/w):0;
+  /* Tempo und Gleichmäßigkeit */
+  var ioi=[];for(i=1;i<notes.length;i++){var g=notes[i].t-notes[i-1].t;if(g>0.15&&g<2)ioi.push(g)}
+  var base=0,even=null;
+  if(ioi.length>=6){
+    /* Grundschlag: häufigste Länge im Bereich 0,25 bis 1,2 s */
+    var cand=ioi.filter(function(v){return v>=0.25&&v<=1.2}),bestC=0;
+    cand.forEach(function(c){var cnt=cand.filter(function(v){return Math.abs(v-c)<0.12*c}).length;if(cnt>bestC){bestC=cnt;base=c}});
+    if(base){
+      var near=cand.filter(function(v){return Math.abs(v-base)<0.12*base});base=median(near);
+      var okc=0,tot=0;ioi.forEach(function(v){var q=v/base,k=Math.max(0.5,Math.round(q*2)/2);if(q<0.4)return;tot++;if(Math.abs(v-k*base)<=0.2*k*base)okc++});
+      even=tot?Math.round(100*okc/tot):null;
+    }
+  }
+  /* Pausen */
+  var pauses=0;for(i=1;i<notes.length;i++){var gap=notes[i].t-(notes[i-1].t+notes[i-1].len);if(gap>1.5)pauses++}
+  /* Pro Ton */
+  var by={};notes.forEach(function(n){(by[n.midi]=by[n.midi]||[]).push(n)});
+  var per=Object.keys(by).map(Number).sort(function(a,b){return a-b}).map(function(m){
+    var a=by[m];return {midi:m,n:a.length,dev:median(a.map(function(n){return n.dev})),spread:median(a.map(function(n){return n.spread})),open:OPEN.indexOf(m)>=0}
+  }).filter(function(p){return p.n>=Math.max(3,Math.round(notes.length*0.03))});
+  /* Hinweise */
+  var hints=[],op=per.filter(function(p){return p.open}),fr2=per.filter(function(p){return !p.open});
+  if(notes.length<8)hints.push('Es wurden nur wenige Töne erkannt. Spiel etwas lauter oder näher am Mikrofon, dann wird die Auswertung genauer.');
+  else{
+    if(w15>=85)hints.push('Sauber: '+w15+' % der Tondauer liegen innerhalb von 15 Cent.');
+    else if(w15>=65)hints.push('Gut: '+w15+' % der Tondauer liegen innerhalb von 15 Cent. Bei den markierten Tönen unten lohnt sich ein zweiter Blick.');
+    else hints.push('Noch wackelig: nur '+w15+' % der Tondauer liegen innerhalb von 15 Cent. Spiel langsamer und mit Bordun, das schärft das Gehör.');
+    var worst=per.filter(function(p){return Math.abs(p.dev)>=15}).sort(function(a,b){return Math.abs(b.dev)-Math.abs(a.dev)}).slice(0,3);
+    if(worst.length)hints.push('Am meisten daneben: '+worst.map(function(p){return nm(p.midi)+' ('+(p.dev>0?'+':'')+Math.round(p.dev)+' Cent, '+(p.dev>0?'zu hoch':'zu tief')+')'}).join(', ')+'.');
+    if(op.length&&fr2.length){
+      var so=median(op.map(function(p){return p.spread})),sf=median(fr2.map(function(p){return p.spread}));
+      if(sf>so*2&&sf>8)hints.push('Gegriffene Töne schwanken mit etwa '+Math.round(sf)+' Cent deutlich mehr als leere Saiten ('+Math.round(so)+' Cent). Der Finger landet erst daneben und korrigiert nach. Hilft: langsam üben und den Finger gezielt aufsetzen.');
+    }
+    if(even!=null){
+      if(even>=70)hints.push('Das Tempo ist gleichmäßig (etwa '+Math.round(60/base)+' Schläge pro Minute, '+even+' % der Einsätze im Takt).');
+      else hints.push('Das Tempo schwankt: nur '+even+' % der Einsätze liegen im Takt (Grundschlag etwa '+Math.round(60/base)+' pro Minute). Ein Metronom im Geigenpult hilft.');
+    }
+    if(pauses>0)hints.push(pauses+' längere Pause'+(pauses>1?'n':'')+' (über 1,5 Sekunden). Bei Neustarts lohnt es sich, kleine Abschnitte einzeln zu üben.');
+    if(Math.abs(tune)>=15)hints.push('Deine Geige liegt im Mittel '+Math.abs(Math.round(tune))+' Cent '+(tune>0?'über':'unter')+' 440 Hz. Stimm sie vor dem Spielen nach.');
+  }
+  return {dur:durSec,notes:notes,per:per,w15:w15,tune:tune,base:base,even:even,pauses:pauses,hints:hints,midi:midi,dt:dt,voiced:A.nF?midi.filter(function(v){return !isNaN(v)}).length/A.nF:0};
+}
+
+/* ───── Anzeige ───── */
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()||'#888'}
+function draw(R){
+  var cv=$('#cv'),cw=$('#cw'),dpr=window.devicePixelRatio||1,wpx=Math.max(cw.clientWidth||320,Math.min(6000,Math.round(R.dur*24))),hpx=220;
+  var vals=[],i;for(i=0;i<R.midi.length;i++)if(!isNaN(R.midi[i]))vals.push(R.midi[i]);
+  cv.width=wpx*dpr;cv.height=hpx*dpr;cv.style.width=wpx+'px';cv.style.height=hpx+'px';
+  var c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,wpx,hpx);
+  if(vals.length<3){c.fillStyle=css('--muted');c.font='14px system-ui';c.fillText('Keine Töne erkannt.',12,30);return}
+  var lo=Math.floor(pct(vals,.02))-1,hi=Math.ceil(pct(vals,.98))+1,L=34,T=10,B=22,iw=wpx-L-8,ih=hpx-T-B;
+  var X=function(t){return L+t/R.dur*iw},Y=function(m){return T+(hi-m)/(hi-lo)*ih};
+  c.font='11px system-ui';c.textBaseline='middle';
+  for(var m=lo;m<=hi;m++){var y=Y(m),nat=[0,2,4,5,7,9,11].indexOf(((m%12)+12)%12)>=0;
+    c.strokeStyle=css('--line');c.globalAlpha=nat?1:.35;c.beginPath();c.moveTo(L,y);c.lineTo(wpx-4,y);c.stroke();c.globalAlpha=1;
+    if(nat){c.fillStyle=css('--muted');c.fillText(nm(m),2,y)}}
+  c.textBaseline='alphabetic';c.fillStyle=css('--muted');
+  var step=R.dur>60?10:R.dur>20?5:2;for(var s=0;s<=R.dur;s+=step){c.fillText(s+' s',X(s)-8,hpx-6)}
+  var ok=css('--ok'),wa=css('--warn'),ba=css('--bad');
+  for(i=0;i<R.midi.length;i++){
+    var v=R.midi[i];if(isNaN(v))continue;
+    var d=Math.abs((v-Math.round(v))*100-R.tune);
+    c.fillStyle=d<=15?ok:d<=30?wa:ba;c.beginPath();c.arc(X(i*R.dt),Y(v),2.2,0,6.283);c.fill();
+  }
+}
+function show(R,saved){
+  $('#out').hidden=false;
+  var min=Math.floor(R.dur/60),sec=Math.round(R.dur%60);
+  $('#sum').innerHTML='<div><b>'+min+':'+String(sec).padStart(2,'0')+'</b><span>Dauer</span></div><div><b>'+R.notes.length+'</b><span>Töne erkannt</span></div><div><b>'+R.w15+' %</b><span>sauber (±15 Cent)</span></div>'+(R.base?'<div><b>'+Math.round(60/R.base)+'</b><span>Schläge/Min.</span></div>':'')+(R.even!=null?'<div><b>'+R.even+' %</b><span>gleichmäßig</span></div>':'');
+  $('#hints').innerHTML=R.hints.map(function(h){return '<li>'+h.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</li>'}).join('');
+  var tb=$('#tbl tbody');tb.innerHTML='';
+  R.per.forEach(function(p){
+    var a=Math.abs(p.dev),cls=a<=15?'ok':a<=30?'warn':'bad',txt=a<=15?'sauber':p.dev>0?'zu hoch':'zu tief';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td class="n">'+nm(p.midi)+(p.open?' <span class="small muted">leer</span>':'')+'</td><td>'+p.n+'</td><td><span class="tag '+cls+'">'+(p.dev>0?'+':'')+Math.round(p.dev)+' ct · '+txt+'</span></td><td>'+Math.round(p.spread)+' ct</td>';
+    tb.appendChild(tr);
+  });
+  draw(R);$('#scrollhint').hidden=!($('#cw').scrollWidth>$('#cw').clientWidth+4);
+  try{
+    var H=MK.get('an',{h:[]});if(!Array.isArray(H.h))H.h=[];
+    if(saved){H.h.push({t:Date.now(),d:MK.day(),dur:Math.round(R.dur),n:R.notes.length,w15:R.w15,even:R.even,tune:Math.round(R.tune)});if(H.h.length>40)H.h=H.h.slice(-40);MK.set('an',H)}
+    var hs=H.h.slice(-6).reverse();
+    if(hs.length){
+      $('#histc').hidden=false;
+      var prev=saved?H.h[H.h.length-2]:H.h[H.h.length-1];
+      $('#hist').innerHTML=(saved&&prev?'<p style="margin:0 0 8px">Sauber (±15 Cent): <b>'+R.w15+' %</b>, beim letzten Mal '+prev.w15+' % ('+(R.w15>prev.w15?'besser':R.w15<prev.w15?'etwas schwächer':'gleich')+').</p>':'')+
+        '<table><thead><tr><th>Datum</th><th>Dauer</th><th>Töne</th><th>Sauber</th></tr></thead><tbody>'+hs.map(function(e){return '<tr><td>'+e.d.split('-').reverse().join('.')+'</td><td>'+Math.floor(e.dur/60)+':'+String(e.dur%60).padStart(2,'0')+'</td><td>'+e.n+'</td><td>'+e.w15+' %</td></tr>'}).join('')+'</tbody></table>';
+    }
+  }catch(e){}
+}
+
+/* ───── Rechnen in kleinen Schritten, damit die Seite bedienbar bleibt ───── */
+function run(x,sr,dur,saved){
+  var A=analyze(x,sr),pos=0,CH=60;
+  $('#prog').hidden=false;$('#prog').value=0;$('#out').hidden=true;
+  (function go(){
+    A.step(pos,pos+CH);pos+=CH;$('#prog').value=A.nF?Math.round(100*Math.min(pos,A.nF)/A.nF):100;
+    if(pos<A.nF){setTimeout(go,0);return}
+    $('#prog').hidden=true;
+    var R=finish(A,dur);window.__an.last=R;show(R,saved);
+    var o=$('#out');if(o.scrollIntoView)o.scrollIntoView({block:'start',behavior:'smooth'});
+  })();
+}
+window.__an={setThr:function(v){THR=v},analyze:function(x,sr,dur){var A=analyze(x,sr);A.step(0,A.nF);return finish(A,dur)},run:run,last:null};
+
+/* ───── Aufnahme ───── */
+var REC={on:false,chunks:[],len:0,t0:0};
+function errText(e){
+  var n=e&&e.name||'';
+  if(!window.isSecureContext)return 'Das Mikrofon geht nur auf einer sicheren Seite (https, z. B. GitHub Pages, oder als lokale Datei). In einer Vorschau oder eingebetteten Ansicht ist es gesperrt. Öffne die App direkt im Browser.';
+  if(n==='NotAllowedError'||n==='SecurityError')return 'Das Mikrofon ist gesperrt. Erlaube es in den Browser-Einstellungen für diese Seite und versuche es nochmal.';
+  if(n==='NotFoundError'||n==='OverconstrainedError')return 'Kein passender Audio-Eingang gefunden. Prüfe den Eingang unter Einstellungen.';
+  return 'Das Mikrofon konnte nicht gestartet werden'+(e&&e.message?' ('+e.message+')':'')+'.';
+}
+function showErr(t){var e=$('#err');if(t){e.textContent=t;e.hidden=false}else e.hidden=true}
+function startRec(){
+  showErr('');
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){showErr(errText({name:'SecurityError'}));return}
+  var m=MK.mic(),cons={echoCancellation:false,noiseSuppression:false,autoGainControl:false};
+  if(m.dev)cons.deviceId={ideal:m.dev};
+  navigator.mediaDevices.getUserMedia({audio:cons}).then(function(st){
+    var K=window.AudioContext||window.webkitAudioContext,ctx=new K();if(ctx.resume)ctx.resume();
+    var src=ctx.createMediaStreamSource(st),pr=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();mute.gain.value=0;
+    REC={on:true,chunks:[],len:0,t0:Date.now(),ctx:ctx,st:st,pr:pr,src:src,sr:ctx.sampleRate};
+    pr.onaudioprocess=function(e){
+      if(!REC.on)return;var d=e.inputBuffer.getChannelData(0),c=new Float32Array(d);REC.chunks.push(c);REC.len+=c.length;
+      var s=0;for(var i=0;i<c.length;i+=8)s+=c[i]*c[i];var lv=Math.sqrt(s/(c.length/8));$('#lvl').style.width=Math.min(100,Math.round(lv*500))+'%';
+      if(REC.len/REC.sr>600)stopRec();
+    };
+    src.connect(pr);pr.connect(mute);mute.connect(ctx.destination);
+    $('#rec').hidden=true;$('#stop').hidden=false;$('#lvlw').hidden=false;
+    REC.iv=setInterval(function(){var s=Math.round((Date.now()-REC.t0)/1000);$('#timer').textContent='Aufnahme läuft: '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},250);
+  }).catch(function(e){showErr(errText(e))});
+}
+function stopRec(){
+  if(!REC.on)return;REC.on=false;clearInterval(REC.iv);
+  try{REC.pr.disconnect();REC.src.disconnect();REC.st.getTracks().forEach(function(t){t.stop()});REC.ctx.close()}catch(e){}
+  $('#rec').hidden=false;$('#stop').hidden=true;$('#lvlw').hidden=true;$('#timer').textContent='';
+  var x=new Float32Array(REC.len),o=0;REC.chunks.forEach(function(c){x.set(c,o);o+=c.length});
+  var dur=x.length/REC.sr;
+  if(dur<3){showErr('Die Aufnahme war zu kurz. Spiel mindestens ein paar Sekunden.');return}
+  /* Übungszeit zählt wie im Geigenpult */
+  try{var a=MK.get('gp.log',[]),d=MK.day(),e=a.filter(function(q){return q.d===d&&q.t==='Aufnahme'})[0];if(!e){e={d:d,t:'Aufnahme',s:0,p:0,h:null};a.push(e)}e.s+=Math.round(Math.min(dur,600));if(a.length>400)a=a.slice(-400);MK.set('gp.log',a)}catch(e){}
+  var dm=downmix([x],REC.sr);run(dm.x,dm.sr,dur,true);
+}
+$('#rec').onclick=startRec;$('#stop').onclick=stopRec;
+
+/* ───── Datei ───── */
+$('#file').onchange=function(){
+  var f=this.files&&this.files[0];if(!f)return;showErr('');
+  var fr=new FileReader();
+  fr.onerror=function(){showErr('Die Datei konnte nicht gelesen werden.')};
+  fr.onload=function(){
+    var K=window.AudioContext||window.webkitAudioContext,ctx=new K();
+    var done=function(buf){
+      var chs=[];for(var c=0;c<buf.numberOfChannels;c++)chs.push(buf.getChannelData(c));
+      var dm=downmix(chs,buf.sampleRate);try{ctx.close()}catch(e){}
+      run(dm.x,dm.sr,buf.duration,false);
+    };
+    var fail=function(){showErr('Dieses Audioformat kann der Browser nicht öffnen. Versuche eine WAV- oder MP3-Datei, oder nimm direkt hier auf.')};
+    try{var p=ctx.decodeAudioData(fr.result,done,fail);if(p&&p.catch)p.catch(fail)}catch(e){fail()}
+  };
+  fr.readAsArrayBuffer(f);
+};
+window.addEventListener('resize',function(){var R=window.__an.last;if(R&&!$('#out').hidden)draw(R)});
+})();
+</script>
+</body>
+</html>

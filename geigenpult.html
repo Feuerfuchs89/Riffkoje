@@ -314,6 +314,7 @@
       <div class="row" id="lesson-actions">
         <button class="btn" id="les-quiz" type="button">Quiz</button>
         <button class="btn primary" id="les-ex" type="button">Übung spielen</button>
+        <a class="btn" id="les-nt" href="noten.html" hidden>🎼 In „Noten lernen“ üben</a>
         <button class="btn small" id="les-manual" type="button">Ohne Mikro als erledigt markieren</button>
       </div>
       <p class="hint" id="lesson-state"></p>
@@ -2650,8 +2651,11 @@ $('#dq-go').addEventListener('click',function(){startQuiz({})});
 
 /* ── Lektionsansicht ── */
 var curLesson=null;
+/* Lektionen, zu denen „Noten lernen“ passt: Link mit Lage oder Tonleiter-Ansicht */
+var NTLINK={lagen1:'noten.html?lage=1',lagen2:'noten.html?lage=3',lagen3:'noten.html?lage=0','dur-bauplan':'noten.html?mode=s&lage=1','moll-bauplan':'noten.html?mode=s&lage=1','moll-d':'noten.html?mode=s&lage=1'};
 function openLesson(id){
   var l=lessonBy(id);if(!l)return;curLesson=id;
+  var nl=$('#les-nt');if(nl){nl.hidden=!NTLINK[id];if(NTLINK[id])nl.href=NTLINK[id]}
   $('#lesson').hidden=false;$('#lesson-title').textContent=l.t;$('#lesson-theory').innerHTML=l.th;
   $('#lesson-state').textContent=P.lessons[id]?'Abgeschlossen am '+P.lessons[id].d.split('-').reverse().join('.')+'.':'So wird die Lektion geschafft: Übung '+exGoal(id)+'-mal sauber spielen (bisher '+Math.min(exGoal(id),P.reps[id]||0)+'). Das Quiz hilft beim Lernen, ist aber freiwillig.';
   $('#les-manual').hidden=!!P.lessons[id];
@@ -3015,6 +3019,17 @@ var SONGS=[{"id":"stille-nacht","cat":"Weihnachten","title":"Stille Nacht (Urfas
 /* ───────── Stücke zum Üben (app) ───────── */
 function songById(id){return SONGS.find(function(x){return x.id===id})}
 render();
+/* Sprungmarken: ?plan=short (Heute üben) und ?lesson=ID (aus „Noten lernen“) */
+(function(){
+  var q=new URLSearchParams(location.search);
+  try{
+    if(q.get('plan')==='short'){
+      gpTab('ueben',true);
+      if(!P.plan||P.plan.day!==today()||P.plan.src!=='kurz'){P.plan=planRules(true);saveP();render()}
+      var el=$('#plan-list');if(el)setTimeout(function(){el.scrollIntoView({block:'start'})},60);
+    }else if(q.get('lesson')&&lessonBy(q.get('lesson'))){gpTab('ueben',true);openLesson(q.get('lesson'))}
+  }catch(e){}
+})();
 var SRC={'stille-nacht':['Urfassung 1818, weicht von der gesungenen Fassung ab',1],'o-tannenbaum':['Essener Sammlung, bitte gegenhören',1],'o-du-froehliche':['Essener Sammlung, bitte gegenhören',1],'haste-to-the-wedding':['O’Neill’s, 1903',0],'st-patricks-day':['O’Neill’s, 1903',0],'drowsy-maggie':['O’Neill’s, 1903',0]};
 var SOK=lsGet('gp.songok',{});
 function songRender(){

@@ -46,8 +46,8 @@ applyTheme();
 try{matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyTheme)}catch(e){}
 
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige',['geigenpult.html','noten.html']],['riffkoje.html','Riffkoje','Riff'],['akkorde.html','Gitarre','Gitarre',['akkorde.html','tabs.html']],['whistle.html','Low Whistle','Whistle'],['theorie.html','Theorie','Theorie']];
-var SUBG=[['Geige',[['geigenpult.html','🎻 Geigenpult'],['noten.html','🎼 Noten lernen']]],['Gitarre',[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur']]]];
+var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige',['geigenpult.html','noten.html','analyse.html']],['riffkoje.html','Riffkoje','Riff'],['akkorde.html','Gitarre','Gitarre',['akkorde.html','tabs.html']],['whistle.html','Low Whistle','Whistle'],['theorie.html','Theorie','Theorie']];
+var SUBG=[['Geige',[['geigenpult.html','🎻 Geigenpult'],['noten.html','🎼 Noten lernen'],['analyse.html','🎙 Aufnahme auswerten']]],['Gitarre',[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur']]]];
 function css(){
   var s=document.createElement('style');
   s.textContent=':root{--nb:#0B1520;--nf:#E7EDF2;--nl:#3A5068;--nb2:#1E3346;--nm:#A3B3C2;--na:#8CBBEA;--nao:#0B1520}'+
@@ -64,6 +64,7 @@ function css(){
   '#mkdlg button,#mkdlg input,#mkdlg select{font:inherit;border-radius:8px;border:1px solid var(--nl);background:var(--nb2);color:var(--nf);padding:8px 11px;min-height:38px}#mkdlg button{cursor:pointer}'+
   '#mkdlg button.pri{background:var(--na);color:var(--nao);border-color:var(--na)}#mkdlg .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}#mkdlg input[type=text]{flex:1;min-width:8em}'+
   '#mkdlg .em button{font-size:20px;padding:4px 8px}#mkdlg .em button[aria-pressed=true],#mkdlg .seg button[aria-pressed=true]{background:var(--na);color:var(--nao);border-color:var(--na)}'+
+  '.btn,.chip,select{min-height:44px}.btn.small{min-height:40px}#mknav a,#mksub a{min-height:40px;display:inline-flex;align-items:center}#mknav button{min-height:40px}'+
   '#mknav a:focus-visible,#mknav button:focus-visible,#mkdlg button:focus-visible,#mkdlg input:focus-visible,#mkdlg select:focus-visible{outline:2px solid var(--na);outline-offset:2px}';
   document.head.appendChild(s);
 }

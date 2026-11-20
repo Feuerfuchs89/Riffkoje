@@ -42,12 +42,17 @@ svg.staff{max-height:22vh;margin:0 auto}
 .pill.ok{border-color:var(--ok);color:var(--ok)}
 .group p{margin:0 0 6px;color:var(--muted);font-size:.9rem}
 .group>div{display:flex;gap:6px;flex-wrap:wrap}
-.board{background:#221E1C;border-radius:10px 10px 18px 18px;padding:8px 8px 10px;display:grid;grid-template-columns:78px repeat(4,1fr);color:#EDE6D8}
+.board{background:#221E1C;border-radius:10px 10px 18px 18px;padding:8px 8px 10px;display:grid;grid-template-columns:86px repeat(4,1fr);color:#EDE6D8}
 .board .h{text-align:center;font:600 .95rem Georgia,serif;padding:4px 0 6px;color:#CBBF9E}
 .board .r{display:flex;align-items:center;font-size:.72rem;line-height:1.2;color:#A59E92;height:44px}
 .cell{position:relative;height:44px;border:0;background:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:inherit;font:inherit}
 .cell::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:var(--w);transform:translateX(-50%);background:#B9B3A6}
 .cell.nut{border-bottom:4px solid #EDE6D8}
+.xrow,.board .xrow{display:none}
+.board.all .r{font-size:.66rem}
+.board.all .r small{display:block;color:#CBBF9E;font-size:.62rem;letter-spacing:.02em}
+.board.all .sepl{background:repeating-linear-gradient(90deg,rgba(237,230,216,.45) 0 6px,transparent 6px 12px) top/100% 1px no-repeat}
+.board.all .sepl.r{background-position:top;background-size:100% 1px}
 .dot{position:relative;z-index:1;width:36px;height:36px;border-radius:50%;background:#3B3430;display:flex;align-items:center;justify-content:center;font:600 1rem Georgia,serif;transition:background .15s;color:#EDE6D8}
 .cell.ok .dot{background:#3F7F57;color:#fff}.cell.bad .dot{background:#B23A48;color:#fff}.cell.on .dot{background:#6FB5D6;color:#0E1A1E}.cell.hot .dot{background:#3F7F57;color:#fff;transform:scale(1.18)}
 .cell[data-lv="1"] .dot{box-shadow:0 0 0 3px var(--ok)}
@@ -84,7 +89,7 @@ svg.staff{max-height:22vh;margin:0 auto}
 <button class="btn" id="m-s" type="button" aria-pressed="false">Tonleitern</button>
 </div>
 <div class="stick">
-<div class="card"><svg class="staff" id="staff" viewBox="0 0 320 200" role="img" aria-label="Notenzeile"></svg></div>
+<div class="card"><svg class="staff" id="staff" viewBox="0 -26 320 226" role="img" aria-label="Notenzeile"></svg></div>
 <div id="msg" aria-live="polite"></div>
 <div id="m-live" hidden>
     <div id="m-heard">Ich höre zu …</div>
@@ -101,7 +106,7 @@ svg.staff{max-height:22vh;margin:0 auto}
   <div class="err" id="m-err" role="alert" hidden></div>
 </section>
 
-<div class="group"><p>Lage</p><div id="posbox"></div></div>
+<div class="group"><p>Griffbrett</p><div id="posbox"></div><p class="small" style="margin:8px 0 0"><a href="geigenpult.html?lesson=lagen1">📘 Dazu die Lektionen „Lagen“ und „Tonleitern“ im Geigenpult</a></p></div>
 <div class="group" id="scalebox" hidden><p>Tonleiter, eine Oktave aufwärts</p><div id="scales"></div><div style="margin-top:10px" class="row"><button class="btn" id="play" type="button">▶ Vorspielen</button><button class="btn" id="mine" type="button">🎤 Selbst spielen</button></div></div>
 <div class="board" id="board"></div>
 <div class="group" id="strbox"><p>Saiten zum Üben</p><div id="strings"></div></div>
@@ -118,17 +123,23 @@ svg.staff{max-height:22vh;margin:0 auto}
 <div class="lg" id="weaklg" hidden><span><i style="background:var(--bad)"></i>wackelt</span><span><i style="background:var(--star)"></i>fast</span><span><i style="background:var(--ok)"></i>sitzt</span><span>Ringe im Griffbrett</span></div>
 <div class="row"><button class="btn" id="weakreset" type="button" hidden>Zurücksetzen</button></div>
 </section>
-<p class="small muted">Tipp: Die Geige hat keine Bünde. Die Punkte im Griffbrett zeigen die Fingerstellung in der gewählten Lage. „tief“ heißt: Finger dicht an den vorigen. „hoch“: etwas weiter oben.</p>
+<p class="small muted">Tipp: Die Geige hat keine Bünde. Bei „Alle Lagen“ (1. bis 5. Lage) trennen Strichellinien die Lagen: Jede Linie zeigt, wo die Lage darüber endet. Wähle oben eine einzelne Lage, wenn du sie gezielt üben willst. Bei Tonleitern siehst du dann die Tonleiter in genau dieser Lage, bei „Alle Lagen“ überall auf dem Griffbrett. Die Punkte zeigen die Fingerstellung. „tief“ heißt: Finger dicht an den vorigen. „hoch“: etwas weiter oben.</p>
 </main>
 <script>
 (function(){
 'use strict';
 var L=['C','D','E','F','G','A','B'],S=[0,2,4,5,7,9,11];
 var STR=['G','D','A','E'],OPEN=[55,62,69,76];
-var pos=1;
-function off(){return 2*(pos-1)}
+var pos=0; /* 0 = ganzes Griffbrett, 1–3 = eine Lage */
+function off(){return pos>0?2*(pos-1):0}
+function nrows(){return pos===0?16:8}
 function semi(s,f){return OPEN[s]+(f?f+off():0)}
 var ROWS=['leer','1. Finger tief','1. Finger hoch','2. Finger tief','2. Finger hoch','3. Finger tief','3. Finger hoch','4. Finger'];
+/* Ganzes Griffbrett: Halbtonschritte ab der leeren Saite. Strichellinien dort, wo die 1. Lage endet (nach 7) und die 2. Lage endet (nach 9) */
+var ROWS_ALL=ROWS.concat(['3. Finger hoch','4. Finger','3. Finger hoch','4. Finger','3. Finger hoch','4. Finger','3. Finger hoch','4. Finger']);
+var ZONE_ALL=['','1. Lage','','','','','','','2. Lage','','3. Lage','','4. Lage','','5. Lage',''];
+function isSep(f){return f>=8&&f%2===0}
+function rowName(f){return pos===0?(f>=8?(2+Math.floor((f-8)/2))+'. Lage · '+ROWS_ALL[f]:ROWS_ALL[f]):ROWS[f]}
 var NAT={0:0,2:1,4:2,5:3,7:4,9:5,11:6},DL=['C','D','E','F','G','A','H'];
 var $=function(id){return document.getElementById(id)};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -138,7 +149,7 @@ var on=new Set([0,1,2,3]),t0=0;
 /* Fortschritt pro Profil */
 var PR=MK.get('nt',null);
 if(!PR||typeof PR!=='object')PR={hit:0,miss:0,run:0,best:0,days:{},mic:false};
-PR.days=PR.days||{};PR.w=PR.w||{};
+PR.days=PR.days||{};PR.w=PR.w||{};PR.log=PR.log||{};PR.ui=PR.ui||{};
 function save(){try{MK.set('nt',PR)}catch(e){}}
 function stats(){$('st-hit').textContent=PR.hit;$('st-run').textContent=PR.run;$('st-best').textContent=PR.best;$('st-days').textContent=Object.keys(PR.days).length}
 /* Schwächen pro Ton: h = Treffer, m = gewichtete Fehler (verblassen mit jedem Treffer) */
@@ -151,9 +162,26 @@ function rec(m,ok,half){
   if(ok){e.h++;e.m=Math.max(0,e.m*0.8-0.1)}else e.m+=half?0.5:1;
   e.t=Date.now();
 }
+var lastAns=0;
+/* Übungszeit ins gemeinsame Geigen-Protokoll schreiben, damit sie bei „Min. Geige heute“ und der Serie zählt */
+function logSecs(sec,d){
+  try{
+    var a=MK.get('gp.log',[]),e=a.filter(function(x){return x.d===d&&x.t==='Noten lernen'})[0];
+    if(!e){e={d:d,t:'Noten lernen',s:0,p:0,h:null};a.push(e)}
+    e.s+=Math.round(sec);
+    var L=PR.log[d];if(L&&L.h+L.m>0)e.h=Math.round(L.h/(L.h+L.m)*100);
+    if(a.length>400)a=a.slice(-400);
+    MK.set('gp.log',a);
+  }catch(x){}
+}
 function count(ok,m,half){
   rec(m,ok,half);
-  PR.days[MK.day()]=1;
+  var dk=MK.day(),now=Date.now();
+  PR.days[dk]=1;
+  var L=PR.log[dk]||(PR.log[dk]={h:0,m:0});if(ok)L.h++;else L.m++;
+  var ks=Object.keys(PR.log).sort();while(ks.length>60)delete PR.log[ks.shift()];
+  var from=Math.max(lastAns,t0||0),dt=from?Math.min(30,(now-from)/1000):4;
+  lastAns=now;logSecs(Math.max(2,dt),dk);
   if(ok){PR.hit++;PR.run++;if(PR.run>PR.best)PR.best=PR.run}else{PR.miss++;PR.run=0}
   save();stats();weakUI();
 }
@@ -171,19 +199,35 @@ var board=$('board');
 board.appendChild(Object.assign(document.createElement('div'),{className:'h'}));
 STR.forEach(function(s){board.appendChild(Object.assign(document.createElement('div'),{className:'h',textContent:s}))});
 var cells=[];
-for(var f=0;f<8;f++){
-  board.appendChild(Object.assign(document.createElement('div'),{className:'r',textContent:ROWS[f]}));
+var rowEls=[];
+for(var f=0;f<16;f++){
+  var rl=Object.assign(document.createElement('div'),{className:'r'});rowEls.push(rl);board.appendChild(rl);
   for(var s=0;s<4;s++){
     (function(s,f){
       var b=document.createElement('button');
-      b.type='button';b.className='cell'+(f===0?' nut':'');
+      b.type='button';b.className='cell'+(f===0?' nut':'');b.dataset.f=f;
       b.style.setProperty('--w',(3.2-s*0.7)+'px');
-      b.setAttribute('aria-label',STR[s]+'-Saite, '+ROWS[f]);
       b.innerHTML='<span class="dot"></span>';
       b.onclick=function(){tap(s,f,b)};
       board.appendChild(b);cells.push({b:b,s:s,f:f});
     })(s,f);
   }
+}
+function applyPos(){
+  board.classList.toggle('all',pos===0);
+  var n=nrows();
+  for(var f=0;f<16;f++){
+    var rl=rowEls[f];
+    var z=pos===0&&ZONE_ALL[f]&&f>0?'<small>'+ZONE_ALL[f]+'</small>':'';
+    rl.innerHTML='<span>'+z+esc(pos===0?ROWS_ALL[f]:ROWS[f])+'</span>';
+    rl.classList.toggle('xrow',f>=n);
+    rl.classList.toggle('sepl',pos===0&&isSep(f));
+  }
+  cells.forEach(function(c){
+    c.b.classList.toggle('xrow',c.f>=n);
+    c.b.classList.toggle('sepl',pos===0&&isSep(c.f));
+    c.b.setAttribute('aria-label',STR[c.s]+'-Saite, '+(c.f?rowName(c.f):'leer'));
+  });
 }
 function labels(){
   if(mode==='s')return;
@@ -227,12 +271,12 @@ function play(m){
 
 /* Ablauf */
 function flash(b,cls){b.classList.add(cls);setTimeout(function(){b.classList.remove(cls)},650)}
-function where(s,f){return f?STR[s]+'-Saite, '+ROWS[f]:STR[s]+'-Saite leer'}
+function where(s,f){return f?STR[s]+'-Saite, '+rowName(f):STR[s]+'-Saite leer'}
 function msg(t,c){var m=$('msg');m.textContent=t;m.className=c||''}
 function score(){$('score').textContent=mode==='u'?('Treffer '+PR.hit+' · Fehler '+PR.miss):''}
 function next(){
   var pool=[],seen={};
-  cells.forEach(function(c){if(on.has(c.s)){var m=semi(c.s,c.f);if(!seen[m]){seen[m]=1;pool.push(m)}}});
+  cells.forEach(function(c){if(on.has(c.s)&&c.f<nrows()){var m=semi(c.s,c.f);if(!seen[m]){seen[m]=1;pool.push(m)}}});
   var n,useW=$('wk').checked;
   function draw(){
     if(!useW)return pool[Math.floor(Math.random()*pool.length)];
@@ -278,7 +322,7 @@ $('m-u').onclick=function(){setMode('u')};$('m-e').onclick=function(){setMode('e
 /* Übersicht der Schwächen */
 function weakUI(){
   var ks=Object.keys(PR.w).filter(function(k){return level(+k)>0}),has=Object.keys(PR.w).length>0;
-  cells.forEach(function(c){var l=level(semi(c.s,c.f));if(l&&mode!=='s')c.b.setAttribute('data-lv',l);else c.b.removeAttribute('data-lv')});
+  cells.forEach(function(c){var l=level(semi(c.s,c.f));if(l&&mode!=='s'&&c.f<nrows())c.b.setAttribute('data-lv',l);else c.b.removeAttribute('data-lv')});
   var rows=Object.keys(PR.w).map(function(k){return +k}).filter(function(m){return PR.w[m].m>0.3}).sort(function(a,b){return weakScore(b)-weakScore(a)}).slice(0,5);
   var box=$('weaklist');
   if(!has){box.className='small muted';box.textContent='Noch keine Daten. Übe ein paar Töne, dann zeigt sich hier, welche noch wackeln.'}
@@ -286,7 +330,7 @@ function weakUI(){
   else{
     box.className='';
     box.innerHTML='<ul>'+rows.map(function(m){
-      var e=PR.w[m],c=cells.filter(function(x){return semi(x.s,x.f)===m})[0];
+      var e=PR.w[m],c=cells.filter(function(x){return x.f<nrows()&&semi(x.s,x.f)===m})[0];
       return '<li><span><b>'+esc(info(m).name)+'</b> <span class="muted small">'+(c?esc(where(c.s,c.f)):'')+'</span></span><span class="muted small">'+Math.round(e.m)+' Fehler · '+e.h+' Treffer</span><span class="bar" aria-hidden="true"><i style="width:'+Math.round(weakScore(m)*100)+'%"></i></span></li>';
     }).join('')+'</ul>';
   }
@@ -323,11 +367,12 @@ function cellOf(m){
   var o=OPEN.indexOf(m),s,f;if(o>=0)return [o,0];
   for(s=0;s<4;s++){f=m-OPEN[s]-off();if(f>=1&&f<=6)return [s,f]}
   for(s=0;s<4;s++)if(m-OPEN[s]-off()===7)return [s,7];
+  if(pos===0)for(s=0;s<4;s++){f=m-OPEN[s];if(f>=8&&f<=15)return [s,f]}
   return null;
 }
-function rootFor(iv,pc,r1){for(var m=55;m<=72;m++)if(m%12===pc&&iv.every(function(i){return cellOf(m+i)}))return m;return r1}
+function rootFor(iv,pc,r1){for(var m=55;m<=80;m++)if(m%12===pc&&iv.every(function(i){return cellOf(m+i)}))return m;return r1}
 var SC=[['G-Dur',55,MAJ,'s'],['D-Dur',62,MAJ,'s'],['A-Dur',69,MAJ,'s'],['C-Dur',60,MAJ,'s'],['a-Moll',69,MIN,'s'],['d-Moll',62,MIN,'b'],['g-Moll',55,MIN,'b'],['e-Moll',64,MIN,'s'],['D-dorisch',62,DOR,'s'],['A-dorisch',69,DOR,'s'],['E-phrygisch',64,PHR,'s'],['a-Moll harmonisch',69,HAR,'s']].map(function(a){
-  return {n:a[0],p:a[3],r1:a[1],iv:a[2],notes:function(){var b=pos===1?this.r1:rootFor(this.iv,this.r1%12,this.r1);return this.iv.map(function(i){return b+i})}};
+  return {n:a[0],p:a[3],r1:a[1],iv:a[2],notes:function(){var b=pos<=1?this.r1:rootFor(this.iv,this.r1%12,this.r1);return this.iv.map(function(i){return b+i})}};
 });
 sc=SC[0];
 function ledg(x,yy){return "<line x1='"+(x-15)+"' x2='"+(x+15)+"' y1='"+yy+"' y2='"+yy+"' stroke='currentColor' stroke-width='1.5'/>"}
@@ -348,7 +393,10 @@ function showScale(){
   run++;force=sc.p;
   cells.forEach(function(c){c.b.classList.remove('on','hot');c.b.firstChild.textContent=''});
   var ms=sc.notes();
-  ms.forEach(function(m){var a=cellOf(m);if(!a)return;var c=cells[a[1]*4+a[0]];c.b.classList.add('on');c.b.firstChild.textContent=FN[a[1]]});
+  if(pos===0){
+    var pcs={};ms.forEach(function(m){pcs[m%12]=1});
+    cells.forEach(function(c){var m=semi(c.s,c.f);if(c.f<nrows()&&pcs[m%12]){c.b.classList.add('on');c.b.firstChild.textContent=info(m).name}});
+  }else ms.forEach(function(m){var a=cellOf(m);if(!a)return;var c=cells[a[1]*4+a[0]];c.b.classList.add('on');c.b.firstChild.textContent=FN[a[1]]});
   staffScale(ms);
   msg(ms.map(function(m){return info(m).name}).join(' – '));
 }
@@ -373,10 +421,10 @@ SC.forEach(function(x,i){
   b.onclick=function(){sc=x;force=x.p;Array.prototype.forEach.call($('scales').children,function(y){y.setAttribute('aria-pressed',y===b)});run++;micOff();showLive(false);showScale()};
   $('scales').appendChild(b);
 });
-[1,2,3].forEach(function(p){
-  var b=Object.assign(document.createElement('button'),{className:'chip',type:'button',textContent:p+'. Lage'});
+[0,1,2,3,4,5].forEach(function(p){
+  var b=Object.assign(document.createElement('button'),{className:'chip',type:'button',textContent:p?p+'. Lage':'Alle Lagen'});
   b.setAttribute('aria-pressed',p===pos);
-  b.onclick=function(){pos=p;Array.prototype.forEach.call($('posbox').children,function(x){x.setAttribute('aria-pressed',x===b)});setMode(mode)};
+  b.onclick=function(){pos=p;applyPos();Array.prototype.forEach.call($('posbox').children,function(x){x.setAttribute('aria-pressed',x===b)});setMode(mode)};
   $('posbox').appendChild(b);
 });
 
@@ -481,7 +529,7 @@ function hitU(g){
   var slow=Date.now()-t0>12000;
   if(slow){rec(g,false,true)}
   count(true,g);
-  var c=cells.filter(function(x){return semi(x.s,x.f)===g})[0];
+  var c=cells.filter(function(x){return x.f<nrows()&&semi(x.s,x.f)===g})[0];
   msg('Richtig: '+info(g).name+(c?' · '+where(c.s,c.f):''),'ok');score();
   setTimeout(function(){if(mode==='u')next()},1100);
 }
@@ -505,7 +553,27 @@ document.addEventListener('visibilitychange',function(){if(document.hidden){micO
 
 stats();devList();
 $('wk').checked=PR.wk!==false;
-labels();setMode('u');
+/* gemerkte Einstellungen und Sprungmarken aus dem Link (?lage=2, ?mode=s) */
+(function(){
+  var U=PR.ui,q=new URLSearchParams(location.search);
+  if(typeof U.pos==='number'&&U.pos>=0&&U.pos<=5)pos=U.pos;
+  if(U.names!=null)$('names').checked=!!U.names;
+  if(U.sound!=null)$('sound').checked=!!U.sound;
+  if(U.octok!=null)$('octok').checked=!!U.octok;
+  if(U.pref==='s'||U.pref==='b'){pref=U.pref;Array.prototype.forEach.call($('spell').children,function(x,i){x.setAttribute('aria-pressed',(i===0)===(pref==='s'))})}
+  if(Array.isArray(U.str)&&U.str.length){on=new Set(U.str.filter(function(i){return i>=0&&i<4}));if(!on.size)on=new Set([0,1,2,3]);Array.prototype.forEach.call($('strings').children,function(x,i){x.setAttribute('aria-pressed',on.has(i))})}
+  if(typeof U.sci==='number'&&SC[U.sci]){sc=SC[U.sci];Array.prototype.forEach.call($('scales').children,function(x,i){x.setAttribute('aria-pressed',i===U.sci)})}
+  if(q.has('lage')){var l=+q.get('lage');if(l>=0&&l<=5)pos=l}
+  window.__startMode=q.get('mode');
+  Array.prototype.forEach.call($('posbox').children,function(x,i){x.setAttribute('aria-pressed',i===pos)});
+  function saveUI(){
+    PR.ui={pos:pos,names:$('names').checked,sound:$('sound').checked,octok:$('octok').checked,pref:pref,str:Array.from(on),sci:SC.indexOf(sc)};
+    save();
+  }
+  document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('.chip,label'))setTimeout(saveUI,0)});
+  document.addEventListener('change',function(){setTimeout(saveUI,0)});
+})();
+applyPos();labels();setMode(['u','e','s'].indexOf(window.__startMode)>=0?window.__startMode:'u');
 window.__nt={setMode:setMode,heard:heard,listen:listen,info:info,cells:cells,get goal(){return goal},get target(){return target},PR:PR};
 })();
 </script>
