@@ -42,6 +42,13 @@ td.n{font-weight:700}
 ul.hints{margin:0;padding-left:1.1rem;display:grid;gap:6px}
 .lg{display:flex;gap:12px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
 .lg i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-2px;margin-right:4px}
+audio{width:100%;max-width:100%}
+.rl{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.rl li{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:6px;background:var(--bg)}
+.rl .top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.rl .acts{display:flex;gap:8px;flex-wrap:wrap}
+.rl .btn{min-height:44px;padding:6px 12px}
+input.txt{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;min-height:44px;min-width:0;flex:1 1 160px}
 progress{width:100%;height:10px;accent-color:var(--acc)}
 </style>
 </head>
@@ -69,6 +76,12 @@ progress{width:100%;height:10px;accent-color:var(--acc)}
     <div class="stats" id="sum"></div>
     <ul class="hints" id="hints"></ul>
   </div>
+  <div class="card" id="savec" hidden>
+    <h2>Gefällt dir die Aufnahme?</h2>
+    <audio id="pl" controls preload="metadata"></audio>
+    <div class="row"><input class="txt" id="ttl" type="text" maxlength="60" placeholder="Name, z. B. Go Tell Aunt Rhody" aria-label="Name der Aufnahme"><button class="btn primary" id="sv" type="button">Aufnahme speichern</button></div>
+    <p class="small muted" style="margin:0" id="svmsg">Gespeichert wird nur auf diesem Gerät, getrennt pro Profil.</p>
+  </div>
   <div class="card">
     <h2>Tonhöhe über die Zeit</h2>
     <div class="chartwrap" id="cw"><canvas id="cv" role="img" aria-label="Tonhöhenverlauf der Aufnahme"></canvas></div>
@@ -84,6 +97,11 @@ progress{width:100%;height:10px;accent-color:var(--acc)}
     <h2>Verlauf</h2>
     <div id="hist" class="small"></div>
   </div>
+</section>
+<section class="card" id="libc" hidden aria-label="Gespeicherte Aufnahmen">
+  <h2>Meine Aufnahmen</h2>
+  <ul class="rl" id="lib"></ul>
+  <p class="small muted" style="margin:0" id="libinfo"></p>
 </section>
 </main>
 <script>
@@ -283,11 +301,85 @@ function run(x,sr,dur,saved){
     A.step(pos,pos+CH);pos+=CH;$('#prog').value=A.nF?Math.round(100*Math.min(pos,A.nF)/A.nF):100;
     if(pos<A.nF){setTimeout(go,0);return}
     $('#prog').hidden=true;
-    var R=finish(A,dur);window.__an.last=R;show(R,saved);
+    var R=finish(A,dur);window.__an.last=R;show(R,saved);try{prepSave(x,sr,R,saved)}catch(e){}
     var o=$('#out');if(o.scrollIntoView)o.scrollIntoView({block:'start',behavior:'smooth'});
   })();
 }
 window.__an={setThr:function(v){THR=v},analyze:function(x,sr,dur){var A=analyze(x,sr);A.step(0,A.nF);return finish(A,dur)},run:run,last:null};
+
+
+/* ───── Aufnahmen speichern (IndexedDB, pro Profil) ───── */
+var CUR=null,DB=null,plUrl=null;
+function pid(){try{return MK.profile().id}catch(e){return 'p1'}}
+function idb(){
+  return new Promise(function(res,rej){
+    if(DB)return res(DB);
+    if(!window.indexedDB)return rej(new Error('idb'));
+    var q=indexedDB.open('musikkoje-rec',1);
+    q.onupgradeneeded=function(){var d=q.result;if(!d.objectStoreNames.contains('rec')){var st=d.createObjectStore('rec',{keyPath:'id'});st.createIndex('pr','pr')}};
+    q.onsuccess=function(){DB=q.result;res(DB)};q.onerror=function(){rej(q.error||new Error('idb'))};
+  });
+}
+function tx(mode,fn){return idb().then(function(d){return new Promise(function(res,rej){var t=d.transaction('rec',mode),st=t.objectStore('rec'),out=fn(st);t.oncomplete=function(){res(out&&out.result)};t.onerror=t.onabort=function(){rej(t.error||new Error('tx'))}})})}
+function wavBlob(x,sr){
+  var n=x.length,b=new ArrayBuffer(44+n*2),v=new DataView(b);
+  function w(o,t){for(var i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))}
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  for(var i=0;i<n;i++){var s=Math.max(-1,Math.min(1,x[i]));v.setInt16(44+i*2,s<0?s*32768:s*32767,true)}
+  return new Blob([b],{type:'audio/wav'});
+}
+function fmtD(s){return Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0')}
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+function prepSave(x,sr,R,saved){
+  CUR={blob:wavBlob(x,sr),dur:R.dur,w15:R.w15,n:R.notes.length,tune:Math.round(R.tune),done:false};
+  if(plUrl)URL.revokeObjectURL(plUrl);plUrl=URL.createObjectURL(CUR.blob);
+  $('#pl').src=plUrl;$('#savec').hidden=false;$('#sv').disabled=false;$('#sv').textContent='Aufnahme speichern';
+  var d=new Date();$('#ttl').value='';$('#ttl').placeholder='Name, z. B. Stück vom '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.';
+  $('#svmsg').textContent='Gespeichert wird nur auf diesem Gerät, getrennt pro Profil. Größe: ca. '+(CUR.blob.size/1048576).toFixed(1).replace('.',',')+' MB.';
+}
+$('#sv').onclick=function(){
+  if(!CUR||CUR.done)return;var btn=this;btn.disabled=true;
+  var t=$('#ttl').value.trim()||$('#ttl').placeholder.replace(/^Name, z\. B\. /,'');
+  var rec={id:Date.now()+'-'+Math.random().toString(36).slice(2,6),pr:pid(),t:Date.now(),d:MK.day(),name:t,dur:CUR.dur,w15:CUR.w15,n:CUR.n,blob:CUR.blob};
+  tx('readwrite',function(st){return st.put(rec)}).then(function(){
+    CUR.done=true;btn.textContent='✓ Gespeichert';$('#svmsg').textContent='Du findest sie unten unter „Meine Aufnahmen“.';
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+    renderLib();
+  }).catch(function(){btn.disabled=false;$('#svmsg').textContent='Speichern ging nicht. Der Browser erlaubt hier keinen Speicher, oder er ist voll. Bei privaten Fenstern ist das normal.'});
+};
+var ARM=null;
+function renderLib(){
+  tx('readonly',function(st){return st.index('pr').getAll(pid())}).then(function(all){
+    all=(all||[]).sort(function(a,b){return b.t-a.t});
+    var c=$('#libc');c.hidden=!all.length;if(!all.length)return;
+    var tot=all.reduce(function(a,r){return a+(r.blob?r.blob.size:0)},0);
+    $('#libinfo').textContent=all.length+' Aufnahme'+(all.length>1?'n':'')+', zusammen ca. '+(tot/1048576).toFixed(1).replace('.',',')+' MB auf diesem Gerät.';
+    var L=$('#lib');L.innerHTML='';
+    all.forEach(function(r){
+      var li=document.createElement('li');
+      li.innerHTML='<div class="top"><b>'+esc(r.name)+'</b><span class="small muted">'+r.d.split('-').reverse().join('.')+' · '+fmtD(r.dur)+' · '+r.w15+' % sauber</span></div><div class="pw"></div><div class="acts"><button class="btn" data-a="play" type="button">▶ Anhören</button><button class="btn" data-a="ren" type="button">Umbenennen</button><button class="btn" data-a="dl" type="button">Herunterladen</button><button class="btn" data-a="del" type="button">Löschen</button></div>';
+      li.querySelector('.acts').onclick=function(e){
+        var a=e.target.getAttribute&&e.target.getAttribute('data-a');if(!a)return;
+        if(a==='play'){
+          var pw=li.querySelector('.pw');if(pw.firstChild){var au=pw.firstChild;au.pause();URL.revokeObjectURL(au.src);pw.innerHTML='';e.target.textContent='▶ Anhören';return}
+          var au2=document.createElement('audio');au2.controls=true;au2.src=URL.createObjectURL(r.blob);pw.appendChild(au2);e.target.textContent='■ Zuklappen';au2.play&&au2.play().catch(function(){});
+        }else if(a==='dl'){
+          var u=URL.createObjectURL(r.blob),l=document.createElement('a');l.href=u;l.download=(r.name.replace(/[^\wäöüÄÖÜß-]+/g,'_')||'aufnahme')+'.wav';document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);
+        }else if(a==='ren'){
+          var row=li.querySelector('.top');row.innerHTML='<input class="txt" type="text" maxlength="60" value="'+esc(r.name)+'" aria-label="Neuer Name"><button class="btn primary" type="button">OK</button>';
+          var inp=row.querySelector('input');inp.focus();inp.select();
+          var ok=function(){var nn=inp.value.trim()||r.name;r.name=nn;tx('readwrite',function(st){return st.put(r)}).then(renderLib)};
+          row.querySelector('button').onclick=ok;inp.onkeydown=function(k){if(k.key==='Enter')ok()};
+        }else if(a==='del'){
+          if(ARM!==r.id){ARM=r.id;e.target.textContent='Wirklich löschen?';setTimeout(function(){if(ARM===r.id){ARM=null;if(e.target.isConnected)e.target.textContent='Löschen'}},4000);return}
+          ARM=null;tx('readwrite',function(st){return st.delete(r.id)}).then(renderLib);
+        }
+      };
+      L.appendChild(li);
+    });
+  }).catch(function(){});
+}
+renderLib();
 
 /* ───── Aufnahme ───── */
 var REC={on:false,chunks:[],len:0,t0:0};

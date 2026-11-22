@@ -54,6 +54,10 @@ Alle Bereiche und die Navigationsleiste nutzen jetzt die Farben der Praxis-App: 
 - **Freunde:** Jede Person nutzt ihre eigene Sync-Datei. Profile werden über eine zufällige Kennung erkannt, notfalls über den Namen.
 - Nicht enthalten: Gemini-Schlüssel, Pad-Belegung und Riffkoje-Aufnahmen.
 
+## Stand v22: Aufnahmen speichern
+- Nach jeder Auswertung (aufgenommen oder geladen) kannst du die Aufnahme anhören, benennen und speichern. Unten auf der Seite steht „Meine Aufnahmen“: anhören, umbenennen, als WAV herunterladen, löschen (mit Rückfrage).
+- Gespeichert wird nur auf dem Gerät (im Browser, IndexedDB), getrennt pro Profil. Eine Minute ist ca. 1,3 MB groß. Die Aufnahmen sind **nicht** in der Geräte-Sicherung und beim Abgleich zwischen Geräten enthalten. Wichtige Aufnahmen daher herunterladen. Löschst du die Browserdaten, sind sie weg.
+
 ## Stand v21: Aufnahme auswerten, Heute üben, Wochenverlauf, Verknüpfungen
 - **Aufnahme auswerten (analyse.html, Geige → 🎙):** Du nimmst dein Spiel mit dem Mikrofon auf (Eingang wie in den Einstellungen) oder lädst eine Audiodatei. Die Seite zeigt pro Ton die Abweichung in Cent (gerechnet ab deiner eigenen Grundstimmung), die Schwankung, Tempo, Gleichmäßigkeit, Pausen und ein Tonhöhen-Diagramm. Dazu kurze Hinweise. Der Verlauf der letzten Auswertungen vergleicht mit dem letzten Mal. Aufnahmezeit zählt wie Übungszeit. Alles läuft auf dem Gerät.
   - Erkennung: Autokorrelation mit Oktavprüfung über die Obertöne (Handy-Mikrofone haben oft kaum Grundton). Wiederholte gleiche Töne werden über Lautstärkeeinbrüche getrennt. Die Werte sind Schätzungen mit wenigen Cent Unsicherheit.
