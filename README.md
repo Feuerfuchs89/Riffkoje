@@ -54,6 +54,10 @@ Alle Bereiche und die Navigationsleiste nutzen jetzt die Farben der Praxis-App: 
 - **Freunde:** Jede Person nutzt ihre eigene Sync-Datei. Profile werden über eine zufällige Kennung erkannt, notfalls über den Namen.
 - Nicht enthalten: Gemini-Schlüssel, Pad-Belegung und Riffkoje-Aufnahmen.
 
+## Stand v23: Mentor-Bericht
+- Neue Seite `mentor.html` (Kachel auf der Startseite, im Geige-Untermenü). Sie baut aus den Daten des gewählten Profils einen Text: Übungszeit der letzten 28 Tage, Lektionen, Bestwerte, schwächste Töne aus „Noten lernen“, die letzten Aufnahme-Auswertungen, Gitarre/Whistle/Theorie, dazu die Lieder in der App und eine Aufgabe (Plan, Lieder, Schwächen, Aufnahmen, freie Frage).
+- Den Text kopierst du in einen Chat mit Claude. Nichts wird automatisch verschickt, Aufnahmen sind nicht enthalten. Optionales Feld „Über dich“ (Ziele, Geschmack, Zeit) wird pro Profil gespeichert.
+
 ## Stand v22: Aufnahmen speichern
 - Nach jeder Auswertung (aufgenommen oder geladen) kannst du die Aufnahme anhören, benennen und speichern. Unten auf der Seite steht „Meine Aufnahmen“: anhören, umbenennen, als WAV herunterladen, löschen (mit Rückfrage).
 - Gespeichert wird nur auf dem Gerät (im Browser, IndexedDB), getrennt pro Profil. Eine Minute ist ca. 1,3 MB groß. Die Aufnahmen sind **nicht** in der Geräte-Sicherung und beim Abgleich zwischen Geräten enthalten. Wichtige Aufnahmen daher herunterladen. Löschst du die Browserdaten, sind sie weg.

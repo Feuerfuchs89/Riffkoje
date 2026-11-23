@@ -46,8 +46,8 @@ applyTheme();
 try{matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyTheme)}catch(e){}
 
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige',['geigenpult.html','noten.html','analyse.html']],['riffkoje.html','Riffkoje','Riff'],['akkorde.html','Gitarre','Gitarre',['akkorde.html','tabs.html']],['whistle.html','Low Whistle','Whistle'],['theorie.html','Theorie','Theorie']];
-var SUBG=[['Geige',[['geigenpult.html','🎻 Geigenpult'],['noten.html','🎼 Noten lernen'],['analyse.html','🎙 Aufnahme auswerten']]],['Gitarre',[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur']]]];
+var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige',['geigenpult.html','noten.html','analyse.html','mentor.html']],['riffkoje.html','Riffkoje','Riff'],['akkorde.html','Gitarre','Gitarre',['akkorde.html','tabs.html']],['whistle.html','Low Whistle','Whistle'],['theorie.html','Theorie','Theorie']];
+var SUBG=[['Geige',[['geigenpult.html','🎻 Geigenpult'],['noten.html','🎼 Noten lernen'],['analyse.html','🎙 Aufnahme auswerten'],['mentor.html','🧭 Mentor-Bericht']]],['Gitarre',[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur']]]];
 function css(){
   var s=document.createElement('style');
   s.textContent=':root{--nb:#0B1520;--nf:#E7EDF2;--nl:#3A5068;--nb2:#1E3346;--nm:#A3B3C2;--na:#8CBBEA;--nao:#0B1520}'+

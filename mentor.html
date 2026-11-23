@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B1520">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Mentor-Bericht</title>
+<script src="shared.js"></script>
+<style>
+:root{--bg:#F5F1EA;--card:#fff;--ink:#14283B;--muted:#4D5F70;--line:#DDD5C8;--acc:#17466E;--on:#fff;--ok:#3F5F45}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0F1A24;--card:#172633;--ink:#E7EDF2;--muted:#A3B3C2;--line:#2B3D4E;--acc:#8CBBEA;--on:#0B1520;--ok:#86B08D;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0F1A24;--card:#172633;--ink:#E7EDF2;--muted:#A3B3C2;--line:#2B3D4E;--acc:#8CBBEA;--on:#0B1520;--ok:#86B08D;color-scheme:dark}
+:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:620px;margin:0 auto;padding:16px 16px 80px;display:grid;gap:14px}
+h1{font-size:1.6rem;margin:4px 0 0}h2{font-size:1.1rem;margin:0}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;min-height:44px;cursor:pointer}
+.btn.primary{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+textarea{font:inherit;width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px;min-height:96px;resize:vertical}
+textarea.rep{font:.82rem/1.45 ui-monospace,Menlo,Consolas,monospace;min-height:340px}
+label{display:grid;gap:4px;font-size:.92rem}
+.ok{color:var(--ok);font-weight:600}
+a{color:var(--acc)}
+</style>
+</head>
+<body>
+<main>
+  <h1>🧭 Mentor-Bericht</h1>
+  <p class="muted" style="margin:0">Fasst deine Übungsdaten in einem Text zusammen. Kopiere ihn in einen Chat mit Claude, dann bekommst du Übungen und Lieder, die zu deinem Stand passen. Der Text entsteht nur auf diesem Gerät und wird nirgends hingeschickt, bis du ihn selbst einfügst.</p>
+
+  <section class="card" aria-label="Ziele">
+    <h2>Über dich (optional)</h2>
+    <label>Instrument, Ziele, Geschmack
+      <textarea id="ab" placeholder="z. B. Ich spiele seit einem Jahr Geige ohne Lehrer. Ziel: irische und schwedische Folkmelodien. Ich höre gern Metal und Folk. Ich habe ca. 10 Minuten am Tag."></textarea>
+    </label>
+    <label>Was soll der Mentor für dich tun?
+      <select id="fr" class="btn" style="width:100%;text-align:left">
+        <option value="plan">Übungsplan für die nächste Woche</option>
+        <option value="lieder">Passende nächste Lieder vorschlagen</option>
+        <option value="schwach">Meine Schwächen gezielt angehen</option>
+        <option value="auswert">Meine Aufnahmen einordnen</option>
+        <option value="frei">Freie Frage (schreibe ich selbst dazu)</option>
+      </select>
+    </label>
+  </section>
+
+  <section class="card" aria-label="Bericht">
+    <h2>Dein Bericht</h2>
+    <textarea id="rep" class="rep" readonly aria-label="Berichtstext"></textarea>
+    <div class="row">
+      <button class="btn primary" id="cp" type="button">Kopieren</button>
+      <button class="btn" id="sh" type="button" hidden>Teilen</button>
+      <button class="btn" id="dl" type="button">Als Datei</button>
+      <span class="small ok" id="msg" role="status"></span>
+    </div>
+    <p class="small muted" style="margin:0">Der Bericht enthält Namen und Zahlen deines Profils, aber keine Aufnahmen. Prüfe ihn kurz, bevor du ihn weitergibst.</p>
+  </section>
+</main>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+/* Kataloge aus dem Geigenpult (Stand v23), damit Lektionen und Lieder lesbar sind */
+var LESSONS=[["saiten","Die vier Saiten"],["noten","Noten lesen im Violinschlüssel"],["werte","Notenwerte und Takt"],["dur-bauplan","Dur-Tonleiter: der Bauplan"],["dur-d","D-Dur"],["dur-a","A-Dur"],["dur-g","G-Dur"],["lagen1","Lagen: die erste Lage"],["intervalle","Intervalle"],["dreiklang","Dreiklänge"],["moll-bauplan","Moll-Tonleiter: Bauplan und Parallele"],["moll","Moll-Tonleitern"],["moll-d","d-Moll und h-Moll"],["tonarten","Vorzeichen und Tonarten"],["lagen2","Lagen: die dritte Lage"],["lagen3","Lagen: Tonleitern über zwei Oktaven"],["stricharten","Bogen und Stricharten"],["punktiert","Punktierte Noten"],["dorisch","Dorisch (irisch und folkig)"],["mixo","Mixolydisch (Dur mit Kante)"],["phryg","Phrygisch und der Metal-Klang"],["galopp","Metal: Galopp-Riff"],["tritonus","Metal: Riff mit Tritonus"],["jig","Irischer Jig: Haste to the Wedding"],["reel","Irischer Reel: Drowsy Maggie"],["weihnacht","Weihnachtslied üben"],["polska","Schwedische Polska"]];
+var SONGS=[["Stille Nacht (Urfassung 1818)","Weihnachten","D-Dur, 6/8"],["O Tannenbaum","Weihnachten","G-Dur, 3/4"],["O du fröhliche","Weihnachten","G-Dur, 2/4"],["Haste to the Wedding (Jig)","Irisch","D-Dur, 6/8"],["St. Patrick’s Day (Jig)","Irisch","D-Dur, 6/8"],["Drowsy Maggie (Reel)","Irisch","E-Dorisch"]];
+var NN=['C','Cis','D','Dis','E','F','Fis','G','Gis','A','B','H'];
+function nname(m){return NN[m%12]+(Math.floor(m/12)-1)}
+function G(k,d){try{var v=MK.get(k,d);return v==null?d:v}catch(e){return d}}
+function dstr(d){var p=String(d).split('-');return p.length===3?p[2]+'.'+p[1]+'.':String(d)}
+function minTxt(s){return Math.round(s/60)}
+function pct(a,b){return b>0?Math.round(a/b*100):0}
+function lastDays(n){var o=[],t=new Date();t=new Date(t.getFullYear(),t.getMonth(),t.getDate());for(var i=0;i<n;i++){o.push(MK.day(t.getTime()));t.setDate(t.getDate()-1)}return o}
+function mapIf(o){return o&&typeof o==='object'?o:{}}
+
+function build(){
+  var pr=MK.profile(),L=[],now=new Date();
+  var add=function(t){L.push(t||'')};
+  var ab=$('#ab').value.trim(),fr=$('#fr').value;
+  var ASK={
+    plan:'Erstelle mir einen konkreten Übungsplan für die nächsten 7 Tage (Tag, Minuten, was genau). Berücksichtige meine Übungszeiten und meine Schwächen.',
+    lieder:'Schlage mir 3 bis 5 passende nächste Lieder vor, mit kurzer Begründung, was ich daran lerne und was schwer wird.',
+    schwach:'Analysiere meine Schwächen und gib mir 3 gezielte Übungen dagegen. Sag, woran ich merke, dass es besser wird.',
+    auswert:'Ordne meine Aufnahme-Auswertungen ein: Was läuft gut, was ist auffällig, was soll ich als Nächstes tun?',
+    frei:'Meine Frage:'
+  };
+  add('Du bist mein persönlicher Geigen-Mentor. Antworte auf Deutsch, freundlich und konkret, ohne Fachchinesisch.');
+  add('Wichtig: Erfinde keine Noten. Schlage nur Lieder vor, die du sicher kennst, und sag dazu, wo ich verlässliche Noten finde (z. B. IMSLP, Mutopia, Essener Volksliedsammlung). Du hörst mich nicht, nutze nur die Zahlen unten.');
+  add();
+  add('AUFGABE: '+ASK[fr]);
+  add();
+  add('=== PROFIL ===');
+  add('Name: '+pr.name+' · Stufe: '+({kita:'Entdecker (Kita)',schule:'Schulkind',erw:'Erwachsene/r Anfänger/in'}[pr.stage]||pr.stage||'-')+' · Stand: '+now.getDate()+'.'+(now.getMonth()+1)+'.'+now.getFullYear());
+  if(ab)add('Angaben von mir: '+ab);
+
+  /* Übungszeit */
+  var log=G('gp.log',[]);if(!Array.isArray(log))log=[];
+  var per={},byT={},d28=lastDays(28),d14=lastDays(14);
+  log.forEach(function(e){per[e.d]=(per[e.d]||0)+(+e.s||0);if(d28.indexOf(e.d)>=0){var t=e.t||'Üben';byT[t]=(byT[t]||0)+(+e.s||0)}});
+  var tot28=0,days28=0;d28.forEach(function(d){if(per[d]){tot28+=per[d];days28++}});
+  add();add('=== ÜBUNGSZEIT (Geige) ===');
+  if(!log.length)add('Noch keine Übungszeit aufgezeichnet.');
+  else{
+    add('Letzte 28 Tage: '+minTxt(tot28)+' Minuten an '+days28+' Tagen'+(days28?' (Ø '+Math.round(tot28/days28/60)+' Min. an Übungstagen)':'')+'.');
+    add('Letzte 14 Tage, Minuten pro Tag (neu → alt): '+d14.map(function(d){return Math.round((per[d]||0)/60)}).join(', '));
+    var ts=Object.keys(byT).sort(function(a,b){return byT[b]-byT[a]});
+    if(ts.length)add('Wofür geübt (28 Tage): '+ts.map(function(t){return t+' '+minTxt(byT[t])+' Min.'}).join(', '));
+  }
+
+  /* Geigenpult */
+  var P=mapIf(G('gp.prog',{})),les=mapIf(P.lessons);
+  add();add('=== GEIGENPULT / LEKTIONEN ===');
+  var done=LESSONS.filter(function(l){return les[l[0]]});
+  var nxt=LESSONS.find(function(l){return !les[l[0]]});
+  add('Lektionen geschafft: '+done.length+' von '+LESSONS.length+(done.length?' – '+done.map(function(l){return l[1]}).join('; '):'')+'.');
+  if(nxt)add('Nächste Lektion im Lehrplan: '+nxt[1]+'.');
+  if(P.xp)add('Erfahrungspunkte: '+P.xp+'. Tagesziel: '+(P.goal||15)+' Minuten.');
+  var best=mapIf(P.best),bk=Object.keys(best);
+  if(bk.length)add('Bestwerte beim Nachspielen: '+bk.slice(0,10).map(function(k){var p=k.split('|');return p[0]+' ('+({follow:'Mitspielen',wait:'Warten auf Ton'}[p[1]]||p[1])+') '+best[k]+' %'}).join('; ')+'.');
+  var sc=Object.keys(mapIf(P.sc));if(sc.length)add('Tonleitern gespielt: '+sc.join(', ')+'.');
+  var qz=mapIf(P.quiz),qk=Object.keys(qz);if(qk.length)add('Quiz-Ergebnisse: '+qk.slice(0,10).map(function(k){return k+' '+qz[k]}).join(', ')+'.');
+
+  /* Noten lernen */
+  var nt=mapIf(G('nt',null));
+  add();add('=== NOTEN LERNEN (Griffbrett-Ratespiel) ===');
+  if(!(nt.hit||nt.miss))add('Noch nicht gespielt.');
+  else{
+    add('Treffer '+nt.hit+', Fehler '+(nt.miss||0)+' (Quote '+pct(nt.hit,nt.hit+(nt.miss||0))+' %). Beste Serie: '+(nt.best||0)+'. Übungstage: '+Object.keys(mapIf(nt.days)).length+'.');
+    var w=mapIf(nt.w),ks=Object.keys(w).map(Number).filter(function(m){return w[m].h+w[m].m>=2});
+    function sc(m){var e=w[m];return e.m/(e.m+e.h*.5+1)}
+    var weak=ks.filter(function(m){return w[m].m>0.3}).sort(function(a,b){return sc(b)-sc(a)}).slice(0,8);
+    if(weak.length)add('Schwächste Töne: '+weak.map(function(m){return nname(m)+' ('+Math.round(w[m].m)+' Fehler, '+w[m].h+' Treffer)'}).join('; ')+'.');
+    else if(ks.length)add('Keine auffälligen Schwächen bei den bisher geübten Tönen.');
+    var strong=ks.filter(function(m){return w[m].h>=6&&w[m].m<=0.3}).sort(function(a,b){return w[b].h-w[a].h}).slice(0,8);
+    if(strong.length)add('Sichere Töne: '+strong.map(nname).join(', ')+'.');
+    var ui=mapIf(nt.ui);if(ui.pos!=null)add('Zuletzt geübte Lage: '+(ui.pos===0||ui.pos==='0'?'alle Lagen':ui.pos+'. Lage')+'.');
+  }
+
+  /* Aufnahmen */
+  var an=mapIf(G('an',{h:[]})),h=Array.isArray(an.h)?an.h:[];
+  add();add('=== AUFNAHMEN (Tonhöhen-Auswertung) ===');
+  if(!h.length)add('Noch keine Aufnahme ausgewertet.');
+  else{
+    add(h.length+' Auswertungen. Die letzten (neu → alt):');
+    h.slice(-6).reverse().forEach(function(e){add('- '+dstr(e.d)+': '+Math.round(e.dur)+' s, '+e.n+' Töne, '+e.w15+' % innerhalb ±15 Cent, Grundstimmung '+(e.tune>0?'+':'')+e.tune+' Cent'+(e.even!=null?', Rhythmus gleichmäßig '+e.even+' %':''))});
+    if(h.length>=6){var av=function(x){return Math.round(x.reduce(function(s,e){return s+e.w15},0)/x.length)};add('Trend sauber gespielt: die ersten 3 Auswertungen Ø '+av(h.slice(0,3))+' %, die letzten 3 Ø '+av(h.slice(-3))+' %.')}
+  }
+
+  /* Andere Instrumente / Theorie */
+  var ak=mapIf(G('akk',null)),wh=mapIf(G('wh',null)),tb=mapIf(G('tabs',null)),th=mapIf(G('theory',null));
+  var other=[];
+  if(Object.keys(mapIf(ak.known)).filter(function(k){return ak.known[k]}).length)other.push('Gitarre: '+Object.keys(ak.known).filter(function(k){return ak.known[k]}).length+' Akkorde gelernt ('+Object.keys(mapIf(ak.days)).length+' Übungstage)');
+  if(Object.keys(mapIf(tb.played)).length)other.push('Tabulatur: '+Object.keys(tb.played).length+' Übungen gespielt');
+  if(Object.keys(mapIf(wh.les)).length||Object.keys(mapIf(wh.days)).length)other.push('Low Whistle: '+Object.keys(mapIf(wh.days)).length+' Übungstage');
+  if(th.xp)other.push('Theorie: '+th.xp+' XP, '+Object.keys(mapIf(th.stars)).length+' Aufgaben bewertet');
+  if(other.length){add();add('=== WEITERES ===');other.forEach(function(o){add('- '+o)})}
+
+  add();add('=== LIEDER, DIE ICH IN DER APP HABE ===');
+  SONGS.forEach(function(s){add('- '+s[0]+' ['+s[1]+', '+s[2]+']')});
+  add();add('Frag nach, wenn dir etwas fehlt, um sinnvoll zu planen.');
+  return L.join('\n');
+}
+function show(){$('#rep').value=build()}
+var ST=G('mentor',{});if(ST&&ST.ab)$('#ab').value=ST.ab;if(ST&&ST.fr)$('#fr').value=ST.fr;
+function save(){try{MK.set('mentor',{ab:$('#ab').value,fr:$('#fr').value})}catch(e){}}
+$('#ab').addEventListener('input',function(){save();show()});
+$('#fr').addEventListener('change',function(){save();show()});
+function say(t){$('#msg').textContent=t;clearTimeout(say.t);say.t=setTimeout(function(){$('#msg').textContent=''},3500)}
+$('#cp').onclick=function(){
+  var t=$('#rep').value;
+  var fb=function(){var ta=$('#rep');ta.removeAttribute('readonly');ta.focus();ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.setAttribute('readonly','');say(ok?'Kopiert.':'Bitte Text markieren und selbst kopieren.')};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){say('Kopiert.')},fb);else fb();
+};
+if(navigator.share){$('#sh').hidden=false;$('#sh').onclick=function(){navigator.share({title:'Mentor-Bericht',text:$('#rep').value}).catch(function(){})}}
+$('#dl').onclick=function(){var b=new Blob([$('#rep').value],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='mentor-bericht-'+MK.day()+'.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)};
+show();
+})();
+</script>
+</body>
+</html>
