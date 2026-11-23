@@ -54,6 +54,9 @@ Alle Bereiche und die Navigationsleiste nutzen jetzt die Farben der Praxis-App: 
 - **Freunde:** Jede Person nutzt ihre eigene Sync-Datei. Profile werden über eine zufällige Kennung erkannt, notfalls über den Namen.
 - Nicht enthalten: Gemini-Schlüssel, Pad-Belegung und Riffkoje-Aufnahmen.
 
+## Stand v24: Karte „Dein Stand“ im Mentor-Bericht
+- Oben auf `mentor.html` steht jetzt eine lesbare Auswertung ohne KI: Übungszeit, Tonhöhe, Stimmung (zu tief/zu hoch), Verlauf, Rhythmus, Noten lernen, Lehrplan. Den Chat-Text gibt es weiterhin darunter.
+
 ## Stand v23: Mentor-Bericht
 - Neue Seite `mentor.html` (Kachel auf der Startseite, im Geige-Untermenü). Sie baut aus den Daten des gewählten Profils einen Text: Übungszeit der letzten 28 Tage, Lektionen, Bestwerte, schwächste Töne aus „Noten lernen“, die letzten Aufnahme-Auswertungen, Gitarre/Whistle/Theorie, dazu die Lieder in der App und eine Aufgabe (Plan, Lieder, Schwächen, Aufnahmen, freie Frage).
 - Den Text kopierst du in einen Chat mit Claude. Nichts wird automatisch verschickt, Aufnahmen sind nicht enthalten. Optionales Feld „Über dich“ (Ziele, Geschmack, Zeit) wird pro Profil gespeichert.
