@@ -23,11 +23,13 @@ PF.stufenPage({key:'pf.gei',emoji:'🎻',title:'Geige: Lehrpfad',desc:'Acht Stuf
   {id:'v1a',kind:'check',t:'Haltung: Geige liegt locker auf Schlüsselbein und Schulter, Schultern entspannt',d:'Ein Spiegel oder ein kurzes Video helfen, das zu prüfen.'},
   {id:'v1b',kind:'check',t:'Bogenhaltung: Daumen gebogen, kleiner Finger auf dem Stock'},
   {id:'v1c',kind:'notes',t:'Alle vier leeren Saiten erkennen',hint:'Streiche nacheinander G, D, A und E. Die Oktave ist egal.',notes:N([55,62,69,76])},
+  {id:'v1h',kind:'hold',t:'Gleichmäßiger Bogenstrich: einen Ton 8 Sekunden ruhig halten',hint:'Streiche eine leere Saite mit ruhigem, gleichmäßigem Bogen. Wacklige Töne setzen die Zeit zurück.',seconds:8},
   {id:'v1d',kind:'check',t:'Gerade Bogenstriche auf jeder Saite (ganzer Bogen)',link:['geigenpult.html','Geigenpult']}
  ]},
  {id:'v2',t:'Stufe 2 · Erste Lage',ziel:'Alle Finger der ersten Lage auf A- und D-Saite sauber greifen.',tasks:[
   {id:'v2a',kind:'check',t:'Lagen: die erste Lage verstehen',link:['geigenpult.html','Geigenpult']},
   {id:'v2b',kind:'notes',t:'D-Dur aufwärts (D E Fis G A H Cis D)',hint:'Spiele die Töne der D-Dur-Tonleiter in der ersten Lage. Achte auf saubere Intonation.',notes:N([62,64,66,67,69,71,73,74])},
+  {id:'v2i',kind:'inton',t:'Intonation: D-Dur Ton für Ton sauber',tol:20,notes:N([62,64,66,67,69,71,73,74])},
   {id:'v2c',kind:'check',t:'Intonation kontrollieren (Aufnahme auswerten)',link:['analyse.html','Aufnahme auswerten']},
   {id:'v2d',kind:'check',t:'Tonleiter mit Drohnenton (leere Saite mitklingen lassen)'}
  ]},
@@ -45,6 +47,7 @@ PF.stufenPage({key:'pf.gei',emoji:'🎻',title:'Geige: Lehrpfad',desc:'Acht Stuf
  ]},
  {id:'v5',t:'Stufe 5 · Tonleitern und Tonarten',ziel:'G-, D- und A-Dur sowie a-Moll sicher spielen und die Tonart erkennen.',tasks:[
   {id:'v5a',kind:'notes',t:'G-Dur (G A H C D E Fis G)',notes:N([55,57,59,60,62,64,66,67])},
+  {id:'v5i',kind:'inton',t:'Intonation: G-Dur sauber',tol:20,notes:N([55,57,59,60,62,64,66,67])},
   {id:'v5b',kind:'notes',t:'A-Dur zwei Oktaven bis A',hint:'A H Cis D E Fis Gis A.',notes:N([69,71,73,74,76,78,80,81])},
   {id:'v5c',kind:'notes',t:'a-Moll natürlich (A H C D E F G A)',notes:N([57,59,60,62,64,65,67,69])},
   {id:'v5d',kind:'check',t:'Vorzeichen und Tonarten',link:['geigenpult.html','Geigenpult']},

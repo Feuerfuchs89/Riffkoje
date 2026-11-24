@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B1520">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Gesang Lehrpfad</title>
+<script src="shared.js"></script>
+<script src="pfad.js"></script>
+<script src="pfad-stufen.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function(){
+'use strict';
+function N(a){return a.map(function(m){return {m:m}})}
+PF.stufenPage({key:'pf.ges',emoji:'🎤',title:'Gesang: Lehrpfad',desc:'Zehn Stufen von Atmen und Haltung bis zum Lied vor Publikum. Das Mikrofon zeigt dir, ob du den Ton triffst. Die Oktave ist egal, singe in deiner bequemen Lage.',stufen:[
+ {id:'s1',t:'Stufe 1 · Atem und Haltung',ziel:'Aufrecht stehen, tief atmen, locker bleiben.',tasks:[
+  {id:'s1a',kind:'check',t:'Haltung: Füße hüftbreit, Knie weich, Schultern locker, Kinn parallel zum Boden'},
+  {id:'s1b',kind:'check',t:'Bauchatmung: Hand auf den Bauch, beim Einatmen hebt sie sich, Schultern bleiben unten'},
+  {id:'s1c',kind:'counter',t:'Ausatmen auf „sss“: so lange wie möglich, ganz gleichmäßig (Ziel 20 Sekunden)',target:20,unit:'Sek.'},
+  {id:'s1d',kind:'check',t:'Aufwärmen: Lippenflattern und leises Summen, zwei Minuten'},
+  {id:'s1e',kind:'check',t:'Wissen: Stimme und Atem in der Gesangslehre bestehen',link:['gesangslehre.html','Gesangslehre']}
+ ]},
+ {id:'s2',t:'Stufe 2 · Den ersten Ton treffen',ziel:'Einen Ton hören, nachsingen und halten.',tasks:[
+  {id:'s2a',kind:'hold',t:'Tonhalte: einen bequemen Ton 8 Sekunden ruhig halten (auf „a“ oder „o“)',seconds:8},
+  {id:'s2b',kind:'inton',t:'Nachsingen: C – D – E',hint:'Höre den Referenzton, singe ihn nach und halte ihn kurz. Die Nadel zeigt zu tief oder zu hoch.',tol:35,notes:N([60,62,64])},
+  {id:'s2c',kind:'inton',t:'Nachsingen: E – D – C abwärts',tol:35,notes:N([64,62,60])},
+  {id:'s2d',kind:'check',t:'Zwischen den Tönen atmen und locker bleiben'},
+  {id:'s2e',kind:'check',t:'Hörübung: höher, tiefer oder sauber?',link:['gesangslehre.html','Gesangslehre']}
+ ]},
+ {id:'s3',t:'Stufe 3 · Tonleiter',ziel:'Die Dur-Tonleiter sauber singen.',tasks:[
+  {id:'s3a',kind:'inton',t:'C-Dur aufwärts singen (Do Re Mi Fa Sol La Si Do)',tol:30,notes:N([60,62,64,65,67,69,71,72])},
+  {id:'s3b',kind:'inton',t:'C-Dur abwärts singen',tol:30,notes:N([72,71,69,67,65,64,62,60])},
+  {id:'s3c',kind:'check',t:'Mit Klavier oder Klavierseite zusammen singen',link:['klavier.html','Klavier']},
+  {id:'s3d',kind:'check',t:'Auf „no“, „mi“ und „la“ singen, damit die Zunge locker bleibt'},
+  {id:'s3e',kind:'inton',t:'a-Moll natürlich singen (A H C D E F G A)',tol:30,notes:N([57,59,60,62,64,65,67,69])},
+  {id:'s3f',kind:'inton',t:'Pentatonik: C D E G A C',tol:30,notes:N([60,62,64,67,69,72])}
+ ]},
+ {id:'s4',t:'Stufe 4 · Intervalle singen',ziel:'Sprünge treffen: Terz, Quinte, Oktave.',tasks:[
+  {id:'s4a',kind:'hear',t:'Terz und Quinte hören',text:'Die große Terz klingt hell und fröhlich (Do – Mi), die Quinte offen und tragend (Do – Sol). Höre die Beispiele und singe mit.',demos:[{label:'Große Terz',ev:[[60,.7],[64,.9]]},{label:'Quinte',ev:[[60,.7],[67,.9]]},{label:'Oktave',ev:[[60,.7],[72,.9]]}]},
+  {id:'s4b',kind:'inton',t:'Terz: C – E – C',tol:30,notes:N([60,64,60])},
+  {id:'s4c',kind:'inton',t:'Quinte: C – G – C',tol:30,notes:N([60,67,60])},
+  {id:'s4d',kind:'inton',t:'Dreiklang aufwärts: C – E – G – C',tol:30,notes:N([60,64,67,72])},
+  {id:'s4e',kind:'check',t:'Gehörtraining: Intervalle erkennen',link:['gehoer.html','Gehörtraining']}
+ ]},
+ {id:'s5',t:'Stufe 5 · Umfang und Register',ziel:'Deine Stimme kennenlernen, ohne zu pressen.',tasks:[
+  {id:'s5a',kind:'check',t:'Gleiten (Sirene) von tief nach hoch und zurück auf „ng“ oder „u“, ohne Druck'},
+  {id:'s5b',kind:'check',t:'Deinen bequemen Umfang finden: tiefster und höchster Ton, den du ohne Anstrengung singst'},
+  {id:'s5c',kind:'hold',t:'Tonhalte: 12 Sekunden, Lautstärke gleich lassen',seconds:12},
+  {id:'s5d',kind:'check',t:'Pause machen, wenn der Hals kratzt, und viel Wasser trinken'},
+  {id:'s5e',kind:'check',t:'Wissen: Stimmlagen, Register und Stimmgesundheit bestehen',link:['gesangslehre.html','Gesangslehre']}
+ ]},
+ {id:'s6',t:'Stufe 6 · Lieder',ziel:'Echte Melodien singen und Phrasen gestalten.',tasks:[
+  {id:'s6a',kind:'inton',t:'Alle meine Entchen: C D E F G G',tol:35,notes:N([60,62,64,65,67,67])},
+  {id:'s6b',kind:'inton',t:'Hänschen klein: G E E F D D C D E F G G G',tol:35,notes:N([67,64,64,65,62,62,60,62,64,65,67,67,67])},
+  {id:'s6c',kind:'check',t:'Ein Lied mit Text singen und an den Phrasenenden atmen'},
+  {id:'s6d',kind:'check',t:'Zum Klavier oder zur Gitarre singen',link:['klavier.html','Klavier']},
+  {id:'s6e',kind:'inton',t:'Ode an die Freude: E E F G G F E D C C D E E D D',tol:35,notes:N([64,64,65,67,67,65,64,62,60,60,62,64,64,62,62])},
+  {id:'s6f',kind:'inton',t:'Kuckuck: G E G E',tol:35,notes:N([67,64,67,64])}
+ ]},
+ {id:'s7',t:'Stufe 7 · Klang und Ausdruck',ziel:'Dynamik, Textverständlichkeit und Stimmfarbe.',tasks:[
+  {id:'s7a',kind:'check',t:'Laut und leise: einen Ton langsam anschwellen und wieder abschwellen lassen'},
+  {id:'s7b',kind:'check',t:'Deutlich sprechen: Text erst sprechen, dann singen'},
+  {id:'s7c',kind:'check',t:'Zweite Stimme: zu einem bekannten Lied eine Terz drüber oder drunter singen'},
+  {id:'s7d',kind:'check',t:'Gehörtraining: Dur und Moll unterscheiden',link:['gehoer.html','Gehörtraining']}
+ ]},
+ {id:'s8',t:'Stufe 8 · Sprünge und Treffsicherheit',ziel:'Größere Intervalle ohne Rutschen treffen.',tasks:[
+  {id:'s8a',kind:'hear',t:'Sexte und Septime hören',text:'Die große Sexte klingt weit und warm (Do – La), die große Septime spannungsvoll und zieht nach oben (Do – Si). Höre die Beispiele und singe mit.',demos:[{label:'Große Sexte',ev:[[60,.7],[69,.9]]},{label:'Große Septime',ev:[[60,.7],[71,.9]]},{label:'Kleine Terz',ev:[[60,.7],[63,.9]]}]},
+  {id:'s8b',kind:'inton',t:'Sprünge: C – A – C – F – C',tol:30,notes:N([60,69,60,65,60])},
+  {id:'s8c',kind:'inton',t:'Moll-Dreiklang: A – C – E – A',tol:30,notes:N([57,60,64,69])},
+  {id:'s8d',kind:'inton',t:'Zickzack: C – G – D – A – E',tol:30,notes:N([60,67,62,69,64])},
+  {id:'s8e',kind:'hold',t:'Tonhalte: 15 Sekunden ohne Wackeln',seconds:15},
+  {id:'s8f',kind:'check',t:'Einen gesungenen Ton erst vorstellen, dann singen (innerlich hören)'}
+ ]},
+ {id:'s9',t:'Stufe 9 · Pop und Mikrofon',ziel:'Mit Mikrofon und Begleitung singen.',tasks:[
+  {id:'s9a',kind:'check',t:'Mikrofonabstand: eine Handbreit, bei lauten Tönen weiter weg'},
+  {id:'s9b',kind:'check',t:'Mit Kopfhörer zu einem Playback singen, ohne dass es ins Mikro läuft'},
+  {id:'s9c',kind:'check',t:'Ein Lied in eine bequemere Tonart bringen (Transponieren)',link:['harmonie.html','Theorie Pro']},
+  {id:'s9d',kind:'check',t:'Wissen: Klang, Intonation, Chor und Mikrofon in der Gesangslehre bestehen',link:['gesangslehre.html','Gesangslehre']}
+ ]},
+ {id:'s10',t:'Stufe 10 · Auftritt',ziel:'Auswendig, sicher und aufgenommen.',tasks:[
+  {id:'s10a',kind:'check',t:'Ein Lied auswendig singen'},
+  {id:'s10b',kind:'check',t:'Aufnehmen und Tonhöhe prüfen',link:['analyse.html','Aufnahme auswerten']},
+  {id:'s10c',kind:'check',t:'Der Familie ein Lied vorsingen, egal wie holprig'},
+  {id:'s10d',kind:'check',t:'Gemeinsam singen: zwei Stimmen, zum Beispiel mit den Zwillingen'}
+ ]}
+]});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B1520">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Gesangslehre</title>
+<script src="shared.js"></script>
+<script src="pfad.js"></script>
+<script src="pfad-quiz.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function(){
+'use strict';
+var pick=PF.pick,sh=PF.shuffle,rnd=PF.rnd;
+function Q(t,c,w,e){return {t:t,c:c,w:w,e:e||''}}
+function L(id,t,sub,intro,list,n){return {id:id,t:t,sub:sub,intro:intro,n:n||8,gen:function(){var f=pick(list);return {kind:'choice',text:f.t,opts:[f.c].concat(f.w),ans:0,expl:f.e||('Richtig: '+f.c+'.')}}}}
+
+var A1=[
+ Q('Wo entsteht der Ton beim Singen?','In den Stimmlippen im Kehlkopf',['Im Zwerchfell','In der Lunge','Im Gaumen'],'Die Stimmlippen schwingen im Luftstrom. Lunge und Zwerchfell liefern nur die Luft.'),
+ Q('Was passiert mit den Stimmlippen bei höheren Tönen?','Sie schwingen schneller',['Sie schwingen langsamer','Sie hören auf zu schwingen','Sie werden zusammengepresst und ruhen'],'Je höher der Ton, desto mehr Schwingungen pro Sekunde.'),
+ Q('Wie viele Schwingungen hat ein Ton eine Oktave höher?','Doppelt so viele',['Halb so viele','Eine mehr','Dreimal so viele'],'Eine Oktave ist das Frequenzverhältnis 2 zu 1.'),
+ Q('Welche Frequenz hat der Kammerton a’?','440 Hz',['220 Hz','330 Hz','523 Hz'],'Das eingestrichene a hat 440 Hz.'),
+ Q('Wie heißen die Räume über dem Kehlkopf, die den Klang färben?','Ansatzrohr (Rachen, Mund, Nase)',['Luftröhre','Speiseröhre','Zwerchfellraum'],'Das Ansatzrohr formt aus dem Grundton den typischen Klang deiner Stimme.'),
+ Q('Warum klingt jede Stimme anders?','Durch Kehlkopf, Stimmlippen und Ansatzrohr',['Nur durch die Lautstärke','Nur durch die Körpergröße','Nur durch die Zahnstellung'],'Bau und Form dieser Teile sind bei jedem Menschen verschieden.'),
+ Q('Was passiert beim Schlucken im Kehlkopf?','Der Kehldeckel schließt die Luftröhre',['Die Stimmlippen schwingen kräftig','Das Zwerchfell hebt sich','Die Lunge atmet aus'],'So gelangt kein Essen in die Atemwege.')
+];
+var A2=[
+ Q('Welcher Muskel ist der wichtigste Atemmuskel?','Das Zwerchfell',['Der Bizeps','Der Trapezmuskel','Die Zunge'],''),
+ Q('Was tut das Zwerchfell beim Einatmen?','Es senkt sich ab',['Es hebt sich','Es dreht sich','Es spannt den Hals an'],'Dadurch wird Platz für die Lunge und der Bauch weitet sich.'),
+ Q('Wie atmest du für das Singen am besten ein?','Bauch und Flanken weiten sich, die Schultern bleiben unten',['Die Schultern ziehen hoch','Der Bauch wird eingezogen','Der Kopf geht in den Nacken'],'Hochgezogene Schultern machen den Hals eng.'),
+ Q('Was bedeutet Stütze beim Singen?','Gleichmäßiger Luftdruck durch Spannung von Bauch und Flanken',['Möglichst viel Luft herauspressen','Den Atem anhalten','Den Hals fest machen'],'Der Hals bleibt locker, der Körper steuert den Luftstrom.'),
+ Q('Wofür ist die Übung „sss“ gut?','Die Ausatmung gleichmäßig lenken',['Die Tonhöhe messen','Die Lautstärke steigern','Die Zunge dehnen'],'Du übst, den Luftstrom lange und gleichmäßig zu halten.'),
+ Q('Was ist eine Phrase?','Ein musikalischer Sinnabschnitt, oft ein Atembogen',['Ein einzelner Ton','Ein Taktstrich','Ein Tempowechsel'],''),
+ Q('Wo atmest du am besten?','An Phrasenenden und Satzenden',['Mitten im Wort','Nie','Nach jedem einzelnen Ton'],'So bleibt der Sinn von Text und Melodie erhalten.')
+];
+var B1=[
+ Q('Welche ist die höchste Frauenstimme?','Sopran',['Alt','Tenor','Bass'],''),
+ Q('Welche ist die tiefste Frauenstimme?','Alt',['Sopran','Bariton','Tenor'],''),
+ Q('Welche ist die höchste Männerstimme?','Tenor',['Bariton','Bass','Alt'],''),
+ Q('Welche ist die tiefste Männerstimme?','Bass',['Bariton','Tenor','Alt'],''),
+ Q('Welche Männerstimme liegt zwischen Tenor und Bass?','Bariton',['Mezzosopran','Alt','Falsett'],''),
+ Q('Wie heißen die vier Stimmgruppen im gemischten Chor?','Sopran, Alt, Tenor, Bass',['Violine, Bratsche, Cello, Bass','Do, Re, Mi, Fa','Solo, Duo, Trio, Quartett'],'Kurz SATB.'),
+ Q('Welchen Umfang hat eine ungeübte Stimme ungefähr?','Etwa anderthalb bis zwei Oktaven',['Nur eine Quinte','Vier Oktaven','Genau eine Terz'],'Mit Training wächst der Umfang.'),
+ Q('Ein Mann singt mit einer Frauenstimme im Radio mit. Wo singt er meist?','Eine Oktave tiefer',['Eine Quinte höher','Einen Halbton tiefer','Auf derselben Tonhöhe'],'Der Tonname bleibt gleich, nur die Oktave ist eine andere. Deshalb ist die Oktave beim Tontreffen egal.')
+];
+var B2=[
+ Q('Was ist die Brustregister-Stimme?','Voller Klang in der tieferen Lage',['Dünner Klang ganz oben','Flüstern','Summen mit geschlossenem Mund'],'Man spürt oft Schwingung im Brustbereich.'),
+ Q('Was ist die Kopfstimme?','Leichterer Klang in der Höhe',['Lautes Rufen','Tiefe Töne','Normales Sprechen'],'Man spürt eher Schwingung im Kopf.'),
+ Q('Was ist das Passaggio?','Der Übergang zwischen zwei Registern',['Ein Lied ohne Text','Ein Atemgeräusch','Ein sehr tiefer Ton'],'Dort „kippt“ die Stimme leicht, wenn man presst.'),
+ Q('Was ist Mischstimme?','Mischung aus Brust- und Kopfanteilen für einen weichen Übergang',['Zwei Sänger gleichzeitig','Singen mit Sprechen im Wechsel','Singen ohne Luft'],''),
+ Q('Wie überwindest du den Registerwechsel am besten?','Weich, mit weniger Druck und leichter Vokalfarbe',['Mit mehr Kraft pressen','Möglichst laut schreien','Atem anhalten'],'Zu viel Druck lässt die Stimme kippen.'),
+ Q('Was ist ein Glissando (Sirene)?','Stufenloses Gleiten von einem Ton zum anderen',['Ein ganz kurzer Ton','Ein Taktwechsel','Ein Chorlied'],'Ideal, um die Register sanft zu verbinden.'),
+ Q('Was ist die Mutation?','Der Stimmwechsel in der Pubertät',['Ein Fehler beim Singen','Ein Chorfestival','Ein Atemgeräusch'],'Bei Jungen sinkt die Stimme dabei meist etwa um eine Oktave.'),
+ Q('Wie klingen Kinderstimmen im Vergleich zu Erwachsenen?','Höher und mit kleinerem Umfang',['Tiefer als Bässe','Mit dem gleichen Umfang','Gar nicht anders'],'Deshalb liegen Kinderlieder in einem engen, höheren Bereich.')
+];
+var C1=[
+ Q('Warum wärmst du die Stimme auf?','Muskeln und Stimmlippen werden durchblutet und locker',['Damit du lauter bist','Damit du tiefer sprichst','Aufwärmen ist unnötig'],''),
+ Q('Welche Übung eignet sich zum Aufwärmen?','Summen, Lippenflattern, leichte Sirenen',['Schreien','Husten','Laut räuspern'],''),
+ Q('Was trinkst du am besten beim Singen?','Wasser, nicht eiskalt',['Nur Kaffee','Eiskalte Getränke in einem Zug','Nichts'],'Wasser hält die Schleimhäute feucht.'),
+ Q('Was schadet den Stimmlippen?','Dauerndes Räuspern, Pressen, Schreien',['Summen','Wasser trinken','Genug Schlaf'],'Räuspern reibt die Stimmlippen hart aufeinander.'),
+ Q('Was tust du bei Heiserkeit?','Pausieren und nicht pressen',['Lauter singen','Kräftig räuspern','Noch höher üben'],''),
+ Q('Wie übst du am besten?','Kurz und regelmäßig, etwa 10 bis 20 Minuten',['Einmal im Monat vier Stunden','Nur vor Auftritten','Bis es kratzt'],''),
+ Q('Der Hals kratzt oder tut weh. Was tust du?','Aufhören, das ist ein Warnzeichen',['Weitermachen und lauter singen','Höher singen','Kalt trinken und weitermachen'],'Schmerz beim Singen heißt: zu viel Druck oder Überlastung.'),
+ Q('Wann gehst du bei anhaltender Heiserkeit zum Arzt?','Wenn sie länger als etwa zwei Wochen anhält',['Nie','Nach zwei Jahren','Nur bei Fieber'],'Dann sollte ein HNO-Arzt die Stimmlippen ansehen.')
+];
+var C2=[
+ Q('Wie stehst du beim Singen?','Füße hüftbreit, Knie weich',['Beine überkreuzt','Knie durchgedrückt','Auf Zehenspitzen'],''),
+ Q('Wohin schaut das Kinn?','Parallel zum Boden',['Hoch in den Nacken','Auf die Brust','Weit vorgestreckt'],'So bleibt der Hals frei.'),
+ Q('Wie sind die Schultern?','Locker und unten',['Hochgezogen','Nach vorn gerollt','Fest nach hinten gedrückt'],''),
+ Q('Wie ist der Kiefer?','Locker, der Mund leicht geöffnet',['Fest zusammengepresst','Weit aufgerissen','Seitlich verschoben'],'Ein fester Kiefer macht den Klang eng.'),
+ Q('Wo liegt die Zungenspitze meist?','Locker an den unteren Schneidezähnen',['Hochgezogen am Gaumen','Hinten im Hals','Eingerollt'],'Eine hochgezogene Zunge drückt auf den Kehlkopf.'),
+ Q('Wozu dient Summen?','Es entspannt und lässt Vibration im Gesicht spüren',['Es macht lauter','Es verbessert die Atmung nicht','Es ist nur Spaß'],'Du merkst, ob der Ton vorn im Gesicht sitzt.'),
+ Q('Wie sitzt du beim Singen?','Aufrecht auf der vorderen Stuhlhälfte',['Zusammengesunken','Mit Lehne ganz zurück','Mit hochgelegten Beinen'],'So kann das Zwerchfell frei arbeiten.')
+];
+var D1=[
+ Q('Was trägt beim Singen den Ton?','Die Vokale',['Die Konsonanten','Die Zischlaute','Die Pausen'],'Vokale werden gedehnt, Konsonanten kurz und klar gesprochen.'),
+ Q('Wozu dienen Konsonanten?','Verständlichkeit und Rhythmus',['Tonhöhe','Lautstärke','Atem'],''),
+ Q('Welcher Vokal klingt am hellsten?','I',['U','O','A'],'I und E klingen hell, U und O dunkel.'),
+ Q('Welcher Vokal klingt am dunkelsten?','U',['I','E','A'],''),
+ Q('Welche Silben eignen sich zum Einsingen?','„no“, „mi“, „la“',['Nur Zischlaute','Nur „k“','Nur Geflüstertes'],'Sie halten Zunge und Kiefer locker.'),
+ Q('Was heißt legato?','Gebunden, die Töne fließen ineinander',['Kurz und abgesetzt','Sehr laut','Sehr langsam'],''),
+ Q('Was heißt staccato?','Kurz und abgesetzt',['Gebunden','Leise','Gesungen'],''),
+ Q('Wie wird Text verständlicher?','Konsonanten klar sprechen, Vokale tragen',['Alles nuscheln','Mit geschlossenem Mund','Nur flüstern'],'')
+];
+var D2=[
+ Q('Was heißt piano?','Leise',['Laut','Schnell','Langsam'],''),
+ Q('Was heißt forte?','Laut',['Leise','Schnell','Langsam'],''),
+ Q('Was heißt crescendo?','Lauter werdend',['Leiser werdend','Schneller werdend','Langsamer werdend'],''),
+ Q('Was heißt decrescendo?','Leiser werdend',['Lauter werdend','Schneller werdend','Höher werdend'],'Auch diminuendo genannt.'),
+ Q('Was ist Vibrato?','Ein leichtes, regelmäßiges Schwanken der Tonhöhe',['Starres Halten','Ein Sprung','Ein Atemgeräusch'],''),
+ Q('Wie schnell ist ein natürliches Vibrato ungefähr?','Etwa 5 bis 7 Schwingungen pro Sekunde',['Eine pro Sekunde','20 pro Sekunde','50 pro Sekunde'],''),
+ Q('Wann setzt du Vibrato ein?','Meist am Ende langer Töne, ohne es zu erzwingen',['Auf jedem Ton gepresst','Nie','Nur in der Tiefe'],'Vibrato entsteht von selbst, wenn die Stimme frei ist.')
+];
+var E1=[
+ Q('Wie viel Cent hat ein Halbton?','100',['10','50','1200'],''),
+ Q('Wie viel Cent hat eine Oktave?','1200',['100','600','2400'],''),
+ Q('Du singst „zu tief“. Wo liegt dein Ton?','Unter dem Zielton',['Über dem Zielton','Genau darauf','Gar nicht'],''),
+ Q('Ab wie vielen Cent Abweichung hören die meisten eine Verstimmung?','Ab etwa 10 bis 20 Cent',['Ab 1 Cent','Ab 100 Cent','Ab 600 Cent'],'Bei Einzeltönen sind wenige Cent kaum hörbar, bei Akkorden fällt es früher auf.'),
+ Q('Was hilft beim Tontreffen vor dem Singen?','Den Ton innerlich vorstellen',['Lauter singen','Schneller singen','Die Augen aufreißen'],'Wer den Ton im Kopf hört, trifft ihn leichter.'),
+ Q('Wie nennt man ein allmähliches Tieferwerden im Chor?','Absinken',['Aufschwingen','Legato','Vibrato'],'Hilfreich: aufrechte Haltung und genug Atemstütze.'),
+ Q('Wie klingt eine große Terz?','Hell',['Dunkel','Gar nicht','Wie ein Tritonus'],'Eine kleine Terz klingt dunkler und ist der Kern von Moll.')
+];
+/* Hörlektion: höher oder tiefer, zu tief oder zu hoch */
+function genHigh(){
+  var base=rnd(55,70)+rnd(0,9)/10,d=pick([.8,.5,.35,.25]),up=Math.random()<.5,m2=base+(up?d:-d),ev=PF.seqEv([base,m2],.95,.8);
+  return {kind:'choice',text:'Welcher Ton ist höher?',audio:ev,opts:up?['Der zweite','Der erste']:['Der erste','Der zweite'],ans:0,expl:'Der Unterschied war etwa '+Math.round(d*100)+' Cent.'};
+}
+function genOff(){
+  var ref=rnd(55,70),off=pick([-.5,-.35,0,.35,.5]),r=off===0?'Sauber':off<0?'Zu tief':'Zu hoch',ev=[{m:[ref],at:0,d:1},{m:[ref+off],at:1.4,d:1}];
+  return {kind:'choice',text:'Erst kommt der Zielton, dann ein gesungener Ton. Wie ist er?',audio:ev,opts:[r].concat(['Zu tief','Sauber','Zu hoch'].filter(function(x){return x!==r})),ans:0,expl:off===0?'Beide Töne waren gleich.':'Der zweite Ton lag etwa '+Math.abs(Math.round(off*100))+' Cent '+(off<0?'unter':'über')+' dem Zielton.'};
+}
+var E2={id:'g_h',t:'Höher, tiefer, sauber',sub:'Hörübung',intro:'Zwei Töne liegen nur wenige Cent auseinander. Höre genau hin. Das ist die Grundlage, um beim Singen die eigene Tonhöhe zu kontrollieren.',n:10,gen:function(){return Math.random()<.5?genHigh():genOff()}};
+var F1=[
+ Q('Was ist ein Kanon?','Eine Melodie, die zeitversetzt von mehreren Stimmen gesungen wird',['Alle singen gleichzeitig dasselbe','Ein Lied ohne Text','Nur Begleitung'],'Zum Beispiel „Bruder Jakob“ mit zwei oder drei Gruppen.'),
+ Q('Was heißt mehrstimmig?','Mehrere Stimmen singen verschiedene Töne',['Alle singen denselben Ton','Es singt nur einer','Es gibt keinen Text'],''),
+ Q('Was heißt Unisono?','Alle singen denselben Ton',['Alle singen verschiedene Töne','Leise singen','Ohne Text'],''),
+ Q('Was heißt a cappella?','Ohne Instrumentalbegleitung',['Mit Orchester','Im Kanon','Sehr laut'],''),
+ Q('Was tust du im Chor?','Die eigene Stimme halten und zugleich die anderen hören',['So laut wie möglich singen','Nur auf die Erste hören','Immer schneller werden'],''),
+ Q('In welchem Abstand wird oft eine zweite Stimme geführt?','In Terzen oder Sexten',['In Sekunden','In Tritoni','In Septimen'],'Terzen und Sexten klingen weich zusammen.')
+];
+var F2=[
+ Q('Wie weit hältst du den Mund vom Mikrofon?','Etwa eine Handbreit, bei lauten Tönen etwas weiter',['Direkt hineinsingen','Einen Meter entfernt','Hinter dem Rücken'],'So klingt die Stimme voll, ohne zu übersteuern.'),
+ Q('Wofür ist ein Poppschutz?','Er dämpft Knall bei P- und B-Lauten',['Er macht lauter','Er hält Staub ab','Er stimmt das Mikrofon'],''),
+ Q('Wie entsteht Rückkopplung (Pfeifen)?','Der Ton aus dem Lautsprecher gelangt wieder ins Mikrofon',['Weil die Stimme zu hoch ist','Weil das Kabel zu lang ist','Weil der Sänger heiser ist'],'Abstand zu den Lautsprechern oder weniger Lautstärke hilft.'),
+ Q('Was ist ein Monitor auf der Bühne?','Ein Lautsprecher, damit du dich selbst hörst',['Ein Notenbildschirm','Ein Chorleiter','Ein Mikrofonständer'],''),
+ Q('Warum trägst du bei Aufnahmen Kopfhörer?','Damit die Begleitung nicht ins Mikrofon gelangt',['Damit du lauter singst','Als Schutz vor Kälte','Damit das Mikrofon wärmer wird'],''),
+ Q('Welche Haltung hilft beim Singen ins Mikrofon?','Aufrecht, das Mikrofon auf Mundhöhe',['Nach unten ins Mikro schauen','Das Mikrofon nach oben halten','Das Kinn hochstrecken'],'')
+];
+PF.quizPage({key:'pf.gl',log:'Gesangslehre',emoji:'🎤',title:'Gesangslehre',desc:'Wie die Stimme funktioniert, wie du sie gesund einsetzt und wie du sauber singst. Dazu Hörübungen für die Tonhöhe. Die Fragen kommen in wechselnder Reihenfolge.',chapters:[
+ {id:'gl1',t:'1 · Stimme und Atem',desc:'Kehlkopf, Zwerchfell, Stütze.',ls:[L('a1','Stimmlippen und Kehlkopf','Wie der Ton entsteht','Der Ton entsteht in den Stimmlippen. Atem liefert die Energie, das Ansatzrohr gibt dem Klang seine Farbe.',A1),L('a2','Atmung und Zwerchfell','Luft lenken','Das Zwerchfell ist dein wichtigster Atemmuskel. Beim Einatmen weiten sich Bauch und Flanken, die Schultern bleiben unten.',A2)]},
+ {id:'gl2',t:'2 · Stimmlagen und Register',desc:'Sopran bis Bass, Brust- und Kopfstimme.',ls:[L('b1','Stimmlagen','Sopran, Alt, Tenor, Bass','Vier Stimmlagen im Chor: Sopran und Alt bei den Frauen, Tenor und Bass bei den Männern. Dazwischen liegen Mezzosopran und Bariton.',B1),L('b2','Register und Stimmwechsel','Brust, Kopf, Passaggio','Die Stimme hat mehrere Register. Der Wechsel dazwischen gelingt weich, wenn du nicht presst.',B2)]},
+ {id:'gl3',t:'3 · Gesunde Stimme',desc:'Aufwärmen, Pflege, Haltung.',ls:[L('c1','Aufwärmen und Pflege','Stimme schonen','Kurz und regelmäßig üben, Wasser trinken, bei Schmerz sofort aufhören.',C1),L('c2','Haltung und Entspannung','Locker bleiben','Aufrecht, aber locker: Knie weich, Schultern unten, Kiefer frei.',C2)]},
+ {id:'gl4',t:'4 · Klang und Ausdruck',desc:'Vokale, Dynamik, Vibrato.',ls:[L('d1','Vokale und Artikulation','Verständlich singen','Vokale tragen den Klang, Konsonanten geben Verständlichkeit und Rhythmus.',D1),L('d2','Dynamik und Vibrato','Laut, leise, lebendig','Lautstärke und Vibrato machen einen Ton lebendig.',D2)]},
+ {id:'gl5',t:'5 · Intonation',desc:'Cent, Hören, Hörübung.',ls:[L('e1','Tonhöhe verstehen','Cent und Intonation','Ein Halbton hat 100 Cent. Schon wenige Cent Abweichung hört man bei Akkorden.',E1),E2]},
+ {id:'gl6',t:'6 · Chor und Mikrofon',desc:'Zusammen singen, Technik.',ls:[L('f1','Im Chor','Mehrstimmig singen','Im Chor hörst du dich selbst und die anderen zugleich.',F1,6),L('f2','Mikrofon und Bühne','Technik für Pop und Aufnahme','Mikrofonabstand, Rückkopplung und Kopfhörer machen den Unterschied.',F2,6)]}
+]});
+})();
+</script>
+</body>
+</html>

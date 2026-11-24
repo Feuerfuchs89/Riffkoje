@@ -100,6 +100,7 @@ PF.Mic={on:false,ign:0,cb:null,log:[],
     var r=Math.sqrt(s/1024),thr=Math.max(M.thr(),M.noise*4);
     if(M.cb&&M.cb.level)M.cb.level(r,thr);
     if(now<M.ign){M.ema=r;M.pend=null;return}
+    if(M.cb&&M.cb.pitch){if(r>thr){M.pc=(M.pc||0)+1;if(M.pc%2===0){var f0=PF.detect(M.buf,M.sr);M.cb.pitch(f0&&f0>60&&f0<1400?f0:null,r)}}else M.cb.pitch(null,r)}
     var onset=r>thr&&r>M.ema*1.7&&now-M.lastOn>150&&!M.pend;
     M.ema=M.ema*.8+r*.2;if(r<thr)M.noise=M.noise*.97+r*.03;
     if(onset){M.lastOn=now;if(M.cb&&M.cb.onset)M.cb.onset(now/1000);if(M.cb&&M.cb.note)M.pend={t0:now,ps:[]}}
@@ -205,7 +206,8 @@ PF.css=function(){
   '.pad{min-height:110px;font-size:1.3rem}.win{text-align:center;display:grid;gap:8px;padding:10px}.win .big2{font-size:2.4rem;letter-spacing:6px;color:#d99a00}.ok{color:var(--ok);font-weight:600}'+
   '.meter{height:10px;border-radius:6px;background:var(--line);position:relative;overflow:hidden}.meter i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--ok);display:block}.meter u{position:absolute;top:0;bottom:0;width:2px;background:var(--bad);display:block}'+
   '.chk{display:flex;gap:10px;align-items:flex-start;min-height:40px}.chk input{width:22px;height:22px;margin-top:2px;flex:none}.chk.done span{color:var(--muted);text-decoration:line-through}'+
-  '.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:.8rem;color:var(--muted)}.pill.ok{color:var(--ok);border-color:var(--ok)}select.btn{padding:6px 10px}a{color:var(--acc)}';
+  '.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:.8rem;color:var(--muted)}.pill.ok{color:var(--ok);border-color:var(--ok)}select.btn{padding:6px 10px}a{color:var(--acc)}'+
+  '.card{box-shadow:0 1px 4px rgba(0,0,0,.06);border-radius:16px}.btn{transition:transform .1s,box-shadow .1s,background .1s}.btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12)}.btn:active{transform:scale(.97)}.btn.primary{box-shadow:0 2px 8px rgba(0,0,0,.18)}.btn:focus-visible{outline:3px solid var(--acc);outline-offset:2px}h1{letter-spacing:-.01em}@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}';
   document.head.appendChild(s);
 };
 PF.esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};

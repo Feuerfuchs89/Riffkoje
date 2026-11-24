@@ -26,16 +26,21 @@ PF.stufenPage({key:'pf.whi',emoji:'🪈',title:'Low Whistle: Lehrpfad',desc:'Ach
  ]},
  {id:'w2',t:'Stufe 2 · Erste Töne',ziel:'D, E und Fis sicher und sauber.',tasks:[
   {id:'w2a',kind:'notes',t:'D – E – Fis erkennen',hint:'Spiele nacheinander D, E und Fis. Die Oktave ist egal.',notes:N([62,64,66])},
+  {id:'w2i',kind:'inton',t:'Intonation: D – E – Fis sauber treffen',tol:20,notes:N([62,64,66])},
+  {id:'w2h',kind:'hold',t:'Tonhalte: einen Ton 8 Sekunden ruhig halten',seconds:8},
   {id:'w2b',kind:'check',t:'Griffe auswendig',link:['whistle.html','Finger-Trainer']},
   {id:'w2c',kind:'check',t:'Zehn Atemzüge lang jeden Ton halten'}
  ]},
  {id:'w3',t:'Stufe 3 · D-Dur-Tonleiter',ziel:'Die Tonleiter in der ersten Oktave.',tasks:[
   {id:'w3a',kind:'notes',t:'D-Dur aufwärts (D E Fis G A H Cis D)',notes:N([62,64,66,67,69,71,73,74])},
+  {id:'w3i',kind:'inton',t:'Intonation: D-Dur Ton für Ton sauber',tol:20,notes:N([62,64,66,67,69,71,73,74])},
   {id:'w3b',kind:'check',t:'D-Dur-Tonleiter in zwei Tempi',link:['whistle.html','Low Whistle']},
   {id:'w3c',kind:'check',t:'Griff-Quiz bestehen',link:['whistle.html','Griff-Quiz']}
  ]},
  {id:'w4',t:'Stufe 4 · Zweite Oktave',ziel:'Mit mehr Luft in die hohe Lage.',tasks:[
   {id:'w4a',kind:'notes',t:'Zweite Oktave: D E Fis G A',notes:N([74,76,78,79,81])},
+  {id:'w4i',kind:'inton',t:'Intonation in der zweiten Oktave: D E Fis G A',hint:'In der zweiten Oktave wird Überblasen schnell zu hoch. Etwas weniger Luft, sauber bleiben.',tol:25,notes:N([74,76,78,79,81])},
+  {id:'w4h',kind:'hold',t:'Tonhalte: 12 Sekunden in der zweiten Oktave',seconds:12},
   {id:'w4b',kind:'check',t:'Oktavsprung D – D sauber',link:['whistle.html','Low Whistle']},
   {id:'w4c',kind:'check',t:'Beide Oktaven als Tonleiter hoch und runter',link:['whistle.html','Low Whistle']}
  ]},
@@ -45,9 +50,9 @@ PF.stufenPage({key:'pf.whi',emoji:'🪈',title:'Low Whistle: Lehrpfad',desc:'Ach
   {id:'w5c',kind:'check',t:'Dorisch und Mixolydisch spielen',link:['theorie.html','Theorie: Kirchentonarten']}
  ]},
  {id:'w6',t:'Stufe 6 · Verzierungen',ziel:'Cut, Tap und Roll machen den irischen Klang.',tasks:[
-  {id:'w6a',kind:'check',t:'Cut: kurzer hoher Ton vor der Note',link:['whistle.html','Verzierungen']},
-  {id:'w6b',kind:'check',t:'Tap: kurzes Antippen unter der Note',link:['whistle.html','Verzierungen']},
-  {id:'w6c',kind:'check',t:'Roll auf einer langen Note',link:['whistle.html','Verzierungen']}
+  {id:'w6a',kind:'hear',t:'Cut: kurzer höherer Ton vor der Note',link:['whistle.html','Verzierungen'],text:'Der Cut ist ein winziger höherer Ton direkt vor der Hauptnote (meist ein bis drei Stufen darüber). Du hebst dafür kurz einen Finger weiter oben und setzt ihn sofort wieder ab. Er trennt gleiche Töne, ohne dass du die Zunge brauchst. Beispiel auf A:',demos:[{label:'Langsam',ev:[[71,.18],[69,.6]]},{label:'Im Tempo',ev:[[71,.05],[69,.4]]}]},
+  {id:'w6b',kind:'hear',t:'Tap: kurzer tieferer Ton zwischen zwei gleichen Noten',link:['whistle.html','Verzierungen'],text:'Der Tap ist ein kurzes Antippen eines Lochs unterhalb des Tons. Es klingt wie ein ganz kurzer tieferer Ton und lässt dich dieselbe Note noch einmal betonen, ohne die Zunge. Beispiel auf A (tippe das Loch für G):',demos:[{label:'Langsam',ev:[[69,.5],[67,.18],[69,.5]]},{label:'Im Tempo',ev:[[69,.3],[67,.06],[69,.3]]}]},
+  {id:'w6c',kind:'hear',t:'Roll: Note – Cut – Note – Tap – Note',link:['whistle.html','Verzierungen'],text:'Der Roll verziert eine längere Note: Hauptton, kurzer Cut, Hauptton, kurzer Tap, Hauptton, alles in der Zeit der Note. Er macht den typisch irischen Klang. Übe erst die Teile einzeln, dann zusammen. Beispiel auf A:',demos:[{label:'Langsam',ev:[[69,.3],[71,.1],[69,.2],[67,.1],[69,.4]]},{label:'Im Tempo',ev:[[69,.17],[71,.045],[69,.1],[67,.045],[69,.22]]}]}
  ]},
  {id:'w7',t:'Stufe 7 · Tunes',ziel:'Ganze Melodien mit Phrasen.',tasks:[
   {id:'w7a',kind:'check',t:'Ersten Tune spielen',link:['whistle.html','Tunes']},

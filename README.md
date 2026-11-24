@@ -54,6 +54,12 @@ Alle Bereiche und die Navigationsleiste nutzen jetzt die Farben der Praxis-App: 
 - **Freunde:** Jede Person nutzt ihre eigene Sync-Datei. Profile werden über eine zufällige Kennung erkannt, notfalls über den Namen.
 - Nicht enthalten: Gemini-Schlüssel, Pad-Belegung und Riffkoje-Aufnahmen.
 
+## Stand v28: Eigene Übungen in den Lehrpfaden
+- **Intonationsanzeige** (Nadel in Cent, grüner Bereich, Halten bis der Ton sauber sitzt, Referenzton): in den Pfaden Geige (D-Dur, G-Dur), Whistle (D–E–Fis, D-Dur, zweite Oktave) und Gitarre (Stimmung prüfen, ±10 Cent). Oktave egal.
+- **Tonhalte-Trainer** (gleichmäßig halten, Wackler setzen die Zeit zurück): Whistle (8 und 12 s) und Geige (Bogenstrich, 8 s).
+- **Verzierungen zum Anhören** (Whistle, Stufe 6): Cut, Tap und Roll langsam und im Tempo. Die genauen Griffe zeigt die Whistle-Seite.
+- Neue Aufgabentypen in `pfad-stufen.js`: `inton`, `hold`, `hear`.
+
 ## Stand v27: Lehrpfade, Theorie Pro, Gehörtraining
 - **Gemeinsamer Kern** `pfad.js` (Theorie-Bausteine mit korrekter Notenschreibweise, Töne, Mikrofon-Erkennung, Notenzeile, Klaviatur), `pfad-quiz.js` (Quiz-Seite mit Kapiteln, Sternen, Schwachstellen-Training) und `pfad-stufen.js` (Stufenpfade mit Abhaken, Zähler, Mikrofon-Prüfung, Griffbrett-Trainer).
 - **Gehörtraining** (`gehoer.html`, 42 Lektionen, 9 Kapitel): höher/tiefer, Intervalle, Dur/Moll, Akkorde (auch Septakkorde und Umkehrungen), Nachspielen per Bildschirm/MIDI/Mikrofon, Rhythmus nachklatschen, Harmonie (Stufen, Kadenzen, Akkordfolgen), Tonleitern und Modi, Stufen hören. Aufgaben werden zufällig erzeugt. Falsch beantwortete Lektionen bietet die App als Schwachstellen-Training an.
@@ -152,3 +158,16 @@ Eigener Bereich „Akkorde“ in der Leiste. Alle Texte und Griffbilder sind eig
 
 ## Riffkoje
 Funktioniert wie bisher (siehe die Hinweise in der App). Takes und Songs liegen pro Profil getrennt.
+
+## v29: Umbau Startseite und Bedienung
+- Startseite: farbige Begrüßung mit Zahlen, Instrument-Weiche (Geige, Klavier, Gitarre, Whistle, Wissen) merkt sich die letzte Wahl, Lehrpfade als „Empfohlen“ mit Fortschrittsbalken, Wochenübersicht nach unten.
+- Navigation einzeilig und scrollbar auf dem Handy, Profilwechsel bleibt sichtbar.
+- Lernseiten: weichere Karten, Fokus-Rahmen, ruhigere Animationen (respektiert „weniger Bewegung“).
+
+## v30: Gesang
+- Neuer Lehrpfad pfad-gesang.html (Key pf.ges, 8 Stufen, 33 Aufgaben): Atem, erster Ton, C-Dur, Intervalle, Umfang, Lieder, Ausdruck, Auftritt. Mikrofon-Intonation (Oktave egal), Tonhalte, Hörbeispiele.
+- Startseite: sechster Reiter „Gesang“; Navigation und Cache ergänzt.
+
+## v31: Mehr Gesang
+- Neue Seite gesangslehre.html (Key pf.gl, 12 Lektionen in 6 Kapiteln): Stimmlippen, Atmung, Stimmlagen, Register, Aufwärmen und Stimmpflege, Haltung, Vokale, Dynamik und Vibrato, Intonation inkl. Hörübung (höher/tiefer/sauber), Chor, Mikrofon.
+- Lehrpfad Gesang: jetzt 10 Stufen, 50 Aufgaben (a-Moll, Pentatonik, Ode an die Freude, Kuckuck, Sprünge, Moll-Dreiklang, Pop/Mikrofon). Verknüpfung zur Gesangslehre.

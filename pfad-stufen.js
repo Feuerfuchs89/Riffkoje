@@ -75,6 +75,81 @@ PF.counter=function(el,spec,best,onSave){
   draw();
 };
 
+
+/* Cent-Abweichung zum Zielton, oktavunabhängig */
+PF.cents=function(f,m){var c=1200*Math.log(f/PF.fq(m))/Math.LN2;return ((c+600)%1200+1200)%1200-600};
+PF.meterHtml=function(tol){var z=Math.min(50,tol)*1;return '<div style="position:relative;height:26px;border-radius:8px;background:var(--line);overflow:hidden" aria-hidden="true"><div style="position:absolute;top:0;bottom:0;left:'+(50-z)+'%;width:'+(2*z)+'%;background:var(--ok);opacity:.35"></div><div style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:var(--ink)"></div><div class="ndl" style="position:absolute;top:2px;bottom:2px;left:50%;width:6px;margin-left:-3px;border-radius:3px;background:var(--acc);opacity:.25;transition:left .08s"></div></div><div class="row" style="justify-content:space-between"><span class="small muted">♭ zu tief</span><span class="small muted">♯ zu hoch</span></div>'};
+/* Intonation: Ton halten, Abweichung in Cent live */
+PF.intonation=function(el,spec,onDone){
+  var notes=spec.notes,tol=spec.tol||15,need=spec.hold||1.2,i=0,hold=0,last=0,done=false,msg='';
+  function nmM2(m){return PF.nm(PF.mkNote(m))}
+  function draw(){
+    if(done){el.innerHTML='<p class="ok">Geschafft! Alle Töne sauber getroffen.</p><button class="btn" id="iagain" type="button">Nochmal</button>';el.querySelector('#iagain').onclick=function(){i=0;hold=0;done=false;draw()};return}
+    el.innerHTML='<p class="small muted" style="margin:0">'+esc(spec.hint||'Spiele den gezeigten Ton und halte ihn ruhig. Die Nadel zeigt, ob du zu tief oder zu hoch bist. Grüner Bereich: ±'+tol+' Cent. Die Oktave ist egal.')+'</p>'+
+      '<div class="row" style="gap:6px">'+notes.map(function(n,k){return '<span class="pill'+(k<i?' ok':'')+'" style="'+(k===i?'border-color:var(--acc);color:var(--ink);font-weight:700;':'')+'">'+esc(nmM2(n.m))+'</span>'}).join('')+'</div>'+
+      '<div style="text-align:center;font-size:2.6rem;font-weight:800" id="itn">'+esc(nmM2(notes[i].m))+'</div>'+PF.meterHtml(tol)+
+      '<div class="meter" aria-hidden="true"><i id="ihold" style="width:0"></i></div><div class="small" id="itx" style="text-align:center">'+esc(msg||'Mikrofon starten und spielen.')+'</div>'+
+      '<div class="row"><button class="btn" id="iref" type="button">🔊 Referenzton</button><button class="btn" id="imic" type="button">🎤 Mikrofon '+(PF.Mic.on?'aus':'starten')+'</button><button class="btn" id="iman" type="button">✓ Habe ich geschafft</button></div>';
+    el.querySelector('#iref').onclick=function(){PF.tone(notes[i].m+(notes[i].m<57?12:0),1.6);if(PF.Mic.on)PF.Mic.ign=performance.now()+2000};
+    el.querySelector('#imic').onclick=function(){if(PF.Mic.on){PF.Mic.stop();draw()}else PF.Mic.start({},function(ok,err){if(ok){draw();bind()}else{msg=err;draw()}})};
+    el.querySelector('#iman').onclick=function(){i=notes.length;finish()};
+    if(PF.Mic.on)bind();
+  }
+  function bind(){PF.Mic.start({pitch:pitch})}
+  function pitch(f){
+    if(done||!document.body.contains(el))return;
+    var now=performance.now(),dt=Math.min(.25,(now-last)/1000);last=now;
+    var ndl=el.querySelector('.ndl'),tx=el.querySelector('#itx'),hb=el.querySelector('#ihold');if(!ndl)return;
+    if(!f){hold=0;ndl.style.opacity='.25';hb.style.width='0';tx.textContent='Ich höre nichts. Spiele etwas lauter.';return}
+    var c=PF.cents(f,notes[i].m),cl=Math.max(-50,Math.min(50,c));
+    ndl.style.left=(50+cl)+'%';ndl.style.opacity='1';
+    var ok=Math.abs(c)<=tol;hold=ok?hold+dt:Math.max(0,hold-dt*2);
+    hb.style.width=Math.min(100,hold/need*100)+'%';
+    tx.textContent=ok?'Sauber! ('+(c>=0?'+':'')+Math.round(c)+' Cent)':(c<0?'zu tief ':'zu hoch ')+'('+(c>=0?'+':'')+Math.round(c)+' Cent)';
+    if(hold>=need){i++;hold=0;if(i>=notes.length)finish();else draw()}
+  }
+  function finish(){done=true;draw();if(onDone)onDone()}
+  el._pitch=pitch;draw();
+};
+/* Tonhalte: gleichmäßig halten */
+PF.hold=function(el,spec,onDone){
+  var sec=spec.seconds||8,tol=spec.tol||25,t=0,ref=null,last=0,done=false,msg='';
+  function draw(){
+    if(done){el.innerHTML='<p class="ok">Geschafft! '+sec+' Sekunden gleichmäßig gehalten.</p><button class="btn" id="hagain" type="button">Nochmal</button>';el.querySelector('#hagain').onclick=function(){t=0;ref=null;done=false;draw()};return}
+    el.innerHTML='<p class="small muted" style="margin:0">'+esc(spec.hint||'Spiele einen beliebigen Ton und halte ihn '+sec+' Sekunden ruhig. Bleibt die Tonhöhe stabil (±'+tol+' Cent), läuft die Zeit. Bei Wacklern oder Pausen geht sie zurück.')+'</p>'+
+      '<div style="text-align:center;font-size:2.6rem;font-weight:800" id="hn">'+t.toFixed(1)+' s</div>'+PF.meterHtml(tol)+'<div class="meter" aria-hidden="true"><i id="hb" style="width:'+Math.min(100,t/sec*100)+'%"></i></div><div class="small" id="hx" style="text-align:center">'+esc(msg||'Mikrofon starten und einen Ton spielen.')+'</div>'+
+      '<div class="row"><button class="btn" id="hmic" type="button">🎤 Mikrofon '+(PF.Mic.on?'aus':'starten')+'</button><button class="btn" id="hman" type="button">✓ Habe ich geschafft</button></div>';
+    el.querySelector('#hmic').onclick=function(){if(PF.Mic.on){PF.Mic.stop();draw()}else PF.Mic.start({},function(ok,err){if(ok){draw();bind()}else{msg=err;draw()}})};
+    el.querySelector('#hman').onclick=function(){done=true;draw();if(onDone)onDone()};
+    if(PF.Mic.on)bind();
+  }
+  function bind(){PF.Mic.start({pitch:pitch})}
+  function pitch(f){
+    if(done||!document.body.contains(el))return;
+    var now=performance.now(),dt=Math.min(.25,(now-last)/1000);last=now;
+    var ndl=el.querySelector('.ndl'),hn=el.querySelector('#hn'),hb=el.querySelector('#hb'),hx=el.querySelector('#hx');if(!ndl)return;
+    if(!f){t=Math.max(0,t-dt*2);ref=null;ndl.style.opacity='.25';hx.textContent='Ton fehlt. Weiterspielen!'}
+    else{
+      var m=69+12*Math.log(f/440)/Math.LN2;if(ref==null)ref=m;
+      var c=(m-ref)*100;ref=ref*.97+m*.03;var cl=Math.max(-50,Math.min(50,c));
+      ndl.style.left=(50+cl)+'%';ndl.style.opacity='1';
+      if(Math.abs(c)<=tol){t+=dt;hx.textContent='Ruhig, weiter so!'}else{t=Math.max(0,t-dt*2);hx.textContent=c<0?'Der Ton sinkt ab.':'Der Ton steigt an.'}
+    }
+    hn.textContent=t.toFixed(1)+' s';hb.style.width=Math.min(100,t/sec*100)+'%';
+    if(t>=sec){done=true;draw();if(onDone)onDone()}
+  }
+  el._pitch=pitch;draw();
+};
+/* Hörbeispiele (z. B. Verzierungen) */
+PF.demos=function(el,spec,onDone){
+  var h='<p style="margin:0">'+esc(spec.text||'')+'</p><div class="row">';
+  spec.demos.forEach(function(d,i){h+='<button class="btn" data-d="'+i+'" type="button">🔊 '+esc(d.label)+'</button>'});
+  h+='</div><div class="row"><button class="btn primary" id="dok" type="button">✓ Verstanden und ausprobiert</button></div>';
+  el.innerHTML=h;
+  el.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){var d=spec.demos[+b.getAttribute('data-d')],t=0,ev=[];d.ev.forEach(function(e){ev.push({m:[e[0]],at:t,d:e[1]});t+=e[1]});PF.play(ev)}});
+  el.querySelector('#dok').onclick=function(){if(onDone)onDone()};
+};
+
 PF.stufenPage=function(cfg){
   PF.css();
   var app=document.getElementById('app'),P=MK.get(cfg.key,null);
@@ -96,7 +171,7 @@ PF.stufenPage=function(cfg){
         var done=isDone(t);
         h+='<div class="card" style="padding:10px" data-t="'+t.id+'"><div class="chk'+(done?' done':'')+'"><input type="checkbox" '+(done?'checked ':'')+(t.kind==='check'||t.kind==='link'?'':'disabled ')+'aria-label="'+esc(t.t)+'" data-ck="'+t.id+'"><span>'+esc(t.t)+(t.kind==='counter'?' <span class="pill">Ziel '+t.target+(P.best[t.id]?', Best '+P.best[t.id]:'')+'</span>':'')+'</span></div>'+
           (t.d?'<p class="small muted" style="margin:0 0 0 32px">'+esc(t.d)+'</p>':'')+
-          '<div class="row" style="margin-left:32px">'+(t.link?'<a class="btn" href="'+t.link[0]+'">'+esc(t.link[1])+' →</a>':'')+(t.kind==='counter'||t.kind==='notes'||t.kind==='board'?'<button class="btn" data-op="'+t.id+'" type="button">'+(t.kind==='counter'?'Zähler öffnen':'Üben')+'</button>':'')+'</div><div data-pn="'+t.id+'" style="margin-left:32px;display:grid;gap:8px"></div></div>';
+          '<div class="row" style="margin-left:32px">'+(t.link?'<a class="btn" href="'+t.link[0]+'">'+esc(t.link[1])+' →</a>':'')+(t.kind!=='check'&&t.kind!=='link'?'<button class="btn" data-op="'+t.id+'" type="button">'+(t.kind==='counter'?'Zähler öffnen':t.kind==='hear'?'Anhören':'Üben')+'</button>':'')+'</div><div data-pn="'+t.id+'" style="margin-left:32px;display:grid;gap:8px"></div></div>';
       });
       h+='</div></details>';
     });
@@ -113,6 +188,9 @@ PF.stufenPage=function(cfg){
     if(t.kind==='counter')PF.counter(el,t,P.best[id]||0,function(n,best){P.best[id]=best;if(best>=t.target)P.done[id]=1;save();render(t)});
     if(t.kind==='notes')PF.noteCheck(el,t,function(){complete(t)});
     if(t.kind==='board')PF.boardTrainer(el,t,function(){complete(t)});
+    if(t.kind==='inton')PF.intonation(el,t,function(){complete(t)});
+    if(t.kind==='hold')PF.hold(el,t,function(){complete(t)});
+    if(t.kind==='hear')PF.demos(el,t,function(){complete(t)});
   }
   render();
   window.__sp={all:all,P:P,openPanel:openPanel,render:render};

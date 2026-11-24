@@ -21,6 +21,7 @@ function N(a){return a.map(function(m){return {m:m}})}
 PF.stufenPage({key:'pf.git',emoji:'🎸',title:'Gitarre: Lehrpfad',desc:'Acht Stufen von den ersten Griffen bis zu Barré, Pentatonik und Riffs. Jede Stufe hat klare Ziele: kleine Schritte, Akkordwechsel pro Minute, früh echte Musik. Die Übungen selbst findest du in Akkorde, Tabulatur und Riffkoje.',stufen:[
  {id:'g1',t:'Stufe 1 · Erste Akkorde',ziel:'Gitarre stimmen, sauber anschlagen, Em, Am, E und A greifen.',tasks:[
   {id:'g1a',kind:'check',t:'Gitarre ist gestimmt (E A D G H E)',d:'Von der dicken Saite zur dünnen. Mit dem Stimmgerät in der Whistle-Seite oder deinem Clip-Tuner.'},
+  {id:'g1f',kind:'inton',t:'Stimmung prüfen: jede Saite im grünen Bereich',hint:'Zupfe nacheinander die Saiten und halte jeden Ton, bis die Nadel in der Mitte steht. Grüner Bereich: ±10 Cent. Die Oktave ist egal.',tol:10,hold:1.0,notes:N([40,45,50,55,59,64])},
   {id:'g1b',kind:'notes',t:'Alle sechs leeren Saiten sauber erkennen',hint:'Zupfe nacheinander die leeren Saiten von der tiefsten zur höchsten. Die Oktave ist egal.',notes:N([40,45,50,55,59,64])},
   {id:'g1c',kind:'check',t:'Em und Am: jeder Ton klingt, nichts schnarrt',link:['akkorde.html','Akkorde üben'],d:'Greife den Akkord und zupfe Saite für Saite. Jede soll klar klingen.'},
   {id:'g1d',kind:'check',t:'E-Dur und A-Dur greifen',link:['akkorde.html','Akkorde üben']},

@@ -27,45 +27,88 @@ a.tile{display:grid;gap:6px;background:var(--card);border:1px solid var(--line);
 a.tile:hover{border-color:var(--acc)}.tile .e{font-size:2.2rem;line-height:1}.tile .t{font-weight:700;font-size:1.1rem}.tile .s{color:var(--muted);font-size:.9rem}.tile .k{font-size:.85rem;color:var(--acc);font-weight:600}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
 .stats{display:flex;gap:22px;flex-wrap:wrap}.stats b{font-size:1.6rem;display:block;line-height:1.1}.stats span{font-size:.8rem;color:var(--muted)}
+
+.hero{background:linear-gradient(135deg,var(--acc),#2c7bb6 70%,#5fb3a5);color:#fff;border-radius:20px;padding:20px 18px;box-shadow:0 6px 22px rgba(23,70,110,.22)}
+.hero h1{color:#fff;font-size:1.7rem}.hero p{color:rgba(255,255,255,.88)!important}
+.hero .stats{margin-top:14px;gap:10px 22px}.hero .stats b{font-size:1.5rem;color:#fff}.hero .stats span{color:rgba(255,255,255,.82);font-size:.78rem}
+#stats-card{display:none}
+.isw{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0}
+.isw button{font:inherit;display:grid;justify-items:center;gap:2px;padding:10px 4px 8px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;font-weight:600;font-size:.85rem;min-height:68px;position:relative;overflow:hidden;transition:transform .12s,border-color .12s}
+.isw button span{font-size:1.6rem;line-height:1}
+.isw button:hover{transform:translateY(-2px)}
+.isw button[aria-pressed=true]{border-color:var(--ic,var(--acc));box-shadow:0 3px 12px rgba(0,0,0,.14)}
+.isw button i{position:absolute;left:0;bottom:0;height:4px;background:var(--ic,var(--acc));width:var(--pg,0%);border-radius:0 4px 4px 0}
+.isw button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.inst .gh{display:none}
+.inst a.tile{border-left:6px solid var(--ic,var(--acc));transition:transform .12s,box-shadow .12s;position:relative}
+.inst a.tile:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.inst a.tile.path{background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--ic,var(--acc)) 14%,var(--card)));border-width:2px;border-left-width:6px;border-color:var(--ic,var(--acc))}
+.inst a.tile.path::after{content:"Empfohlen";position:absolute;top:10px;right:12px;font-size:.7rem;font-weight:700;color:var(--ic,var(--acc));letter-spacing:.04em;text-transform:uppercase}
+.tile .bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden}.tile .bar b{display:block;height:100%;background:var(--ic,var(--acc));border-radius:6px}
+#inst-geige{--ic:#2c7bb6}#inst-klavier{--ic:#8a5cc2}#inst-gitarre{--ic:#d2691e}#inst-whistle{--ic:#2e9c78}#inst-gesang{--ic:#d24a4a}#inst-wissen{--ic:#c2477a}.isw button[data-i=gesang]{--ic:#d24a4a}
+.isw button[data-i=geige]{--ic:#2c7bb6}.isw button[data-i=klavier]{--ic:#8a5cc2}.isw button[data-i=gitarre]{--ic:#d2691e}.isw button[data-i=whistle]{--ic:#2e9c78}.isw button[data-i=wissen]{--ic:#c2477a}
+.card{box-shadow:0 1px 3px rgba(0,0,0,.05)}
+@media (max-width:420px){.isw{gap:4px}.isw button{font-size:.68rem;padding:8px 2px 6px}.isw button span{font-size:1.4rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <main>
-  <div><h1 id="hi">Musikkoje</h1><p class="muted" id="sub" style="margin:4px 0 0"></p></div>
-  <div class="card"><div class="stats" id="stats"></div></div>
+  <header class="hero"><h1 id="hi">Musikkoje</h1><p id="sub" style="margin:4px 0 0"></p><div class="stats" id="stats"></div></header>
   <section class="card" id="today" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:12em"><b>Heute üben</b><div class="muted small" id="today-s">10 Minuten: Aufwärmen, Tonleiter, Noten lernen, ein Stück</div></div><a class="btn primary" id="today-a" href="geigenpult.html?plan=short" style="min-height:48px;display:inline-flex;align-items:center">▶ Los geht’s</a></section>
-  <section class="card" id="week" aria-labelledby="week-h"><h2 id="week-h" style="margin:0 0 8px;font-size:1.1rem">Diese Woche</h2><div id="week-bars" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:84px" role="img"></div><div id="week-l" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;font-size:.75rem;color:var(--muted);margin-top:4px"></div><p class="small muted" id="week-t" style="margin:8px 0 0"></p></section>
   <section class="card" id="resume" hidden style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:12em">Weitermachen: <b id="rs-t"></b></span><a class="btn primary" id="rs-a" href="#" style="text-decoration:none;display:inline-block">Öffnen</a></section>
-  <h2 class="gh">🎻 Geige</h2>
+    <nav class="isw" id="isw" aria-label="Instrument wählen">
+    <button type="button" data-i="geige" aria-pressed="false"><span>🎻</span>Geige<i></i></button>
+    <button type="button" data-i="klavier" aria-pressed="false"><span>🎹</span>Klavier<i></i></button>
+    <button type="button" data-i="gitarre" aria-pressed="false"><span>🎸</span>Gitarre<i></i></button>
+    <button type="button" data-i="whistle" aria-pressed="false"><span>🪈</span>Whistle<i></i></button>
+    <button type="button" data-i="gesang" aria-pressed="false"><span>🎤</span>Gesang<i></i></button>
+    <button type="button" data-i="wissen" aria-pressed="false"><span>📖</span>Wissen<i></i></button>
+  </nav>
+  <section class="inst" id="inst-geige" data-i="geige" hidden><h2 class="gh">🎻 Geige</h2>
   <div class="grid">
-    <a class="tile" href="pfad-geige.html"><span class="e">🧭</span><span class="t">Lehrpfad Geige</span><span class="s">Acht Stufen von den leeren Saiten bis Folk, Lagen und Aufnahme. Mit Mikrofon-Prüfungen.</span></a>
+    <a class="tile path" href="pfad-geige.html" data-pf="pfad-geige.html"><span class="e">🧭</span><span class="t">Lehrpfad Geige</span><span class="s">Acht Stufen von den leeren Saiten bis Folk, Lagen und Aufnahme. Mit Mikrofon-Prüfungen.</span></a>
     <a class="tile" href="geigenpult.html"><span class="e">🎻</span><span class="t">Geigenpult</span><span class="s">Noten als Foto oder MusicXML laden, mit Cursor üben, Mikro und MIDI-Keyboard, Lehrplan, Tagesplan, Bordun.</span><span class="k" id="k-gp"></span></a>
     <a class="tile" href="noten.html"><span class="e">🎼</span><span class="t">Noten lernen</span><span class="s">Noten auf dem Griffbrett finden, Lagen und Tonleitern, mit Mikrofon: Ton spielen und sehen, ob er sauber ist.</span><span class="k" id="k-nt"></span></a>
     <a class="tile" href="analyse.html"><span class="e">🎙</span><span class="t">Aufnahme auswerten</span><span class="s">Dein Spiel aufnehmen oder eine Aufnahme laden: pro Ton Abweichung in Cent, Tempo, Pausen und Verlauf.</span><span class="k" id="k-an"></span></a>
     <a class="tile" href="mentor.html"><span class="e">🧭</span><span class="t">Mentor-Bericht</span><span class="s">Deine Übungsdaten als Text für einen Chat mit Claude: Übungsplan, passende Lieder, Schwächen.</span></a>
   </div>
-  <h2 class="gh">🎹 Klavier</h2>
+  </section>
+  <section class="inst" id="inst-klavier" data-i="klavier" hidden><h2 class="gh">🎹 Klavier</h2>
   <div class="grid">
-    <a class="tile" href="klavier.html"><span class="e">🎹</span><span class="t">Klavier lernen</span><span class="s">62 Lektionen von der ersten Note bis zu Akkorden und Rhythmus. Note und Taste leuchten auf. Kindermodus, Mikrofon fürs echte Klavier oder MIDI.</span></a>
+    <a class="tile path" href="klavier.html" data-pf="klavier.html"><span class="e">🎹</span><span class="t">Klavier lernen</span><span class="s">62 Lektionen von der ersten Note bis zu Akkorden und Rhythmus. Note und Taste leuchten auf. Kindermodus, Mikrofon fürs echte Klavier oder MIDI.</span></a>
   </div>
-  <h2 class="gh">🎸 Gitarre</h2>
+  </section>
+  <section class="inst" id="inst-gitarre" data-i="gitarre" hidden><h2 class="gh">🎸 Gitarre</h2>
   <div class="grid">
-    <a class="tile" href="pfad-gitarre.html"><span class="e">🧭</span><span class="t">Lehrpfad Gitarre</span><span class="s">Acht Stufen: erste Akkorde, Wechsel pro Minute, Schlagmuster, Griffbrett, Powerchords, Barré, Pentatonik, Riffs.</span></a>
+    <a class="tile path" href="pfad-gitarre.html" data-pf="pfad-gitarre.html"><span class="e">🧭</span><span class="t">Lehrpfad Gitarre</span><span class="s">Acht Stufen: erste Akkorde, Wechsel pro Minute, Schlagmuster, Griffbrett, Powerchords, Barré, Pentatonik, Riffs.</span></a>
     <a class="tile" href="akkorde.html"><span class="e">🎸</span><span class="t">Akkorde und Rhythmus</span><span class="s">57 Gitarrengriffe: Lernpfad, Griffbilder mit Klang, Wechsel-Trainer, Schlagmuster, Akkordfolgen, sus, maj7, Powerchords.</span><span class="k" id="k-ak"></span></a>
     <a class="tile" href="tabs.html"><span class="e">🎼</span><span class="t">Tabulatur</span><span class="s">Tabs lesen, hören und nachspielen: Leersaiten, Techniken, Pentatonik, Metal-Riffs.</span><span class="k" id="k-tb"></span></a>
     <a class="tile" href="riffkoje.html"><span class="e">🎧</span><span class="t">Riffkoje</span><span class="s">Zu YouTube-Videos mitspielen, Gitarre aufnehmen, Tabs aus Guitar-Pro-Dateien.</span><span class="k" id="k-rk"></span></a>
   </div>
-  <h2 class="gh">🪈 Low Whistle</h2>
+  </section>
+  <section class="inst" id="inst-whistle" data-i="whistle" hidden><h2 class="gh">🪈 Low Whistle</h2>
   <div class="grid">
-    <a class="tile" href="pfad-whistle.html"><span class="e">🧭</span><span class="t">Lehrpfad Whistle</span><span class="s">Acht Stufen von Atem und Griffen bis zum Session-Tune.</span></a>
+    <a class="tile path" href="pfad-whistle.html" data-pf="pfad-whistle.html"><span class="e">🧭</span><span class="t">Lehrpfad Whistle</span><span class="s">Acht Stufen von Atem und Griffen bis zum Session-Tune.</span></a>
     <a class="tile" href="whistle.html"><span class="e">🪈</span><span class="t">Low Whistle</span><span class="s">Griffe, Finger-Trainer, Atmung, Tonleitern und irische Tunes, mit Mikrofon-Check.</span><span class="k" id="k-wh"></span></a>
   </div>
-  <h2 class="gh">📖 Wissen</h2>
+  </section>
+  <section class="inst" id="inst-gesang" data-i="gesang" hidden><h2 class="gh">🎤 Gesang</h2>
+  <div class="grid">
+    <a class="tile path" href="pfad-gesang.html" data-pf="pfad-gesang.html"><span class="e">🧭</span><span class="t">Lehrpfad Gesang</span><span class="s">Zehn Stufen: Atem, erster Ton, Tonleiter, Intervalle, Stimmumfang, Lieder, Sprünge, Mikrofon und Auftritt. Das Mikrofon zeigt, ob du den Ton triffst.</span></a>
+    <a class="tile" href="gesangslehre.html"><span class="e">📚</span><span class="t">Gesangslehre</span><span class="s">12 Lektionen: Stimme und Atem, Stimmlagen, Register, Stimmgesundheit, Klang, Intonation mit Hörübung, Chor und Mikrofon.</span><span class="k" id="k-gl"></span></a>
+    <a class="tile" href="analyse.html"><span class="e">🎙</span><span class="t">Aufnahme auswerten</span><span class="s">Sing etwas auf und sieh pro Ton die Abweichung in Cent.</span></a>
+    <a class="tile" href="gehoer.html"><span class="e">👂</span><span class="t">Gehörtraining</span><span class="s">Intervalle, Akkorde und Tonleitern erkennen. Hilft beim sauberen Singen.</span></a>
+  </div>
+  </section>
+  <section class="inst" id="inst-wissen" data-i="wissen" hidden><h2 class="gh">📖 Wissen</h2>
   <div class="grid">
     <a class="tile" href="theorie.html"><span class="e">📖</span><span class="t">Musiktheorie</span><span class="s">Von Entdecker bis Musiker-Wissen: Hören, Notenlesen, Akkorde, Rhythmus, Gehör. Mit Eltern-Tipps.</span><span class="k" id="k-th"></span></a>
     <a class="tile" href="harmonie.html"><span class="e">🧠</span><span class="t">Theorie Pro</span><span class="s">43 Lektionen: Tonarten, Intervalle, Tonleitern, Akkorde, Harmonielehre, Formen. Aufgaben werden frisch erzeugt.</span></a>
     <a class="tile" href="gehoer.html"><span class="e">👂</span><span class="t">Gehörtraining</span><span class="s">42 Lektionen: Intervalle, Akkorde, Skalen, Stufen, Nachspielen und Rhythmus. Mit Schwachstellen-Training.</span></a>
   </div>
+  </section>
+    <section class="card" id="week" aria-labelledby="week-h"><h2 id="week-h" style="margin:0 0 8px;font-size:1.1rem">Diese Woche</h2><div id="week-bars" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:64px" role="img"></div><div id="week-l" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;font-size:.75rem;color:var(--muted);margin-top:4px"></div><p class="small muted" id="week-t" style="margin:8px 0 0"></p></section>
   <section class="card" id="adv" hidden aria-labelledby="adv-h">
     <h2 id="adv-h" style="margin:0 0 4px;font-size:1.2rem">🎄 Adventskalender</h2>
     <p class="muted small" style="margin:0 0 10px">Jeden Tag eine kleine Aufgabe, 5 bis 10 Minuten. Türchen öffnen sich erst am jeweiligen Tag.</p>
@@ -161,6 +204,35 @@ var ak=MK.get('akk',{});var akn=Object.keys(ak.known||{}).filter(function(k){ret
 })();
 var last=MK.lastBackup(),has=(gp.xp||0)>0||done>0||log.length>0||akn>0,days=last?Math.floor((Date.now()-last)/864e5):null;
 if(has&&(days===null||days>=14)){$('#bk').hidden=false;$('#bk').style.display='flex';$('#bk-t').textContent=days===null?'Deine Fortschritte sind noch nicht gesichert. Alles liegt nur in diesem Browser.':'Die letzte Sicherung ist '+days+' Tage alt.';$('#bk-b').onclick=function(){MK.backupAll();$('#bk').hidden=true}}
+})();
+/* Instrument-Weiche und Fortschritt je Lehrpfad */
+(function(){
+  function cnt(o){return o&&o.done?Object.keys(o.done).length:0}
+  var PT={'pfad-geige.html':['pf.gei',37,'Aufgaben'],'pfad-gitarre.html':['pf.git',40,'Aufgaben'],'pfad-whistle.html':['pf.whi',30,'Aufgaben'],'pfad-gesang.html':['pf.ges',50,'Aufgaben']};
+  var prog={gesang:0,geige:0,klavier:0,gitarre:0,whistle:0,wissen:0};
+  Object.keys(PT).forEach(function(f){
+    var d=PT[f],n=Math.min(d[1],cnt(MK.get(d[0],{}))),tile=document.querySelector('a[data-pf="'+f+'"]');
+    if(tile){var b=document.createElement('span');b.className='bar';b.innerHTML='<b style="width:'+Math.round(n/d[1]*100)+'%"></b>';tile.appendChild(b);var k=document.createElement('span');k.className='k';k.textContent=n?n+' von '+d[1]+' '+d[2]+' erledigt':'Jetzt anfangen';tile.appendChild(k)}
+    var key=f==='pfad-gesang.html'?'gesang':f==='pfad-geige.html'?'geige':f==='pfad-gitarre.html'?'gitarre':'whistle';prog[key]=Math.round(n/d[1]*100);
+  });
+  try{var kl=MK.get('kl',{}),st=kl.stars||{},nk=Object.keys(st).filter(function(k){return st[k]>0}).length,t=document.querySelector('a[data-pf="klavier.html"]');
+    prog.klavier=Math.round(Math.min(62,nk)/62*100);
+    if(t){var b=document.createElement('span');b.className='bar';b.innerHTML='<b style="width:'+prog.klavier+'%"></b>';t.appendChild(b);var k=document.createElement('span');k.className='k';k.textContent=nk?nk+' von 62 Lektionen geschafft':'Jetzt anfangen';t.appendChild(k)}}catch(e){}
+  try{var gl=Object.keys((MK.get('pf.gl',{}).stars)||{}).length;var kgl=document.getElementById('k-gl');if(kgl)kgl.textContent=gl?gl+' von 12 Lektionen begonnen':'Jetzt anfangen'}catch(e){}
+  try{var g=Object.keys((MK.get('pf.ge',{}).stars)||{}).length,h=Object.keys((MK.get('pf.th',{}).stars)||{}).length;prog.wissen=Math.round(Math.min(85,g+h)/85*100)}catch(e){}
+  var btns=document.querySelectorAll('#isw button'),secs=document.querySelectorAll('.inst');
+  function show(i,persist){
+    btns.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.i===i?'true':'false')});
+    secs.forEach(function(x){x.hidden=x.dataset.i!==i});
+    if(persist){try{MK.set('inst',i)}catch(e){}}
+  }
+  btns.forEach(function(b){b.querySelector('i').style.setProperty('--pg',prog[b.dataset.i]+'%');b.style.setProperty('--pg',prog[b.dataset.i]+'%');b.addEventListener('click',function(){show(b.dataset.i,true)});
+    b.setAttribute('aria-label',b.textContent+', '+prog[b.dataset.i]+' Prozent geschafft')});
+  var start=MK.get('inst',null);
+  if(!start){var lp=null;try{lp=JSON.parse(localStorage.getItem('mk.lastpage')||'null')}catch(e){}
+    var u=lp&&lp.p||'';start=/klavier/.test(u)?'klavier':/gesang/.test(u)?'gesang':/gitarre|akkorde|tabs|riffkoje/.test(u)?'gitarre':/whistle/.test(u)?'whistle':/theorie|harmonie|gehoer/.test(u)?'wissen':'geige'}
+  if(!/^(geige|klavier|gitarre|whistle|gesang|wissen)$/.test(start))start='geige';
+  show(start,false);
 })();
 </script>
 </body>
