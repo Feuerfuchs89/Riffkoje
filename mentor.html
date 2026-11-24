@@ -162,6 +162,12 @@ function build(){
   var ak=mapIf(G('akk',null)),wh=mapIf(G('wh',null)),tb=mapIf(G('tabs',null)),th=mapIf(G('theory',null));
   var other=[];
   if(Object.keys(mapIf(ak.known)).filter(function(k){return ak.known[k]}).length)other.push('Gitarre: '+Object.keys(ak.known).filter(function(k){return ak.known[k]}).length+' Akkorde gelernt ('+Object.keys(mapIf(ak.days)).length+' Übungstage)');
+  var kl=mapIf(G('kl',null));if(Object.keys(mapIf(kl.stars)).length){var sv=0;Object.keys(kl.stars).forEach(function(k){sv+=kl.stars[k]});other.push('Klavier: '+sv+' Sterne in '+Object.keys(kl.stars).length+' Lektionen, Trefferquote '+pct(kl.h||0,(kl.h||0)+(kl.m||0))+' %')}
+  var pg=mapIf(G('pf.ge',null)),pt=mapIf(G('pf.th',null)),pgit=mapIf(G('pf.git',null)),pgei=mapIf(G('pf.gei',null)),pwh=mapIf(G('pf.whi',null));
+  function sumS(o){var s=0;Object.keys(mapIf(o.stars)).forEach(function(k){s+=o.stars[k]});return s}
+  if(Object.keys(mapIf(pg.stars)).length)other.push('Gehörtraining: '+sumS(pg)+' Sterne, Trefferquote '+pct(pg.h||0,(pg.h||0)+(pg.m||0))+' %'+(Object.keys(mapIf(pg.weak)).filter(function(k){return pg.weak[k]>=1}).length?', Schwachstellen vorhanden':''));
+  if(Object.keys(mapIf(pt.stars)).length)other.push('Theorie Pro: '+sumS(pt)+' Sterne, Trefferquote '+pct(pt.h||0,(pt.h||0)+(pt.m||0))+' %');
+  [['Gitarre-Lehrpfad',pgit],['Geige-Lehrpfad',pgei],['Whistle-Lehrpfad',pwh]].forEach(function(x){var n=Object.keys(mapIf(x[1].done)).length;if(n)other.push(x[0]+': '+n+' Aufgaben abgehakt')});
   if(Object.keys(mapIf(tb.played)).length)other.push('Tabulatur: '+Object.keys(tb.played).length+' Übungen gespielt');
   if(Object.keys(mapIf(wh.les)).length||Object.keys(mapIf(wh.days)).length)other.push('Low Whistle: '+Object.keys(mapIf(wh.days)).length+' Übungstage');
   if(th.xp)other.push('Theorie: '+th.xp+' XP, '+Object.keys(mapIf(th.stars)).length+' Aufgaben bewertet');

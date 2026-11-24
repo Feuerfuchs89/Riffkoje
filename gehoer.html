@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B1520">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Gehörtraining</title>
+<script src="shared.js"></script>
+<script src="pfad.js"></script>
+<script src="pfad-quiz.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function(){
+'use strict';
+var rnd=PF.rnd,pick=PF.pick,nm=function(m){return PF.nm(PF.mkNote(m))};
+function ch(text,audio,ans,opts,expl){return {kind:'choice',text:text,audio:audio,ans:ans,opts:opts,expl:expl||''}}
+function mel(ms,gap,d){return PF.seqEv(ms,gap||.7,d||.65)}
+function blk(ms,at,d){return {m:ms,at:at||0,d:d||1.2}}
+var MAJ=[0,2,4,5,7,9,11];
+function degS(sc,i){return sc[((i%7)+7)%7]+12*Math.floor(i/7)}
+function triad(sc,r,deg){return [r+degS(sc,deg),r+degS(sc,deg+2),r+degS(sc,deg+4)]}
+/* Tonart durch Kadenz festlegen: I IV V I als Blockakkorde, danach Zielereignisse ab t0 */
+function cadence(r,minor){
+  var sc=minor?[0,2,3,5,7,8,10]:MAJ,t=[triad(sc,r,0),triad(sc,r,3),(minor?[r+7,r+11,r+14]:triad(sc,r,4)),triad(sc,r,0)];
+  return {ev:t.map(function(c,i){return {m:c,at:i*.75,d:.7}}),end:3.3};
+}
+function seqAfter(c,ev){return c.ev.concat(ev.map(function(e){return {m:e.m,at:e.at+c.end,d:e.d}}))}
+
+var NAMEIV=PF.SEMI;
+function ivLesson(id,t,sub,intro,semis,dir,harm,n){
+  return {id:id,t:t,sub:sub,intro:intro,n:n||12,gen:function(){
+    var s=pick(semis),a=rnd(52,70),ev=harm?[blk([a,a+s],0,1.4)]:(dir==='down'?mel([a+s,a],.8,.9):mel([a,a+s],.8,.9));
+    return ch('Welches Intervall hörst du?'+(harm?' (beide Töne gleichzeitig)':dir==='down'?' (abwärts)':''),ev,semis.indexOf(s),semis.map(function(x){return NAMEIV[x]}),
+      'Der Abstand beträgt '+s+' Halbtöne: '+NAMEIV[s]+'.')
+  }};
+}
+var TRI=['dur','moll','dim','aug'];
+function chordMs(key,r,inv,spread){
+  var c=PF.CHORDS[key],ms=c.s.map(function(x){return r+x});
+  for(var i=0;i<inv;i++){ms.push(ms.shift()+12)}
+  if(spread&&ms.length>2){ms[1]+=12;ms.sort(function(a,b){return a-b})}
+  return ms;
+}
+function chordLesson(id,t,sub,intro,keys,inv,n){
+  return {id:id,t:t,sub:sub,intro:intro,n:n||10,gen:function(){
+    var k=pick(keys),r=rnd(48,60),i=inv?rnd(0,1):0,ms=chordMs(k,r,i,Math.random()<.4);
+    return ch('Welcher Akkord ist das?',[blk(ms,0,1.6)],keys.indexOf(k),keys.map(function(x){return PF.CHORDS[x].n}),
+      PF.CHORDS[k].n+': Halbtonabstände von unten '+PF.CHORDS[k].s.join('–')+'.')
+  }};
+}
+function echoLesson(id,t,sub,intro,pool,len,leapMax,tonic,minor,n){
+  return {id:id,t:t,sub:sub,intro:intro,n:n||8,gen:function(){
+    var ms=[],last=pick(pool),i;ms.push(last);
+    for(i=1;i<len;i++){var c,g=0;do{c=pick(pool);g++}while((c===last||Math.abs(c-last)>leapMax)&&g<30);ms.push(c);last=c}
+    var ev=[{m:[tonic],at:0,d:.8}].concat(ms.map(function(m,k){return {m:[m],at:1.3+k*.7,d:.65}}));
+    return {kind:'keys',mode:'seq',text:'Spiele die '+len+' Töne nach. Zuerst hörst du den Grundton '+nm(tonic)+'.',audio:ev,need:ms,lo:60,hi:83,shown:ms.map(nm).join(' – '),expl:'Die Töne waren: '+ms.map(nm).join(' – ')+'.'};
+  }};
+}
+function rhLesson(id,t,sub,intro,pats,bpm){
+  return {id:id,t:t,sub:sub,intro:intro,n:6,gen:function(){var p=pick(pats);return {kind:'rhythm',text:'Hör den Rhythmus und gib ihn dann zurück: tippe oder klatsche.',pat:p,bpm:bpm||80,expl:'Der Rhythmus hatte '+p.length+' Schläge.'}}};
+}
+var C0=[
+ {id:'g1',t:'Höher oder tiefer?',sub:'zwei Töne',intro:'Der erste Schritt im Hörtraining: Vergleiche zwei Töne. Je schneller die Schwingung, desto höher klingt der Ton.',n:10,gen:function(){var a=rnd(52,76),d=rnd(2,12)*(Math.random()<.5?1:-1);return ch('Ist der zweite Ton höher oder tiefer als der erste?',mel([a,a+d],.8,.7),d>0?0:1,['höher','tiefer'],d>0?'Der zweite Ton lag höher.':'Der zweite Ton lag tiefer.')}},
+ {id:'g2',t:'Steigt oder fällt?',sub:'Tonfolgen',intro:'Eine Melodie bewegt sich in Schritten nach oben, nach unten oder wechselt hin und her.',n:10,gen:function(){var r=rnd(55,65),t=rnd(0,2),ms;if(t===0)ms=[0,2,4,5].map(function(x){return r+x});else if(t===1)ms=[5,4,2,0].map(function(x){return r+x});else ms=[0,4,2,5].map(function(x){return r+x});return ch('Wie bewegt sich die Melodie?',mel(ms,.55,.5),t,['sie steigt','sie fällt','sie springt hin und her'],['Die Töne gingen nach oben.','Die Töne gingen nach unten.','Auf und ab im Wechsel.'][t])}},
+ {id:'g3',t:'Wie viele Töne?',sub:'zählen',intro:'Zähle mit: Wie viele einzelne Töne kommen nacheinander?',n:10,gen:function(){var k=rnd(2,5),ms=[],i;for(i=0;i<k;i++)ms.push(rnd(55,72));return ch('Wie viele Töne hörst du?',mel(ms,.5,.4),k-2,['2','3','4','5'],'Es waren '+k+' Töne.')}},
+ {id:'g4',t:'Gleich oder anders?',sub:'sehr kleine Unterschiede',intro:'Auch kleine Unterschiede zählen: ein Halbton ist der kleinste Schritt am Klavier.',n:10,gen:function(){var a=rnd(55,72),same=Math.random()<.5,d=same?0:pick([1,2]),ev=mel([a,a+d],.8,.7);return ch('Sind die zwei Töne gleich oder verschieden?',ev,same?0:1,['gleich','verschieden'],same?'Beide Töne waren gleich.':'Der zweite Ton lag '+d+' Halbton'+(d>1?'e':'')+' höher.')}}
+];
+var C1=[
+ ivLesson('i1','Prime, Quinte, Oktave','drei sehr verschiedene','Prime = gleicher Ton, Quinte = 7 Halbtöne (leer und offen), Oktave = 12 Halbtöne (derselbe Ton, höher).',[0,7,12],'up',false),
+ ivLesson('i2','Terzen und Quarte','kleine Terz, große Terz, Quarte','Große Terz (4 Halbtöne) klingt hell, kleine Terz (3) klingt dunkler. Die Quarte (5) ist offen. Eselsbrücke: „Alle meine Entchen“ beginnt mit Sekunden, „Kuckuck“ fällt als Terz.',[3,4,5],'up',false),
+ ivLesson('i3','Sekunden und Septimen','eng und dissonant','Sekunden und Septimen reiben aneinander. Die Septime ist nur einen Halbton unter der Oktave.',[1,2,10,11],'up',false),
+ ivLesson('i4','Alle Intervalle','Prime bis Oktave','Jetzt alles: 13 Intervalle von 0 bis 12 Halbtönen. Der Tritonus (6) klingt gespannt und unentschieden.',[0,1,2,3,4,5,6,7,8,9,10,11,12],'up',false,14),
+ ivLesson('i5','Abwärts','Intervalle nach unten','Abwärts klingen die gleichen Intervalle oft anders. Hör auf den Abstand, nicht auf die Richtung.',[2,3,4,5,7,8,9],'down',false),
+ ivLesson('i6','Zusammenklang','beide Töne gleichzeitig','Gleichzeitig gespielt klingen Terz und Sexte weich (konsonant), Sekunde und Septime hart (dissonant).',[3,4,5,7,8,9,12],'up',true)
+];
+var C2=[
+ {id:'t1',t:'Dur oder Moll? Akkord',sub:'Dreiklang',intro:'Dur klingt hell und offen, Moll dunkler und ernster. Der Unterschied liegt in der Terz: 4 Halbtöne (Dur) oder 3 (Moll).',n:10,gen:function(){var k=pick(['dur','moll']),ms=chordMs(k,rnd(48,60),0,false);return ch('Dur oder Moll?',[blk(ms,0,1.6)],k==='dur'?0:1,['Dur','Moll'],'Die Terz war '+(k==='dur'?'groß (Dur)':'klein (Moll)')+'.')}},
+ {id:'t2',t:'Dur oder Moll? Tonleiter',sub:'acht Töne aufwärts',intro:'In Moll liegt der dritte Ton einen Halbton tiefer als in Dur.',n:10,gen:function(){var m=Math.random()<.5,sc=m?[0,2,3,5,7,8,10,12]:[0,2,4,5,7,9,11,12],r=rnd(52,62);return ch('Dur oder Moll?',mel(sc.map(function(x){return r+x}),.38,.34),m?1:0,['Dur','Moll'],m?'natürliches Moll: kleine Terz, kleine Sexte, kleine Septime.':'Dur: große Terz, Sexte und Septime.')}},
+ {id:'t3',t:'Dur oder Moll? Melodie',sub:'gebrochener Akkord mit Nachbarton',intro:'Auch in kurzen Melodien erkennt man das Tongeschlecht am dritten Ton über dem Grundton.',n:10,gen:function(){var m=Math.random()<.5,r=rnd(55,64),t=m?3:4,ms=[r,r+t,r+7,r+12,r+7,r+t,r+2,r];return ch('Dur oder Moll?',mel(ms,.42,.38),m?1:0,['Dur','Moll'],'Die Terz über dem Grundton war '+(m?'klein':'groß')+'.')}},
+ {id:'t4',t:'Dur oder Moll? Akkordfolge',sub:'I – IV – V – I',intro:'Eine Akkordfolge in Moll hat andere Grundakkorde: i, iv, v. Die Stimmung bleibt dunkel.',n:10,gen:function(){var m=Math.random()<.5,r=rnd(48,56),sc=m?[0,2,3,5,7,8,10]:MAJ,cs=[triad(sc,r,0),triad(sc,r,3),triad(sc,r,4),triad(sc,r,0)];return ch('Dur oder Moll?',cs.map(function(c,i){return {m:c,at:i*.8,d:.75}}),m?1:0,['Dur','Moll'],m?'Alle Hauptakkorde waren Moll-Akkorde.':'Alle Hauptakkorde waren Dur-Akkorde.')}}
+];
+var C3=[
+ {id:'a1',t:'Dur oder Moll',sub:'mit Umkehrung und Lage',intro:'Auch wenn der Akkord umgedreht oder weit gespielt wird, bleibt die Farbe gleich.',n:10,gen:function(){var k=pick(['dur','moll']),ms=chordMs(k,rnd(48,60),rnd(0,2),Math.random()<.5);return ch('Dur oder Moll?',[blk(ms,0,1.6)],k==='dur'?0:1,['Dur','Moll'],k==='dur'?'Dur: heller, offener Klang.':'Moll: dunkler Klang.')}},
+ chordLesson('a2','Dur, Moll, vermindert, übermäßig','vier Dreiklänge','Vermindert klingt eng und unruhig (kleine Terz + verminderte Quinte), übermäßig schwebend und fremd (große Terz + übermäßige Quinte).',['dur','moll','dim','aug'],false),
+ chordLesson('a3','Septakkorde','maj7, 7, m7, m7b5','maj7 klingt weich und verträumt, die Dominantsept 7 bluesig und treibend, m7 weich und dunkel, m7b5 gespannt.',['maj7','dom7','m7','m7b5'],false),
+ {id:'a4',t:'Umkehrungen',sub:'Grundstellung oder umgedreht',intro:'Ein Akkord kann umgedreht werden: Der Grundton liegt dann nicht mehr unten. Grundstellung klingt stabil, die Umkehrungen schweben.',n:10,gen:function(){var k=pick(['dur','moll']),r=rnd(48,58),i=rnd(0,2),ms=chordMs(k,r,i,false);return ch('Welche Lage hat der Akkord?',[blk(ms,0,1.8)],i,['Grundstellung','Sextakkord (1. Umkehrung)','Quartsextakkord (2. Umkehrung)'],['Der Grundton liegt unten.','Die Terz liegt unten.','Die Quinte liegt unten.'][i])}},
+ chordLesson('a5','Sus und Add','Dur, sus2, sus4, add9','Sus-Akkorde ersetzen die Terz (offen, ohne Dur/Moll). Add9 fügt eine Sekunde oben an (glitzernd).',['dur','sus2','sus4','add9'],false)
+];
+var C4=[
+ echoLesson('m1','Drei Töne','Fünftonraum aus C','Höre genau hin und spiele nach. Zuerst hörst du den Grundton. Am Klavier oder auf dem Bildschirm: Der Ton zählt auch in anderer Oktave, wenn du das Mikrofon oder MIDI benutzt.',[60,62,64,67,69],3,5,60,false),
+ echoLesson('m2','Vier Töne','C-Dur-Tonleiter','Die Töne stammen aus C-Dur (nur weiße Tasten).',[60,62,64,65,67,69,71,72],4,4,60,false),
+ echoLesson('m3','Fünf Töne mit Sprüngen','C-Dur, größere Sprünge','Jetzt mit Sprüngen. Merke dir die Melodie in Stufen: Wie weit geht sie jeweils?',[60,62,64,65,67,69,71,72,74,76],5,7,60,false),
+ echoLesson('m4','Moll-Melodien','a-Moll, Grundton A','Diese Melodien stammen aus a-Moll (A = Grundton, nur weiße Tasten).',[69,71,72,74,76,77,79],4,5,69,true),
+ {id:'m5',t:'Intervalle nachspielen',sub:'zwei Töne',intro:'Höre zwei Töne und spiele beide nach. Nenne dabei im Kopf das Intervall.',n:8,gen:function(){var a=rnd(60,72),s=pick([2,3,4,5,7,9,12]);return {kind:'keys',mode:'seq',text:'Spiele beide Töne nach.',audio:mel([a,a+s],.8,.7),need:[a,a+s],lo:60,hi:83,shown:nm(a)+' – '+nm(a+s),expl:'Das Intervall war: '+NAMEIV[s]+'.'}}}
+];
+var C5=[
+ rhLesson('r1','Gleichmäßig','Viertel','Schlage den Rhythmus nach dem Hören nach, ohne Taktgeber. Wichtig ist das Verhältnis der Abstände, nicht das Tempo.',[[1,1,1,1],[1,1,1,1,1,1],[1,1,1,1,1]]),
+ rhLesson('r2','Lang und kurz','Viertel und halbe Noten','Eine halbe Note ist doppelt so lang wie eine Viertelnote. Warte entsprechend.',[[1,1,2,1],[2,1,1,2],[1,2,1,1,2]]),
+ rhLesson('r3','Achtel','schnelle Schläge','Zwei Achtel passen in einen Viertelschlag.',[[.5,.5,1,.5,.5,1],[1,.5,.5,1,.5,.5,1],[.5,.5,.5,.5,1,1]]),
+ rhLesson('r4','Punktierter Rhythmus','lang-kurz','Eine Note mit Punkt ist anderthalbmal so lang. Danach folgt oft eine kurze.',[[1.5,.5,1,1,1.5,.5],[.5,1.5,1,1,.5,1.5],[1.5,.5,1.5,.5,1]],84),
+ {id:'r5',t:'3/4 oder 4/4?',sub:'Taktart hören',intro:'Der erste Schlag eines Taktes wird betont. Nach 3 Schlägen beginnt ein neuer Takt (Walzer), oder nach 4.',n:8,gen:function(){var t=pick([3,4]),ev=[],i;for(i=0;i<t*4;i++){ev.push({m:[i%t===0?88:81],at:i*.45,d:.12})}return ch('In welcher Taktart steht das Beispiel?',ev,t===3?0:1,['3/4 (Walzer)','4/4'],t===3?'Alle 3 Schläge kam der hohe Ton.':'Alle 4 Schläge kam der hohe Ton.')}}
+];
+var STUF=['1 (Do)','2 (Re)','3 (Mi)','4 (Fa)','5 (Sol)','6 (La)','7 (Si)'];
+function funcLesson(id,t,sub,intro,degs){
+  return {id:id,t:t,sub:sub,intro:intro,n:10,gen:function(){
+    var r=rnd(48,56),d=pick(degs),c=cadence(r,false),ev=seqAfter(c,[{m:triad(MAJ,r,d),at:0,d:1.4}]),opts=degs.map(function(x){return ['I (Tonika)','ii (Subdominantparallele)','iii','IV (Subdominante)','V (Dominante)','vi (Tonikaparallele)','vii°'][x]});
+    return ch('Zuerst hörst du die Tonart, dann einen Akkord. Welche Stufe ist es?',ev,degs.indexOf(d),opts,'Es war der Akkord auf der '+(d+1)+'. Stufe.')
+  }};
+}
+var C6=[
+ funcLesson('h1','I, IV oder V?','die Hauptakkorde','Tonika (I) klingt wie „zu Hause“, Subdominante (IV) hebt sich ab, Dominante (V) will zurück zur Tonika.',[0,3,4]),
+ funcLesson('h2','Fünf Stufenakkorde','I, ii, IV, V, vi','Neben den Hauptakkorden begegnen dir ii und vi (Moll-Akkorde in Dur).',[0,1,3,4,5]),
+ {id:'h3',t:'Kadenzen hören',sub:'Schlussformeln',intro:'Ganzschluss: V–I (fertig). Plagalschluss: IV–I („Amen“). Halbschluss: endet auf V (offen). Trugschluss: V–vi (Überraschung).',n:10,gen:function(){
+   var r=rnd(48,56),k=rnd(0,3),prog=[[0,4,0],[0,3,0],[0,3,4],[0,4,5]][k],ev=prog.map(function(d,i){return {m:triad(MAJ,r,d),at:i*.9,d:.85}});
+   return ch('Welcher Schluss wird gespielt?',ev,k,['Ganzschluss (I–V–I)','Plagalschluss (I–IV–I)','Halbschluss (I–IV–V)','Trugschluss (I–V–vi)'],['Zum Schluss löst V nach I auf.','IV führt weich nach I.','Der Schluss bleibt auf V offen.','V löst sich überraschend nach vi.'][k])}},
+ {id:'h4',t:'Akkordfolgen erkennen',sub:'vier bekannte Folgen',intro:'Diese Folgen sind in vielen Liedern zu finden. Merke dir ihr Gesicht.',n:10,gen:function(){
+   var P=[[0,3,4,0],[0,4,5,3],[5,3,0,4],[0,5,3,4]],N=['I – IV – V – I','I – V – vi – IV','vi – IV – I – V','I – vi – IV – V'],k=rnd(0,3),r=rnd(48,56);
+   return ch('Welche Akkordfolge hörst du?',P[k].map(function(d,i){return {m:triad(MAJ,r,d),at:i*.9,d:.85}}),k,N,'Gespielt wurde '+N[k]+'.')}},
+ {id:'h5',t:'Moll-Stufen',sub:'i, iv oder V in Moll',intro:'In Moll bleibt die Dominante meist ein Dur-Akkord, damit sie stark zur Tonika zieht (harmonisch Moll).',n:10,gen:function(){
+   var r=rnd(48,56),c=cadence(r,true),k=rnd(0,2),ch2=[[r,r+3,r+7],[r+5,r+8,r+12],[r+7,r+11,r+14]][k];
+   return ch('Zuerst die Tonart (Moll), dann ein Akkord. Welcher ist es?',seqAfter(c,[{m:ch2,at:0,d:1.4}]),k,['i (Tonika)','iv (Subdominante)','V (Dominante, Dur)'],['Der Moll-Grundakkord.','Der Moll-Akkord auf der 4. Stufe.','Der Dur-Akkord auf der 5. Stufe.'][k])}}
+];
+function scaleLesson(id,t,sub,intro,keys,gap){
+  return {id:id,t:t,sub:sub,intro:intro,n:10,gen:function(){var k=pick(keys),sc=PF.SCALES[k].s.slice(),r=rnd(52,60);sc.push(12);return ch('Welche Tonleiter wird gespielt?',mel(sc.map(function(x){return r+x}),gap||.4,.36),keys.indexOf(k),keys.map(function(x){return PF.SCALES[x].n}),'Es war '+PF.SCALES[k].n+'.')}};
+}
+var C7=[
+ scaleLesson('s1','Dur, Moll, harmonisch Moll','drei Tonleitern','Harmonisch Moll hat einen großen Sprung (kleine Terz) zwischen 6. und 7. Stufe, das klingt „orientalisch“.',['dur','moll','harm']),
+ scaleLesson('s2','Kirchentonarten','Dorisch, Mixolydisch, Lydisch, Phrygisch','Dorisch: Moll mit heller 6. Stufe. Mixolydisch: Dur mit tiefer 7. Stufe. Lydisch: Dur mit hoher 4. Stufe. Phrygisch: Moll mit tiefer 2. Stufe.',['dor','mix','lyd','phr']),
+ scaleLesson('s3','Pentatonik und Blues','fünf bis sechs Töne','Pentatonik hat nur fünf Töne und kennt keine Reibung. Die Blues-Tonleiter fügt die „Blue Note“ (tiefe Quinte) hinzu.',['pdur','pmoll','blues','dur'],.45),
+ {id:'s4',t:'Ganzton oder chromatisch',sub:'Sonderformen',intro:'Die Ganztonleiter besteht nur aus Ganztonschritten (klingt schwebend), die chromatische Leiter nur aus Halbtönen.',n:10,gen:function(){var k=pick(['whole','chrom','dur']),r=rnd(52,60),sc=k==='whole'?[0,2,4,6,8,10,12]:k==='chrom'?[0,1,2,3,4,5,6,7,8,9,10,11,12]:[0,2,4,5,7,9,11,12];return ch('Welche Tonleiter ist das?',mel(sc.map(function(x){return r+x}),.34,.3),['whole','chrom','dur'].indexOf(k),['Ganztonleiter','chromatisch','Dur'],k==='whole'?'Nur Ganztonschritte.':k==='chrom'?'Nur Halbtonschritte.':'Das war Dur.')}}
+];
+var C8=[
+ {id:'d1',t:'Welche Stufe? (1, 3, 5)',sub:'Tonart hören, Ton erkennen',intro:'Erst hörst du die Tonart (eine kleine Akkordfolge), dann einen einzelnen Ton. Die 1 ist der Grundton, 3 die Terz, 5 die Quinte. Das ist die Grundlage für „nach Gehör“ spielen.',n:10,gen:function(){var r=rnd(55,64),d=pick([0,2,4]),c=cadence(r,false),m=r+MAJ[d]+(Math.random()<.3?12:0);return ch('Welche Stufe der Tonleiter ist der Ton?',seqAfter(c,[{m:[m],at:0,d:1.2}]),[0,2,4].indexOf(d),['1 (Do)','3 (Mi)','5 (Sol)'],'Es war die '+(d+1)+'. Stufe.')}},
+ {id:'d2',t:'Alle sieben Stufen',sub:'1 bis 7',intro:'Hör auf die Spannung: 7 will nach 1, 4 will nach 3, 2 will nach 1 oder 3. Das nennt man Tendenztöne.',n:12,gen:function(){var r=rnd(55,64),d=rnd(0,6),c=cadence(r,false);return ch('Welche Stufe?',seqAfter(c,[{m:[r+MAJ[d]],at:0,d:1.2}]),d,STUF,'Es war die '+(d+1)+'. Stufe.')}},
+ {id:'d3',t:'Stufe spielen',sub:'Ton auf der Tastatur finden',intro:'Du bekommst eine Stufe, hörst die Tonart und suchst den Ton selbst. Die Oktave ist egal.',n:8,gen:function(){var r=rnd(55,64),d=rnd(0,6),c=cadence(r,false),root=nm(r),nme=nm(r+MAJ[d]);return {kind:'keys',mode:'set',pcOnly:true,text:'Tonart: '+root+'-Dur (Grundton '+root+'). Spiele die Stufe '+(d+1)+'.',audio:c.ev,need:[r+MAJ[d]],lo:60,hi:83,shown:nme,expl:'Stufe '+(d+1)+' in '+root+'-Dur ist '+nme+'.'}}},
+ {id:'d4',t:'Melodie in Stufen',sub:'drei Töne nachspielen',intro:'Hör die Tonart, dann eine Melodie aus drei Stufen. Spiele sie nach, ohne dass dir jemand die Noten zeigt.',n:8,gen:function(){var r=60,ds=[rnd(0,4),0,0].map(function(x,i){return i===0?rnd(0,4):rnd(0,6)}),c=cadence(r,false),ms=ds.map(function(d){return r+MAJ[d]});return {kind:'keys',mode:'seq',pcOnly:true,text:'Tonart: C-Dur. Spiele die drei Töne nach.',audio:seqAfter(c,mel(ms,.7,.65)),need:ms,lo:60,hi:83,shown:ms.map(nm).join(' – '),expl:'Stufen '+ds.map(function(d){return d+1}).join(' – ')+' = '+ms.map(nm).join(' – ')+'.'}}}
+];
+PF.quizPage({key:'pf.ge',log:'Gehör',emoji:'👂',title:'Gehörtraining',desc:'Töne, Intervalle, Akkorde, Skalen und Harmonien erkennen und nachspielen. Falsch beantwortete Lektionen merkt sich die App und bietet sie als Schwachstellen-Training an.',chapters:[
+ {id:'ge1',t:'1 · Erste Schritte',desc:'Höher, tiefer, gleich, wie viele.',ls:C0},
+ {id:'ge2',t:'2 · Intervalle',desc:'Den Abstand zweier Töne hören.',ls:C1},
+ {id:'ge3',t:'3 · Dur und Moll',desc:'Das Tongeschlecht erkennen.',ls:C2},
+ {id:'ge4',t:'4 · Akkorde',desc:'Dreiklänge, Septakkorde, Umkehrungen.',ls:C3},
+ {id:'ge5',t:'5 · Nachspielen',desc:'Hören und selbst spielen. Mikrofon, MIDI oder Bildschirm.',ls:C4},
+ {id:'ge6',t:'6 · Rhythmus',desc:'Rhythmen nachklatschen und Taktarten hören.',ls:C5},
+ {id:'ge7',t:'7 · Harmonie',desc:'Stufen, Kadenzen und Akkordfolgen.',ls:C6},
+ {id:'ge8',t:'8 · Tonleitern und Modi',desc:'Farben der Skalen.',ls:C7},
+ {id:'ge9',t:'9 · Stufen hören',desc:'Im Kopf in der Tonart zu Hause sein.',ls:C8}
+]});
+})();
+</script>
+</body>
+</html>

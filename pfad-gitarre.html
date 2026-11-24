@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B1520">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Gitarre Lehrpfad</title>
+<script src="shared.js"></script>
+<script src="pfad.js"></script>
+<script src="pfad-stufen.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function(){
+'use strict';
+function N(a){return a.map(function(m){return {m:m}})}
+PF.stufenPage({key:'pf.git',emoji:'🎸',title:'Gitarre: Lehrpfad',desc:'Acht Stufen von den ersten Griffen bis zu Barré, Pentatonik und Riffs. Jede Stufe hat klare Ziele: kleine Schritte, Akkordwechsel pro Minute, früh echte Musik. Die Übungen selbst findest du in Akkorde, Tabulatur und Riffkoje.',stufen:[
+ {id:'g1',t:'Stufe 1 · Erste Akkorde',ziel:'Gitarre stimmen, sauber anschlagen, Em, Am, E und A greifen.',tasks:[
+  {id:'g1a',kind:'check',t:'Gitarre ist gestimmt (E A D G H E)',d:'Von der dicken Saite zur dünnen. Mit dem Stimmgerät in der Whistle-Seite oder deinem Clip-Tuner.'},
+  {id:'g1b',kind:'notes',t:'Alle sechs leeren Saiten sauber erkennen',hint:'Zupfe nacheinander die leeren Saiten von der tiefsten zur höchsten. Die Oktave ist egal.',notes:N([40,45,50,55,59,64])},
+  {id:'g1c',kind:'check',t:'Em und Am: jeder Ton klingt, nichts schnarrt',link:['akkorde.html','Akkorde üben'],d:'Greife den Akkord und zupfe Saite für Saite. Jede soll klar klingen.'},
+  {id:'g1d',kind:'check',t:'E-Dur und A-Dur greifen',link:['akkorde.html','Akkorde üben']},
+  {id:'g1e',kind:'counter',t:'Wechsel Em ↔ Am',target:20}
+ ]},
+ {id:'g2',t:'Stufe 2 · Wechsel und erste Lieder',ziel:'C, G und D dazulernen und Wechsel flüssig spielen. Ein erstes Lied mit drei Akkorden begleiten.',tasks:[
+  {id:'g2a',kind:'check',t:'D-Dur, C-Dur und G-Dur greifen',link:['akkorde.html','Akkorde üben']},
+  {id:'g2b',kind:'counter',t:'Wechsel G ↔ C',target:20},
+  {id:'g2c',kind:'counter',t:'Wechsel D ↔ G',target:20},
+  {id:'g2d',kind:'check',t:'Akkordfolge G – D – Em – C durchspielen',link:['akkorde.html','Akkordfolgen'],d:'Vier Schläge pro Akkord, ohne Pause beim Wechsel.'},
+  {id:'g2e',kind:'check',t:'Ein Lied mit drei Akkorden von Anfang bis Ende begleiten',d:'Wähle ein Lied, das du kennst. Rhythmus ist wichtiger als Tempo.'}
+ ]},
+ {id:'g3',t:'Stufe 3 · Schlagmuster und Takt',ziel:'Gleichmäßig schlagen und Auf- und Abschlag verbinden.',tasks:[
+  {id:'g3a',kind:'check',t:'Viertel-Abschläge mit Metronom (80 BPM)',link:['akkorde.html','Rhythmus-Trainer']},
+  {id:'g3b',kind:'check',t:'Achtel: Ab – Auf im Wechsel',link:['akkorde.html','Rhythmus-Trainer']},
+  {id:'g3c',kind:'check',t:'Lagerfeuer-Muster (↓ ↓↑ ↑↓↑) auf einem Akkord',link:['akkorde.html','Rhythmus-Trainer']},
+  {id:'g3d',kind:'check',t:'Lagerfeuer-Muster mit Wechsel G – C – D',link:['akkorde.html','Akkordfolgen']},
+  {id:'g3e',kind:'check',t:'Drei Takt-Gefühle unterscheiden: Marsch (2/4), Walzer (3/4), Rock (4/4)',link:['gehoer.html','Gehör: Taktarten']}
+ ]},
+ {id:'g4',t:'Stufe 4 · Töne auf dem Griffbrett',ziel:'Die Noten auf der tiefen E- und der A-Saite kennen. Das ist die Grundlage für Riffs und Powerchords.',tasks:[
+  {id:'g4a',kind:'board',t:'Töne auf der tiefen E-Saite finden (Bund 0 bis 12)',tuning:[40,45,50,55,59,64],names:['E','A','D','G','H','e'],strNames:['tiefen E-Saite','A-Saite','D-Saite','G-Saite','H-Saite','hohen e-Saite'],pick:[0],rounds:10},
+  {id:'g4b',kind:'board',t:'Töne auf der A-Saite finden',tuning:[40,45,50,55,59,64],names:['E','A','D','G','H','e'],strNames:['tiefen E-Saite','A-Saite','D-Saite','G-Saite','H-Saite','hohen e-Saite'],pick:[1],rounds:10},
+  {id:'g4c',kind:'check',t:'Tabs lesen: Leersaiten und Bundzahlen',link:['tabs.html','Tabulatur lernen']},
+  {id:'g4d',kind:'check',t:'Chromatische Spinne (1-2-3-4 auf jeder Saite) sauber und langsam',link:['tabs.html','Tabulatur lernen']}
+ ]},
+ {id:'g5',t:'Stufe 5 · Powerchords und Palm Mute',ziel:'Zweiklänge greifen, gedämpft spielen, im Galopp wechseln.',tasks:[
+  {id:'g5a',kind:'check',t:'E5, A5 und D5 greifen',link:['akkorde.html','Powerchords']},
+  {id:'g5b',kind:'check',t:'Palm Mute: Achtel gedämpft',link:['akkorde.html','Rhythmus-Trainer']},
+  {id:'g5c',kind:'counter',t:'Wechsel E5 ↔ A5 (gedämpft)',target:30},
+  {id:'g5d',kind:'check',t:'Powerchord-Gallop in Tabs',link:['tabs.html','Tabulatur']},
+  {id:'g5e',kind:'check',t:'Metal-Galopp im Rhythmus-Trainer',link:['akkorde.html','Rhythmus-Trainer']}
+ ]},
+ {id:'g6',t:'Stufe 6 · Barré und Septakkorde',ziel:'F und h-Moll als Barré greifen und die ersten Septakkorde nutzen.',tasks:[
+  {id:'g6a',kind:'check',t:'Kleines F (vier Saiten) sauber',link:['akkorde.html','Akkorde']},
+  {id:'g6b',kind:'check',t:'F-Dur als Barré, alle Saiten klingen',link:['akkorde.html','Akkorde']},
+  {id:'g6c',kind:'counter',t:'Wechsel F ↔ C',target:10},
+  {id:'g6d',kind:'check',t:'A7, D7 und E7 greifen',link:['akkorde.html','Akkorde']},
+  {id:'g6e',kind:'check',t:'12-Takte-Blues in A (A7 – D7 – E7)',d:'Zwölf Takte: 4× A7, 2× D7, 2× A7, E7, D7, A7, E7.'}
+ ]},
+ {id:'g7',t:'Stufe 7 · Pentatonik und erstes Solo',ziel:'Die Moll-Pentatonik kennen und darüber improvisieren.',tasks:[
+  {id:'g7a',kind:'notes',t:'E-Moll-Pentatonik aufwärts erkennen',hint:'Spiele E G A H D E nacheinander (erste Lage, tiefste Saiten).',notes:N([52,55,57,59,62,64])},
+  {id:'g7b',kind:'check',t:'E-Moll-Pentatonik in Tabs',link:['tabs.html','Tabulatur']},
+  {id:'g7c',kind:'check',t:'Hammer-on und Pull-off',link:['tabs.html','Tabulatur']},
+  {id:'g7d',kind:'check',t:'Pentatonik über einen Backing-Track improvisieren (eine Minute)',link:['riffkoje.html','Riffkoje']},
+  {id:'g7e',kind:'check',t:'Pentatonik-Regel verstehen: Skala, Grundton, Ruhepunkte',link:['harmonie.html','Theorie Pro: Tonleitern']}
+ ]},
+ {id:'g8',t:'Stufe 8 · Riffs und Songs',ziel:'Echte Riffs spielen, aufnehmen und auswerten.',tasks:[
+  {id:'g8a',kind:'check',t:'Riff in E-phrygisch',link:['tabs.html','Tabulatur']},
+  {id:'g8b',kind:'check',t:'Mit Riffkoje zu einem YouTube-Song mitspielen',link:['riffkoje.html','Riffkoje']},
+  {id:'g8c',kind:'check',t:'Dich selbst aufnehmen und anhören',link:['riffkoje.html','Riffkoje']},
+  {id:'g8d',kind:'check',t:'Akkorde nach Stufen verstehen (I – IV – V, vi)',link:['harmonie.html','Theorie Pro: Harmonie']},
+  {id:'g8e',kind:'check',t:'Einen kompletten Song (Intro, Strophe, Refrain) ohne Stopp spielen'}
+ ]}
+]});
+})();
+</script>
+</body>
+</html>

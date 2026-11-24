@@ -54,6 +54,26 @@ Alle Bereiche und die Navigationsleiste nutzen jetzt die Farben der Praxis-App: 
 - **Freunde:** Jede Person nutzt ihre eigene Sync-Datei. Profile werden über eine zufällige Kennung erkannt, notfalls über den Namen.
 - Nicht enthalten: Gemini-Schlüssel, Pad-Belegung und Riffkoje-Aufnahmen.
 
+## Stand v27: Lehrpfade, Theorie Pro, Gehörtraining
+- **Gemeinsamer Kern** `pfad.js` (Theorie-Bausteine mit korrekter Notenschreibweise, Töne, Mikrofon-Erkennung, Notenzeile, Klaviatur), `pfad-quiz.js` (Quiz-Seite mit Kapiteln, Sternen, Schwachstellen-Training) und `pfad-stufen.js` (Stufenpfade mit Abhaken, Zähler, Mikrofon-Prüfung, Griffbrett-Trainer).
+- **Gehörtraining** (`gehoer.html`, 42 Lektionen, 9 Kapitel): höher/tiefer, Intervalle, Dur/Moll, Akkorde (auch Septakkorde und Umkehrungen), Nachspielen per Bildschirm/MIDI/Mikrofon, Rhythmus nachklatschen, Harmonie (Stufen, Kadenzen, Akkordfolgen), Tonleitern und Modi, Stufen hören. Aufgaben werden zufällig erzeugt. Falsch beantwortete Lektionen bietet die App als Schwachstellen-Training an.
+- **Theorie Pro** (`harmonie.html`, 43 Lektionen, 7 Kapitel): Tonarten und Quintenzirkel, Intervalle (Notenbild, bauen, Umkehrung), Tonleitern und Modi bauen, Akkorde und Symbole, Stufenakkorde, Funktionen, Kadenzen, Zwischendominanten, Notenwerte, Tempo/Dynamik, Formen, Stimmungen, Transponieren, Kapo. Antworten werden berechnet, nicht von Hand getippt.
+- **Lehrpfade je Instrument** (`pfad-gitarre.html`, `pfad-geige.html`, `pfad-whistle.html`): je acht Stufen mit Zielen und Aufgaben, verknüpft mit den vorhandenen Übungsseiten. Gitarre mit Akkordwechsel-Zähler (60 Sekunden), Griffbrett-Trainer und Pentatonik-Prüfung. Geige und Whistle mit Tonleiter-Prüfung per Mikrofon. Die Pfade bleiben getrennt, nur Aufbau und Gestaltung sind gleich.
+- Navigation: Unterleisten für Geige, Gitarre, Whistle und Theorie. Mentor-Bericht kennt jetzt Gehör, Theorie Pro und Lehrpfade.
+
+## Stand v26: Klavier – Mikrofon und großer Lehrgang
+- **Mikrofon-Erkennung** (Button „Mikrofon“ auf der Klavierseite): erkennt einzelne Töne (Autokorrelation) und Klatschen/Anschläge. Empfindlichkeit einstellbar, Pegelanzeige mit Schwelle. Mit Mikrofon bleiben App-Töne und Metronom-Klicks stumm, damit sie nicht fälschlich gehört werden. „Oktave egal“ gilt auch hier. Akkorde werden mit Mikrofon nacheinander gespielt.
+- **62 Lektionen in 7 Kapiteln:** Erste Töne, Lieder (8), Linke Hand mit Bassschlüssel, Rhythmus (9, mit Vorzähler und Treffer-Auswertung), Schwarze Tasten und Tonleitern (Dur/Moll mit Vorzeichen, Halb-/Ganzton, Für Elise), Intervalle (gesuchter Ton ist erst versteckt), Akkorde (Dreiklänge, Kadenz, Pop-Folge).
+- Notation mit Notenlängen (Viertel, halbe, ganze, Achtel, Punkt), Vorzeichen, Pausen, Hilfslinien und Akkorden. Info-Text je Lektion, „Weiter“-Knopf, Kapitel mit Sternen.
+- Die Lieder ohne sichere Notenlängen zeigen nur Tonhöhen und sind so benannt.
+
+## Stand v25: Klavier lernen
+- Neue Seite `klavier.html` (Kachel auf der Startseite, im Menü „Klavier“). Die nächste Note erscheint auf der Notenzeile, der Name groß daneben, und die passende Taste auf der Klaviatur leuchtet in derselben Farbe. Das Programm wartet, bis die richtige Taste gespielt wird (kein Zeitdruck, keine Strafe).
+- Acht Lektionen: C–D–E, fünf Töne, eine Oktave, dazu Hot Cross Buns, Morgen kommt der Weihnachtsmann, Alle meine Entchen, Hänschen klein, Ode an die Freude. Sterne pro Lektion, pro Profil gespeichert. Zählt in der Übungszeit mit („Klavier“).
+- **Kindermodus:** große Tasten, jede mit Namen, bunte Noten, Note vorlesen (Sprachausgabe des Geräts), Nachfrage nach drei Fehlern. Der Modus ist bei Kita-Profilen von Anfang an an.
+- Eingabe über Bildschirmtasten oder USB-MIDI-Keyboard (Web-MIDI, Android Chrome/Edge). „Oktave egal“ ist an, damit das Kind auf einem großen Keyboard in irgendeiner Oktave spielen darf.
+- Noch nicht dabei: Mikrofon-Erkennung, Rhythmus/Notenlängen, schwarze Tasten in den Lektionen.
+
 ## Stand v24: Karte „Dein Stand“ im Mentor-Bericht
 - Oben auf `mentor.html` steht jetzt eine lesbare Auswertung ohne KI: Übungszeit, Tonhöhe, Stimmung (zu tief/zu hoch), Verlauf, Rhythmus, Noten lernen, Lehrplan. Den Chat-Text gibt es weiterhin darunter.
 

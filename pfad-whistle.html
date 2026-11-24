@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B1520">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Whistle Lehrpfad</title>
+<script src="shared.js"></script>
+<script src="pfad.js"></script>
+<script src="pfad-stufen.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function(){
+'use strict';
+function N(a){return a.map(function(m){return {m:m}})}
+PF.stufenPage({key:'pf.whi',emoji:'🪈',title:'Low Whistle: Lehrpfad',desc:'Acht Stufen von Haltung und Atem bis zum irischen Tune. Die Übungen stehen auf der Whistle-Seite.',stufen:[
+ {id:'w1',t:'Stufe 1 · Instrument und Atem',ziel:'Richtig halten, Fingerlage und ruhiger Luftstrom.',tasks:[
+  {id:'w1a',kind:'check',t:'Haltung: Finger mit den Kuppen auf den Löchern, Handgelenke locker',link:['whistle.html','Low Whistle']},
+  {id:'w1b',kind:'check',t:'Atem: ruhiger Luftstrom ohne Quietschen',link:['whistle.html','Low Whistle']},
+  {id:'w1c',kind:'check',t:'Zungenstoß „tu“ üben',link:['whistle.html','Low Whistle']}
+ ]},
+ {id:'w2',t:'Stufe 2 · Erste Töne',ziel:'D, E und Fis sicher und sauber.',tasks:[
+  {id:'w2a',kind:'notes',t:'D – E – Fis erkennen',hint:'Spiele nacheinander D, E und Fis. Die Oktave ist egal.',notes:N([62,64,66])},
+  {id:'w2b',kind:'check',t:'Griffe auswendig',link:['whistle.html','Finger-Trainer']},
+  {id:'w2c',kind:'check',t:'Zehn Atemzüge lang jeden Ton halten'}
+ ]},
+ {id:'w3',t:'Stufe 3 · D-Dur-Tonleiter',ziel:'Die Tonleiter in der ersten Oktave.',tasks:[
+  {id:'w3a',kind:'notes',t:'D-Dur aufwärts (D E Fis G A H Cis D)',notes:N([62,64,66,67,69,71,73,74])},
+  {id:'w3b',kind:'check',t:'D-Dur-Tonleiter in zwei Tempi',link:['whistle.html','Low Whistle']},
+  {id:'w3c',kind:'check',t:'Griff-Quiz bestehen',link:['whistle.html','Griff-Quiz']}
+ ]},
+ {id:'w4',t:'Stufe 4 · Zweite Oktave',ziel:'Mit mehr Luft in die hohe Lage.',tasks:[
+  {id:'w4a',kind:'notes',t:'Zweite Oktave: D E Fis G A',notes:N([74,76,78,79,81])},
+  {id:'w4b',kind:'check',t:'Oktavsprung D – D sauber',link:['whistle.html','Low Whistle']},
+  {id:'w4c',kind:'check',t:'Beide Oktaven als Tonleiter hoch und runter',link:['whistle.html','Low Whistle']}
+ ]},
+ {id:'w5',t:'Stufe 5 · Kreuzgriffe',ziel:'F und C natürlich greifen (nicht nur Fis und Cis).',tasks:[
+  {id:'w5a',kind:'notes',t:'F – Fis – G – F',hint:'Spiele F (Kreuzgriff), Fis, G, dann wieder F.',notes:N([65,66,67,65])},
+  {id:'w5b',kind:'notes',t:'C – Cis – D – C',notes:N([72,73,74,72])},
+  {id:'w5c',kind:'check',t:'Dorisch und Mixolydisch spielen',link:['theorie.html','Theorie: Kirchentonarten']}
+ ]},
+ {id:'w6',t:'Stufe 6 · Verzierungen',ziel:'Cut, Tap und Roll machen den irischen Klang.',tasks:[
+  {id:'w6a',kind:'check',t:'Cut: kurzer hoher Ton vor der Note',link:['whistle.html','Verzierungen']},
+  {id:'w6b',kind:'check',t:'Tap: kurzes Antippen unter der Note',link:['whistle.html','Verzierungen']},
+  {id:'w6c',kind:'check',t:'Roll auf einer langen Note',link:['whistle.html','Verzierungen']}
+ ]},
+ {id:'w7',t:'Stufe 7 · Tunes',ziel:'Ganze Melodien mit Phrasen.',tasks:[
+  {id:'w7a',kind:'check',t:'Ersten Tune spielen',link:['whistle.html','Tunes']},
+  {id:'w7b',kind:'check',t:'Atmen an den Phrasenenden',link:['whistle.html','Low Whistle']},
+  {id:'w7c',kind:'check',t:'Irische Tanzformen: Jig, Reel, Polka unterscheiden',link:['theorie.html','Theorie']}
+ ]},
+ {id:'w8',t:'Stufe 8 · Session-Reife',ziel:'Auswendig, im Tempo und aufgenommen.',tasks:[
+  {id:'w8a',kind:'check',t:'Einen Tune auswendig spielen'},
+  {id:'w8b',kind:'check',t:'Mit Metronom langsam beginnen und Tempo steigern'},
+  {id:'w8c',kind:'check',t:'Aufnehmen und Intonation prüfen',link:['analyse.html','Aufnahme auswerten']},
+  {id:'w8d',kind:'check',t:'Gehör: Melodien nachspielen',link:['gehoer.html','Gehörtraining']}
+ ]}
+]});
+})();
+</script>
+</body>
+</html>
