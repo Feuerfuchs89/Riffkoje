@@ -46,8 +46,8 @@ applyTheme();
 try{matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyTheme)}catch(e){}
 
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige',['geigenpult.html','noten.html','analyse.html','mentor.html','pfad-geige.html']],['riffkoje.html','Riffkoje','Riff'],['akkorde.html','Gitarre','Gitarre',['akkorde.html','tabs.html','pfad-gitarre.html']],['klavier.html','Klavier','Klavier'],['whistle.html','Low Whistle','Whistle',['whistle.html','pfad-whistle.html']],['pfad-gesang.html','Gesang','Gesang',['pfad-gesang.html','gesangslehre.html']],['theorie.html','Theorie','Theorie',['theorie.html','harmonie.html','gehoer.html']]];
-var SUBG=[['Geige',[['geigenpult.html','🎻 Geigenpult'],['noten.html','🎼 Noten lernen'],['analyse.html','🎙 Aufnahme auswerten'],['mentor.html','🧭 Mentor-Bericht'],['pfad-geige.html','🧭 Lehrpfad']]],['Gitarre',[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur'],['pfad-gitarre.html','🧭 Lehrpfad']]],['Whistle',[['whistle.html','🪈 Whistle'],['pfad-whistle.html','🧭 Lehrpfad']]],['Gesang',[['pfad-gesang.html','🎤 Lehrpfad'],['gesangslehre.html','📚 Gesangslehre'],['analyse.html','🎙 Aufnahme auswerten'],['gehoer.html','👂 Gehörtraining']]],['Theorie',[['theorie.html','🎓 Grundlagen'],['harmonie.html','🧠 Theorie Pro'],['gehoer.html','👂 Gehörtraining']]]];
+var LINKS=[['index.html','Start','🏠'],['geigenpult.html','Geigenpult','Geige',['geigenpult.html','noten.html','analyse.html','mentor.html','pfad-geige.html','tonleitern.html']],['riffkoje.html','Riffkoje','Riff'],['akkorde.html','Gitarre','Gitarre',['akkorde.html','tabs.html','pfad-gitarre.html']],['klavier.html','Klavier','Klavier'],['whistle.html','Low Whistle','Whistle',['whistle.html','pfad-whistle.html']],['pfad-gesang.html','Gesang','Gesang',['pfad-gesang.html','gesangslehre.html']],['theorie.html','Theorie','Theorie',['theorie.html','harmonie.html','gehoer.html']]];
+var SUBG=[['Geige',[['geigenpult.html','🎻 Geigenpult'],['noten.html','🎼 Noten lernen'],['tonleitern.html','🎚 Tonleiter-Lab'],['analyse.html','🎙 Aufnahme auswerten'],['mentor.html','🧭 Mentor-Bericht'],['pfad-geige.html','🧭 Lehrpfad']]],['Gitarre',[['akkorde.html','🎸 Akkorde'],['tabs.html','🎼 Tabulatur'],['pfad-gitarre.html','🧭 Lehrpfad']]],['Whistle',[['whistle.html','🪈 Whistle'],['pfad-whistle.html','🧭 Lehrpfad']]],['Gesang',[['pfad-gesang.html','🎤 Lehrpfad'],['gesangslehre.html','📚 Gesangslehre'],['analyse.html','🎙 Aufnahme auswerten'],['gehoer.html','👂 Gehörtraining']]],['Theorie',[['theorie.html','🎓 Grundlagen'],['harmonie.html','🧠 Theorie Pro'],['gehoer.html','👂 Gehörtraining']]]];
 function css(){
   var s=document.createElement('style');
   s.textContent=':root{--nb:#0B1520;--nf:#E7EDF2;--nl:#3A5068;--nb2:#1E3346;--nm:#A3B3C2;--na:#8CBBEA;--nao:#0B1520}'+
@@ -336,6 +336,15 @@ MK.nav=function(){
   document.getElementById('mk-set').addEventListener('click',function(){location.href='einstellungen.html'});
   document.getElementById('mk-theme').addEventListener('click',function(){var o=['auto','light','dark'];MK.theme(o[(o.indexOf(themePref())+1)%3])});
   if(here==='einstellungen.html'){var g=document.getElementById('mk-set');if(g)g.setAttribute('aria-current','page'),g.style.background='var(--na)',g.style.color='var(--nao)'}
+  if(here&&here!=='index.html'&&!document.getElementById('mkhome')){
+    var h=document.createElement('a');h.id='mkhome';h.href='index.html';h.setAttribute('aria-label','Zur Startseite');h.innerHTML='🏠<span>Start</span>';
+    document.body.appendChild(h);
+    var st=document.createElement('style');st.textContent='#mkhome{position:fixed;left:10px;top:max(8px,env(safe-area-inset-top));z-index:40;display:none;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--nb);color:var(--nf);border:1px solid var(--nl);box-shadow:0 2px 10px rgba(0,0,0,.25);text-decoration:none;font:600 14px system-ui,sans-serif}#mkhome.on{display:inline-flex}body.pult #mkhome,body.bigmode #mkhome{display:none!important}';
+    document.head.appendChild(st);
+    var nv=document.getElementById('mknav'),tick=0;
+    function chk(){tick=0;var r=nv.getBoundingClientRect();h.classList.toggle('on',r.bottom<0)}
+    window.addEventListener('scroll',function(){if(!tick)tick=requestAnimationFrame(chk)},{passive:true});
+  }
   applyTheme();
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',MK.nav);else MK.nav();

@@ -171,3 +171,26 @@ Funktioniert wie bisher (siehe die Hinweise in der App). Takes und Songs liegen 
 ## v31: Mehr Gesang
 - Neue Seite gesangslehre.html (Key pf.gl, 12 Lektionen in 6 Kapiteln): Stimmlippen, Atmung, Stimmlagen, Register, Aufwärmen und Stimmpflege, Haltung, Vokale, Dynamik und Vibrato, Intonation inkl. Hörübung (höher/tiefer/sauber), Chor, Mikrofon.
 - Lehrpfad Gesang: jetzt 10 Stufen, 50 Aufgaben (a-Moll, Pentatonik, Ode an die Freude, Kuckuck, Sprünge, Moll-Dreiklang, Pop/Mikrofon). Verknüpfung zur Gesangslehre.
+
+## v32: Tonleiter-Lab
+- Neue Seite tonleitern.html: Tonleitern (Dur, Moll natürlich/harmonisch/melodisch) und Arpeggien in 12 Tonarten, 1 oder 2 Oktaven. Griffbrett-Anzeige mit Finger, Saite und Lage, Handrahmen, Hinweis auf Lagenwechsel.
+- Fingersatz wird berechnet (Kostensuche über Lagen 1 bis 7), ist ein Vorschlag. Übungsarten: Langsam, Gleichmäßig, Lange Tonika, Ohne Lagenwechsel, Arpeggio langsam, Arpeggio. Tempo, Vorzähler, Begleit-Ton, Mikrofon-Modus „Warte auf mich“. Übungszeit im Protokoll („Tonleiter-Lab“).
+- Eigene Umsetzung der Idee, nicht aus einer fremden App kopiert.
+
+## v33: Tonleiter-Lab ausgebaut
+- Drei Reiter: Üben, Stufen, Stimmen. Stufen: sechs eigene Übungsstufen (48 Übungen) mit Haken nach drei Durchläufen, bestes Tempo je Tonleiter, „Weiter“-Knopf.
+- Neue Arten: Chromatisch, Dominantseptakkord, verminderter Septakkord, 3 Oktaven (G, As, A, B, H).
+- Notenbild mit mitlaufendem Ton, drei Fingersatz-Varianten (A/B/C), Bogenstrich (getrennt, 2/4/8 Töne pro Bogen mit Ab-/Aufstrich).
+- Intonation: Live-Anzeige in Cent mit Mikrofon, Auswertung nach jedem Durchlauf (Median je Ton). Modus „Warte auf mich“.
+- Stimmgerät für G, D, A, E (Kammerton 415 bis 443 Hz) mit Referenzton und Mikrofon-Anzeige.
+
+## v34: Bordun, Schwächen-Training, Stücke
+- Bordun im Tonleiter-Lab: Dauerton auf Grundton, Quinte oder beides, mit Lautstärke. Im Reiter „Stimmen“ Bordun auf leeren Saiten (auch Zweiklang).
+- Schwächen-Training: Nach jedem Durchlauf mit Mikrofon wird je Ton die mittlere Abweichung gemerkt (gleitend, Schlüssel tl.w). Die unsaubersten Töne (ab 3 Töne mit über 12 Cent) erscheinen als Karte und lassen sich gezielt üben. Hinweis auf der Startseite.
+- Neuer Reiter „Stücke“: vier Beispielstücke (eigene Eingabe, gemeinfrei) und eigener Import: Text (Töne mit Oktave und Länge), MusicXML (unkomprimiert, erste Stimme) und MIDI. Noten-Koje-Stücke über MusicXML oder MIDI-Export. Transponieren, Fingersatz, Bogen, Tempo mit Vorzähler, Pausen und Tonlängen, Intonations-Auswertung. Bibliothek in tl.lib.
+- Das Exportformat des Noten-Koje ist nicht geprüft (kein Zugriff aufs Repo).
+
+## v35
+- Tonleiter-Lab: Während des Spielens wird nur noch Notenbild/Griffbrett/Anzeige aktualisiert (kein Neuaufbau der ganzen Seite) – nichts springt mehr, Scrollposition bleibt, Notenbild hat feste Höhe.
+- Feste Steuerleiste unten (🏠 Start, aktueller Ton, Start/Stopp, Ton hören, ←/→), immer erreichbar.
+- Alle anderen Seiten: schwebender „🏠 Start“-Knopf erscheint, sobald die obere Leiste weggescrollt ist.

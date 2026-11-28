@@ -69,6 +69,7 @@ a.tile:hover{border-color:var(--acc)}.tile .e{font-size:2.2rem;line-height:1}.ti
   <div class="grid">
     <a class="tile path" href="pfad-geige.html" data-pf="pfad-geige.html"><span class="e">🧭</span><span class="t">Lehrpfad Geige</span><span class="s">Acht Stufen von den leeren Saiten bis Folk, Lagen und Aufnahme. Mit Mikrofon-Prüfungen.</span></a>
     <a class="tile" href="geigenpult.html"><span class="e">🎻</span><span class="t">Geigenpult</span><span class="s">Noten als Foto oder MusicXML laden, mit Cursor üben, Mikro und MIDI-Keyboard, Lehrplan, Tagesplan, Bordun.</span><span class="k" id="k-gp"></span></a>
+    <a class="tile" href="tonleitern.html"><span class="e">🎚</span><span class="t">Tonleiter-Lab und Stücke</span><span class="s">Tonleitern, Arpeggien, Chromatik und Septakkorde mit Griffbrett, Noten, Fingersatz und Bogen. Dazu Bordun, Stücke üben (auch eigene aus Noten-Koje per MusicXML oder MIDI), Intonations-Messung, Schwächen-Training und Stimmgerät.</span><span class="k" id="k-tl"></span></a>
     <a class="tile" href="noten.html"><span class="e">🎼</span><span class="t">Noten lernen</span><span class="s">Noten auf dem Griffbrett finden, Lagen und Tonleitern, mit Mikrofon: Ton spielen und sehen, ob er sauber ist.</span><span class="k" id="k-nt"></span></a>
     <a class="tile" href="analyse.html"><span class="e">🎙</span><span class="t">Aufnahme auswerten</span><span class="s">Dein Spiel aufnehmen oder eine Aufnahme laden: pro Ton Abweichung in Cent, Tempo, Pausen und Verlauf.</span><span class="k" id="k-an"></span></a>
     <a class="tile" href="mentor.html"><span class="e">🧭</span><span class="t">Mentor-Bericht</span><span class="s">Deine Übungsdaten als Text für einen Chat mit Claude: Übungsplan, passende Lieder, Schwächen.</span></a>
@@ -220,6 +221,7 @@ if(has&&(days===null||days>=14)){$('#bk').hidden=false;$('#bk').style.display='f
     if(t){var b=document.createElement('span');b.className='bar';b.innerHTML='<b style="width:'+prog.klavier+'%"></b>';t.appendChild(b);var k=document.createElement('span');k.className='k';k.textContent=nk?nk+' von 62 Lektionen geschafft':'Jetzt anfangen';t.appendChild(k)}}catch(e){}
   try{var gl=Object.keys((MK.get('pf.gl',{}).stars)||{}).length;var kgl=document.getElementById('k-gl');if(kgl)kgl.textContent=gl?gl+' von 12 Lektionen begonnen':'Jetzt anfangen'}catch(e){}
   try{var g=Object.keys((MK.get('pf.ge',{}).stars)||{}).length,h=Object.keys((MK.get('pf.th',{}).stars)||{}).length;prog.wissen=Math.round(Math.min(85,g+h)/85*100)}catch(e){}
+  try{var w=MK.get('tl.w',{}),nw=Object.keys(w).filter(function(k){return w[k].n>=2&&Math.abs(w[k].m)>12}).length,kt=document.getElementById('k-tl');if(kt&&nw>=3)kt.textContent=nw+' Töne zum gezielten Üben vorgemerkt'}catch(e){}
   var btns=document.querySelectorAll('#isw button'),secs=document.querySelectorAll('.inst');
   function show(i,persist){
     btns.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.i===i?'true':'false')});

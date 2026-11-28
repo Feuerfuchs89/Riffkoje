@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B1520">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Tonleiter-Lab</title>
+<script src="shared.js"></script>
+<script src="pfad.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function(){
+'use strict';
+var PF=window.PF,esc=PF.esc;
+PF.css();
+var app=document.getElementById('app');
+
+/* ═════ Daten ═════ */
+var OPEN=[55,62,69,76],SN=['G','D','A','E'];
+var PB={1:2,2:4,3:5,4:7,5:9,6:10,7:12,8:14}; /* Lage → Versatz des 1. Fingers (hoch) über der leeren Saite */
+var MAXO=19;
+var FCOL=['#8c99a6','#4aa3e8','#3dbb8a','#a66be0','#e8913a'];
+var KEYS=['C','G','D','A','E','H','Fis','Des','As','Es','B','F'];
+var KS={C:0,G:1,D:2,A:3,E:4,H:5,Fis:6,Des:-5,As:-4,Es:-3,B:-2,F:-1};
+var TYPES=[['dur','Dur'],['moll','Moll natürlich'],['harm','Moll harmonisch'],['mel','Moll melodisch'],['chrom','Chromatisch'],['dom7','Dominantseptakkord'],['dim7','Verminderter Septakkord']];
+var MODES=[
+ {id:'slow',t:'Langsam',bpm:54,d:'Jeder Ton zwei Schläge lang. Zum genauen Hören und Greifen.'},
+ {id:'even',t:'Gleichmäßig',bpm:69,d:'Ein Ton pro Schlag. Der normale Übungsmodus.'},
+ {id:'long',t:'Lange Tonika',bpm:69,d:'Der Grundton ist doppelt so lang. So kommst du sicher zurück zum Ausgangston.'},
+ {id:'nosh',t:'Ohne Lagenwechsel',bpm:69,d:'Nur erste Lage, eine Oktave. Zum Festigen der Griffe der ersten Lage.'},
+ {id:'arps',t:'Arpeggio langsam',bpm:54,d:'Dreiklangstöne (Grundton, Terz, Quinte), zwei Schläge je Ton.'},
+ {id:'arp',t:'Arpeggio',bpm:66,d:'Dreiklangstöne im Tempo, ein Ton pro Schlag.'}
+];
+var FINGS={
+ A:{n:'A · Ausgewogen',d:'Bleibt möglichst lange in der ersten Lage und wechselt erst, wenn es nötig ist.',pc:.6,f4:.7,sh:2},
+ B:{n:'B · Mehr 4. Finger',d:'Nutzt den kleinen Finger öfter und wechselt seltener die Lage.',pc:.5,f4:.15,sh:3.5},
+ C:{n:'C · Früher wechseln',d:'Wechselt früher in höhere Lagen und vermeidet den kleinen Finger.',pc:.3,f4:1.2,sh:1}
+};
+var BOWS=[['sep','Jeder Ton ein Bogen'],['2','2 Töne pro Bogen'],['4','4 Töne pro Bogen'],['8','8 Töne pro Bogen']];
+/* Eigene Übungsstufen (nicht die offizielle Liste einer Prüfungsstelle, bitte mit deinem Lehrplan abgleichen) */
+var STUFEN=[
+ {t:'Stufe 1 · Erste Lage',d:'Die ersten Tonleitern in D, A und G, eine Oktave.',items:[['D','dur',1],['A','dur',1],['G','dur',1],['D','dur',1,'arp'],['A','dur',1,'arp'],['G','dur',1,'arp']]},
+ {t:'Stufe 2 · Zwei Oktaven',d:'Auf die E-Saite wechseln und erste Molltonleitern.',items:[['D','dur',2],['G','dur',2],['A','dur',2],['A','harm',1],['D','harm',1],['D','dur',2,'arp'],['G','dur',2,'arp'],['A','dur',2,'arp']]},
+ {t:'Stufe 3 · Mehr Tonarten',d:'C, E und B-Dur sowie A und D Moll in zwei Oktaven.',items:[['C','dur',2],['E','dur',2],['B','dur',2],['A','harm',2],['A','mel',2],['D','harm',2],['D','mel',2],['C','dur',2,'arp'],['E','dur',2,'arp']]},
+ {t:'Stufe 4 · Schwerere Tonarten',d:'Vorzeichen, die Lagenwechsel und saubere Intonation fordern.',items:[['F','dur',2],['Es','dur',2],['As','dur',2],['H','dur',2],['G','harm',2],['G','mel',2],['E','harm',2],['H','harm',2],['F','dur',2,'arp'],['G','moll',2,'arp']]},
+ {t:'Stufe 5 · Chromatik und Septakkorde',d:'Halbtonleitern und Arpeggien über vier Töne.',items:[['G','chrom',1],['D','chrom',1],['A','chrom',2],['C','dom7',2],['D','dom7',2],['G','dom7',2],['D','dim7',2],['G','dim7',2]]},
+ {t:'Stufe 6 · Drei Oktaven',d:'Hohe Lagen. Nur für G, As, A, B und H möglich.',items:[['G','dur',3],['As','dur',3],['A','dur',3],['B','dur',3],['H','dur',3],['G','dur',3,'arp'],['A','dur',3,'arp']]}
+];
+var ALL=[];STUFEN.forEach(function(s,si){s.items.forEach(function(it,ii){ALL.push({k:it[0],t:it[1],o:it[2],m:it[3]||'even',si:si,ii:ii})})});
+
+function nmR(key){return PF.nm(PF.root(key,4))}
+function keyLabel(key,type){
+  if(type==='schw')return 'Schwächen-Training';
+  var b=nmR(key);
+  if(type==='dur')return b+'-Dur';
+  if(type==='moll')return b.toLowerCase()+'-Moll';
+  if(type==='harm')return b.toLowerCase()+'-Moll harmonisch';
+  if(type==='mel')return b.toLowerCase()+'-Moll melodisch';
+  if(type==='chrom')return 'Chromatisch ab '+b;
+  if(type==='dom7')return b+'7 (Dominantsept.)';
+  return b+'°7 (vermindert)';
+}
+function lageName(P){return P+'. Lage'}
+function pid(k,t,o){return k+'|'+t+'|'+o}
+
+/* ═════ Tonfolge ═════ */
+var SH=[[0,0],[0,1],[1,0],[1,1],[2,0],[3,0],[3,1],[4,0],[4,1],[5,0],[5,1],[6,0]];
+var FL=[[0,0],[1,-1],[1,0],[2,-1],[2,0],[3,0],[4,-1],[4,0],[5,-1],[5,0],[6,-1],[6,0]];
+function chromNote(m,up){var p=(up?SH:FL)[((m%12)+12)%12],nat=m-p[1],o=Math.floor(nat/12)-1;return {m:m,l:p[0],a:p[1],s:o*7+p[0]}}
+function startOct(key){return PF.root(key,3).m>=55?3:4}
+function octOK(key,oct){return oct<3||PF.root(key,startOct(key)).m<=59}
+function build(S){
+  if(S.type==='piece')return pieceSeq();
+  if(S.type==='schw')return weakSeq();
+  var key=S.key,type=S.type,oct=S.mode==='nosh'?1:S.oct,o0=startOct(key),i,o,seq;
+  if(!octOK(key,oct))oct=2;
+  var root0=PF.root(key,o0);
+  if(type==='chrom'){
+    var up=[],dn=[];
+    for(i=0;i<=12*oct;i++){up.push(chromNote(root0.m+i,true));dn.push(chromNote(root0.m+i,false))}
+    return up.concat(dn.slice(0,dn.length-1).reverse());
+  }
+  if(type==='dom7'||type==='dim7'){
+    var ch=type==='dom7'?[0,4,7,10]:[0,3,6,9],ls=[0,2,4,6],up2=[];
+    for(o=0;o<oct;o++){var r=PF.root(key,o0+o);up2=up2.concat(PF.spell(r,ls,ch))}
+    up2.push(PF.root(key,o0+oct));
+    return up2.concat(up2.slice(0,up2.length-1).reverse());
+  }
+  var arp=(S.mode==='arps'||S.mode==='arp');
+  function oneOct(k,oo){return PF.scaleNotes(key,k,oo)}
+  var upN=[];for(o=0;o<oct;o++)upN=upN.concat(oneOct(type,o0+o));
+  upN.push(PF.root(key,o0+oct));
+  var dk=type==='mel'?'moll':type,dnN=[];
+  for(o=0;o<oct;o++)dnN=dnN.concat(oneOct(dk,o0+o));
+  dnN.push(PF.root(key,o0+oct));
+  if(arp){
+    var idx=[0,2,4],src=(type==='dur')?upN:dnN,base=[];
+    for(o=0;o<oct;o++)idx.forEach(function(ix){base.push(src[ix+7*o])});
+    base.push(src[src.length-1]);
+    return base.concat(base.slice(0,base.length-1).reverse());
+  }
+  return upN.concat(dnN.slice(0,dnN.length-1).reverse());
+}
+
+/* ═════ Fingersatz ═════ */
+function fo(P,f){var b=PB[P];return f===1?[b-1,b]:f===2?[b+1,b+2]:f===3?[b+3,b+4]:[b+5]}
+function cands(m,allowed,pr){
+  var out=[];
+  for(var s=0;s<4;s++){
+    var o=m-OPEN[s];if(o<0||o>MAXO)continue;
+    allowed.forEach(function(P){
+      if(o===0){out.push({s:s,o:0,P:P,f:0,c:.2+.15*(P-1)});return}
+      for(var f=1;f<=4;f++){
+        var offs=fo(P,f),k=offs.indexOf(o);
+        if(k>=0)out.push({s:s,o:o,P:P,f:f,c:pr.pc*(P-1)+(f===4?pr.f4:0)+(f===1&&k===0?.15:0)+(f===2&&k===1?.1:0)+(f===3&&k===1?.3:0)});
+      }
+    });
+  }
+  return out;
+}
+function trans(a,b,pr){
+  var c=0;
+  if(a.P!==b.P&&a.f!==0&&b.f!==0)c+=pr.sh+.5*Math.abs(a.P-b.P)-(a.s===b.s?.8:0);
+  else if(a.P!==b.P)c+=.1;
+  if(a.s===b.s&&a.P===b.P&&a.f&&b.f&&a.o!==b.o){
+    var dd=Math.abs(b.o-a.o);
+    if(dd===1&&a.f===b.f)c+=1.2;
+    else{
+      if((b.o>a.o&&b.f<=a.f)||(b.o<a.o&&b.f>=a.f))c+=4;
+      if(dd>=3&&Math.abs(b.f-a.f)<2)c+=2;
+    }
+  }
+  return c;
+}
+function finger(notes,allowed,pr){
+  var C=notes.map(function(n){return cands(n.m,allowed,pr)}),i;
+  if(C.some(function(c){return !c.length}))return null;
+  var H=[C[0].map(function(c){return {c:c.c,p:-1}})];
+  for(i=1;i<C.length;i++){
+    H.push(C[i].map(function(c){
+      var bc=1e9,bp=0;
+      C[i-1].forEach(function(a,k){var v=H[i-1][k].c+trans(a,c,pr);if(v<bc){bc=v;bp=k}});
+      return {c:bc+c.c,p:bp};
+    }));
+  }
+  var j=0,bc=1e9;H[H.length-1].forEach(function(h,k){if(h.c<bc){bc=h.c;j=k}});
+  var res=[];
+  for(i=C.length-1;i>=0;i--){res[i]=C[i][j];j=H[i][j].p}
+  return res;
+}
+function fixPos(fg){
+  for(var i=0;i<fg.length;i++){if(fg[i].f===0){var p=null,k;for(k=i-1;k>=0;k--)if(fg[k].f){p=fg[k].P;break}if(p==null)for(k=i+1;k<fg.length;k++)if(fg[k].f){p=fg[k].P;break}fg[i]=Object.assign({},fg[i],{P:p||1})}}
+  return fg;
+}
+
+
+/* ═════ Stücke: Import (Text, MusicXML, MIDI) ═════ */
+var PCW=[0,2,4,5,7,9,11];
+function noteFrom(m,l,a,b,r){var nat=m-a,o=Math.floor(nat/12)-1;return {m:m,l:l,a:a,s:o*7+l,b:b,r:r||0}}
+function parseDur(x){if(x==null||x==='')return 1;if(/^\d+\/\d+$/.test(x)){var p=x.split('/');return +p[0]/+p[1]}var v=parseFloat(x);return isFinite(v)&&v>0?v:1}
+function parseText(txt){
+  var toks=txt.replace(/[|,;]/g,' ').split(/\s+/).filter(Boolean),out=[],rest=0,bad=[];
+  toks.forEach(function(t){
+    var m=/^(?:R|P|Pause)(?::([\d.\/]+))?$/i.exec(t);
+    if(m){rest+=parseDur(m[1]);return}
+    m=/^([A-Ha-h])(is|es|s|#|b|x)?(-?\d)?(?::([\d.\/]+))?$/.exec(t);
+    if(!m){bad.push(t);return}
+    var L=m[1].toUpperCase(),l,a=0;
+    if(L==='B'){l=6;a=-1}else l='CDEFGAH'.indexOf(L);
+    var sf=m[2];
+    if(sf==='is'||sf==='#')a=1;else if(sf==='es'||sf==='s')a=-1;else if(sf==='b'){a=L==='B'?-1:-1}else if(sf==='x')a=2;
+    var oct=m[3]==null?4:+m[3],mid=12*(oct+1)+PCW[l]+a;
+    out.push(noteFrom(mid,l,a,parseDur(m[4]),rest));rest=0;
+  });
+  return {notes:out,bad:bad,ks:0,bpm:80};
+}
+function parseXml(str){
+  var doc=new DOMParser().parseFromString(str,'application/xml');
+  if(doc.querySelector('parsererror'))throw new Error('Die Datei ist kein lesbares MusicXML.');
+  var part=doc.querySelector('part');if(!part)throw new Error('Kein Notenteil (part) gefunden.');
+  var div=1,out=[],rest=0,voice=null,ks=0,bpm=0,tie=false;
+  var snd=doc.querySelector('sound[tempo]');if(snd)bpm=Math.round(+snd.getAttribute('tempo'));
+  var fif=doc.querySelector('key > fifths');if(fif)ks=+fif.textContent||0;
+  var STEP={C:[0,0],D:[1,2],E:[2,4],F:[3,5],G:[4,7],A:[5,9],B:[6,11]};
+  Array.prototype.forEach.call(part.querySelectorAll('measure'),function(me){
+    Array.prototype.forEach.call(me.children,function(el){
+      var tg=el.tagName;
+      if(tg==='attributes'){var d=el.querySelector('divisions');if(d)div=+d.textContent||1}
+      else if(tg==='forward'){var fd=el.querySelector('duration');if(fd)rest+=(+fd.textContent)/div}
+      else if(tg==='note'){
+        if(el.querySelector('chord')||el.querySelector('grace'))return;
+        var v=el.querySelector('voice'),vv=v?v.textContent:'1';
+        if(voice==null)voice=vv;if(vv!==voice)return;
+        var du=el.querySelector('duration'),b=du?(+du.textContent)/div:1;
+        if(el.querySelector('rest')){rest+=b;tie=false;return}
+        var st=el.querySelector('pitch > step'),oc=el.querySelector('pitch > octave'),al=el.querySelector('pitch > alter');
+        if(!st||!oc)return;
+        var sp=STEP[st.textContent.trim()],a=al?Math.round(+al.textContent):0,mid=12*(+oc.textContent+1)+sp[1]+a;
+        var ts=el.querySelector('tie[type="stop"]');
+        if(ts&&out.length&&!rest&&out[out.length-1].m===mid){out[out.length-1].b+=b;return}
+        out.push(noteFrom(mid,sp[0],a,b,rest));rest=0;
+      }
+    });
+  });
+  return {notes:out,bad:[],ks:ks,bpm:bpm||80};
+}
+function parseMidi(buf){
+  var u=new Uint8Array(buf),p=0;
+  function r32(){var v=(u[p]<<24|u[p+1]<<16|u[p+2]<<8|u[p+3])>>>0;p+=4;return v}
+  function r16(){var v=u[p]<<8|u[p+1];p+=2;return v}
+  function vlq(){var v=0,b;do{b=u[p++];v=(v<<7)|(b&127)}while(b&128&&p<u.length);return v}
+  if(String.fromCharCode(u[0],u[1],u[2],u[3])!=='MThd')throw new Error('Keine MIDI-Datei.');
+  p=4;var hl=r32();r16();var nt=r16(),div=r16();p=8+hl;
+  if(div&0x8000)throw new Error('Dieses MIDI-Zeitformat wird nicht unterstützt.');
+  var tempo=500000,ksf=0,best=null;
+  for(var t=0;t<nt&&p<u.length;t++){
+    if(String.fromCharCode(u[p],u[p+1],u[p+2],u[p+3])!=='MTrk')break;
+    p+=4;var len=r32(),end=p+len,tick=0,run=0,on={},notes=[];
+    while(p<end){
+      tick+=vlq();var st=u[p];
+      if(st===0xFF){p++;var ty=u[p++],ln=vlq();
+        if(ty===0x51&&ln===3)tempo=u[p]<<16|u[p+1]<<8|u[p+2];
+        if(ty===0x59&&ln>=1){ksf=u[p]>127?u[p]-256:u[p]}
+        p+=ln;continue}
+      if(st===0xF0||st===0xF7){p++;p+=vlq();continue}
+      if(st&128){run=st;p++}else st=run;
+      var hi=st>>4,ch=st&15;
+      if(hi===9||hi===8){var n=u[p++],ve=u[p++];
+        if(ch===9)continue;
+        if(hi===9&&ve>0){on[n]=tick}
+        else if(on[n]!=null){notes.push({m:n,s:on[n],e:tick});delete on[n]}}
+      else if(hi===0xC||hi===0xD)p++;else p+=2;
+    }
+    p=end;
+    if(notes.length&&(!best||notes.length>best.length))best=notes;
+  }
+  if(!best)throw new Error('Keine Noten in der MIDI-Datei gefunden.');
+  best.sort(function(a,b){return a.s-b.s||b.m-a.m});
+  var mono=[];
+  best.forEach(function(n){
+    var l=mono[mono.length-1];
+    if(l&&n.s-l.s<div/16)return; /* gleichzeitige Töne: höchster bleibt */
+    if(l&&l.e>n.s)l.e=n.s;
+    mono.push({m:n.m,s:n.s,e:n.e});
+  });
+  var q=function(x){return Math.max(.125,Math.round(x/div*8)/8)},out=[],prev=0,flats=ksf<0,tab=flats?FL:SH;
+  mono.forEach(function(n){
+    var gap=(n.s-prev)/div,r=gap>.1?Math.round(gap*8)/8:0,pc=tab[((n.m%12)+12)%12];
+    out.push(noteFrom(n.m,pc[0],pc[1],q(n.e-n.s),r));prev=n.e;
+  });
+  return {notes:out,bad:[],ks:ksf,bpm:Math.round(60000000/tempo)||80};
+}
+var BUILTIN=[
+ {id:'b_entchen',name:'Alle meine Entchen (C)',txt:'C4 D4 E4 F4 G4:2 G4:2 A4 A4 A4 A4 G4:4 A4 A4 A4 A4 G4:4 F4 F4 F4 F4 E4:2 E4:2 D4 D4 D4 D4 C4:4',bpm:72,ks:0},
+ {id:'b_jakob',name:'Bruder Jakob (C)',txt:'C4 D4 E4 C4 C4 D4 E4 C4 E4 F4 G4:2 E4 F4 G4:2 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 C4 G3 C4:2 C4 G3 C4:2',bpm:80,ks:0},
+ {id:'b_haensch',name:'Hänschen klein (C)',txt:'G4 E4 E4:2 F4 D4 D4:2 C4 D4 E4 F4 G4 G4 G4:2 G4 E4 E4:2 F4 D4 D4:2 C4 E4 G4 G4 C4:4',bpm:80,ks:0},
+ {id:'b_ode',name:'Ode an die Freude (D-Dur)',txt:'Fis4 Fis4 G4 A4 A4 G4 Fis4 E4 D4 D4 E4 Fis4 Fis4:1.5 E4:.5 E4:2 Fis4 Fis4 G4 A4 A4 G4 Fis4 E4 D4 D4 E4 Fis4 E4:1.5 D4:.5 D4:2',bpm:84,ks:2}
+];
+function pieceList(){
+  var out=BUILTIN.map(function(b){var r=parseText(b.txt);return {id:b.id,name:b.name,notes:r.notes,ks:b.ks,bpm:b.bpm,own:false}});
+  getLib().forEach(function(l){out.push({id:l.id,name:l.name,notes:l.notes,ks:l.ks||0,bpm:l.bpm||80,own:true})});
+  return out;
+}
+function curPiece(){var l=pieceList(),i;for(i=0;i<l.length;i++)if(l[i].id===D.piece)return l[i];return null}
+function pieceKs(p){
+  var k=p.ks+7*D.tr;
+  while(k>6)k-=12;while(k<-5)k+=12;
+  return Math.abs(k)>7?0:k;
+}
+function pieceSeq(){
+  var p=curPiece();if(!p)return [];
+  var tr=D.tr,flats=pieceKs(p)<0;
+  return p.notes.map(function(n){
+    if(!tr)return Object.assign({},n);
+    var m=n.m+tr,c=chromNote(m,!flats);
+    return Object.assign({},c,{b:n.b,r:n.r});
+  });
+}
+function weakSeq(){
+  var out=[];
+  weakList().forEach(function(w){var n=chromNote(w.m,true);n.b=1;n.r=0;out.push(n);var n2=Object.assign({},n);out.push(n2)});
+  return out;
+}
+
+/* ═════ Zustand ═════ */
+var D={key:'D',type:'dur',oct:2,mode:'even',bpm:69,hear:true,mic:false,wait:false,fing:'A',bow:'sep',tab:'ueben',a4:440,piece:null,tr:0,dv:.25};
+try{var sv=MK.get('tl',null);if(sv&&typeof sv==='object')for(var kk in sv)if(kk in D)D[kk]=sv[kk]}catch(e){}
+if(!MODES.some(function(m){return m.id===D.mode}))D.mode='even';
+if(!FINGS[D.fing])D.fing='A';
+if(D.tab!=='stufen'&&D.tab!=='stimmen'&&D.tab!=='stuecke')D.tab='ueben';
+var DR='off'; /* Bordun-Auswahl, startet nie von selbst */
+D.mic=false;D.wait=false; /* Mikrofon startet nie von selbst */
+var DS=[];
+var seq=[],fg=[],idx=0,run=null,timers=[],msg='',noShiftWarn=false,octWarn=false,t0=0,micMsg='',stat=[],noteT=0,report=null,tuner={on:false,s:null};
+function save(){try{MK.set('tl',D)}catch(e){}}
+function mode(){return MODES.filter(function(m){return m.id===D.mode})[0]}
+function getP(){try{var p=MK.get('tl.p',{});return p&&typeof p==='object'?p:{}}catch(e){return {}}}
+function setP(p){try{MK.set('tl.p',p)}catch(e){}}
+function getW(){try{var w=MK.get('tl.w',{});return w&&typeof w==='object'?w:{}}catch(e){return {}}}
+function setW(w){try{MK.set('tl.w',w)}catch(e){}}
+function updateWeak(meds,notes){
+  var w=getW();
+  meds.forEach(function(m,i){
+    if(m==null)return;var k=String(notes[i].m),e=w[k]||{n:0,m:0};
+    e.m=e.n?e.m*.6+m*.4:m;e.n++;e.d=MK.day();w[k]=e;
+  });
+  setW(w);
+}
+function weakList(){
+  var w=getW(),out=[];
+  Object.keys(w).forEach(function(k){var e=w[k];if(e.n>=2&&Math.abs(e.m)>12)out.push({m:+k,c:e.m,n:e.n})});
+  out.sort(function(a,b){return Math.abs(b.c)-Math.abs(a.c)});
+  return out.slice(0,8);
+}
+function getLib(){try{var l=MK.get('tl.lib',[]);return Array.isArray(l)?l:[]}catch(e){return []}}
+function setLib(l){try{MK.set('tl.lib',l)}catch(e){}}
+/* Bordun: Dauerton aus Web Audio */
+var drone={nodes:[],gain:null,notes:[]};
+function droneStop(){
+  if(drone.gain){var c=PF.ac(),t=c.currentTime,nodes=drone.nodes;
+    try{drone.gain.gain.cancelScheduledValues(t);drone.gain.gain.setTargetAtTime(.0001,t,.08)}catch(e){}
+    setTimeout(function(){nodes.forEach(function(o){try{o.stop()}catch(e){}})},600)}
+  drone={nodes:[],gain:null,notes:[]};
+}
+function droneSet(ms){
+  droneStop();if(!ms.length)return;
+  var c=PF.ac();if(!c)return;
+  var g=c.createGain();g.gain.value=.0001;g.connect(c.destination);
+  var nodes=[],sh=12*Math.log2(D.a4/440);
+  ms.forEach(function(m){
+    var f=PF.fq(m+sh);
+    [[1,'triangle',.5],[2,'sine',.18],[3,'sine',.08]].forEach(function(p){var o=c.createOscillator(),pg=c.createGain();o.type=p[1];o.frequency.value=f*p[0];pg.gain.value=p[2]/ms.length;o.connect(pg);pg.connect(g);o.start();nodes.push(o)});
+  });
+  g.gain.setTargetAtTime(D.dv,c.currentTime,.12);
+  drone={nodes:nodes,gain:g,notes:ms};
+}
+function droneNotes(){
+  if(!seq.length||D.type==='piece'||D.type==='schw'||DR==='off')return [];
+  var t=seq[0].m;
+  return DR==='t'?[t]:DR==='f'?[t+7]:[t,t+7];
+}
+function curId(){if(D.type==='piece')return 'piece|'+D.piece+'|0';if(D.type==='schw')return 'schw|0|0';return pid(D.key,D.type,(D.mode==='nosh'?1:(octWarn?2:D.oct)))}
+
+function rebuild(){
+  stop(true);
+  if(D.type==='piece'&&!curPiece())D.type='dur';
+  if(D.type==='schw'&&!weakList().length)D.type='dur';
+  droneStop();DR='off';
+  octWarn=D.type!=='piece'&&D.type!=='schw'&&D.oct===3&&D.mode!=='nosh'&&!octOK(D.key,3);
+  seq=build(D);
+  var pr=FINGS[D.fing],allowed=(D.mode==='nosh'&&D.type!=='piece'&&D.type!=='schw')?[1]:[1,2,3,4,5,6,7,8];
+  fg=finger(seq,allowed,pr);noShiftWarn=false;
+  if(!fg&&D.mode==='nosh'){noShiftWarn=true;fg=finger(seq,[1,2,3,4,5,6,7,8],pr)}
+  if(!fg)fg=seq.map(function(){return {s:2,o:0,P:1,f:0,c:0}});
+  fg=fixPos(fg);idx=0;report=null;
+  stat=seq.map(function(){return []});
+}
+
+/* ═════ Bogen ═════ */
+function bowN(){return D.bow==='sep'?1:+D.bow}
+function bowDown(i){return Math.floor(i/bowN())%2===0}
+function bowInfo(i){var N=bowN();return {down:bowDown(i),pos:i%N+1,N:N}}
+
+/* ═════ Griffbrett ═════ */
+function yOf(o){var T=34,L=350;return T+L*(1-Math.pow(2,-o/12))/(1-Math.pow(2,-20/12))}
+function board(){
+  var W=300,H=420,xs=[60,115,170,225],cur=fg[idx],P=cur.P,b=PB[P];
+  var sv='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:340px;display:block;margin:0 auto" role="img" aria-label="Griffbrett mit aktuellem Ton">';
+  sv+='<rect x="30" y="26" width="225" height="'+(H-30)+'" rx="10" fill="var(--card)" stroke="var(--line)"/>';
+  sv+='<rect x="38" y="26" width="209" height="8" fill="var(--ink)" opacity=".7"/>';
+  xs.forEach(function(x,i){sv+='<line x1="'+x+'" y1="30" x2="'+x+'" y2="'+(H-6)+'" stroke="var(--muted)" stroke-width="'+(3-i*.5)+'" opacity=".7"/><text x="'+x+'" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="var(--muted)">'+SN[i]+'</text>'});
+  var y1=yOf(b-1.4),y2=yOf(b+5.4);
+  sv+='<rect x="34" y="'+y1+'" width="217" height="'+(y2-y1)+'" rx="8" fill="var(--acc)" opacity=".10" stroke="var(--acc)" stroke-width="2" stroke-dasharray="5 3"/>';
+  sv+='<text x="258" y="'+(y1+14)+'" font-size="12" font-weight="700" fill="var(--acc)">'+P+'.</text><text x="258" y="'+(y1+27)+'" font-size="10" fill="var(--acc)">Lage</text>';
+  var seen={};
+  fg.forEach(function(g){var key=g.s+'_'+g.o;if(seen[key]||g.o===0)return;seen[key]=1;
+    sv+='<circle cx="'+xs[g.s]+'" cy="'+yOf(g.o)+'" r="9" fill="'+FCOL[g.f]+'" opacity=".25"/><text x="'+xs[g.s]+'" y="'+(yOf(g.o)+4)+'" text-anchor="middle" font-size="10" fill="var(--ink)" opacity=".55">'+g.f+'</text>'});
+  if(idx+1<fg.length){var nx=fg[idx+1];
+    if(nx.o===0)sv+='<circle cx="'+xs[nx.s]+'" cy="46" r="8" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 2"/>';
+    else sv+='<circle cx="'+xs[nx.s]+'" cy="'+yOf(nx.o)+'" r="12" fill="none" stroke="'+FCOL[nx.f]+'" stroke-width="2.5" stroke-dasharray="4 3"/>'}
+  var cy=cur.o===0?46:yOf(cur.o);
+  sv+='<circle cx="'+xs[cur.s]+'" cy="'+cy+'" r="'+(cur.o===0?10:15)+'" fill="'+(cur.o===0?'none':FCOL[cur.f])+'" stroke="'+(cur.o===0?'var(--acc)':'var(--ink)')+'" stroke-width="3"/>';
+  sv+='<text x="'+xs[cur.s]+'" y="'+(cy+5)+'" text-anchor="middle" font-size="'+(cur.o===0?'11':'15')+'" font-weight="800" fill="'+(cur.o===0?'var(--acc)':'#fff')+'">'+(cur.o===0?'0':cur.f)+'</text>';
+  return sv+'</svg>';
+}
+
+/* ═════ Notenbild ═════ */
+function ksOf(){
+  if(D.type==='piece'){var pp=curPiece();return pp?pieceKs(pp):0}
+  if(D.type==='schw')return 0;
+  var k=KS[D.key];if(D.type==='moll'||D.type==='harm'||D.type==='mel')k-=3;
+  if(D.type==='chrom'||D.type==='dom7'||D.type==='dim7')k=0;
+  return Math.abs(k)>7?0:k;
+}
+var sbCache=null;
+function staffBox(){
+  if(sbCache&&sbCache.seq===seq)return sbCache;
+  var pmax=0,pmin=0;seq.forEach(function(n){pmax=Math.max(pmax,n.s-30);pmin=Math.min(pmin,n.s-30)});
+  sbCache={seq:seq,top:Math.min(0,90-pmax*7-22),bot:Math.max(130,90-pmin*7+22)};return sbCache;
+}
+function staff(){
+  var W=8,ws=Math.floor(idx/W)*W,part=seq.slice(ws,ws+W),pmax=0,pmin=0;
+  var steps=part.map(function(n,k){
+    var i=ws+k;pmax=Math.max(pmax,n.s-30);pmin=Math.min(pmin,n.s-30);
+    return {n:[n],d:(n.b>=4?4:n.b>=2?2:1),col:i===idx?FCOL[fg[i].f]||'var(--acc)':'var(--ink)',op:i<idx?.4:1};
+  });
+  var h=PF.staff({clef:'g',ks:ksOf(),steps:steps,label:'Noten ab Ton '+(ws+1)});
+  var bx=staffBox(),top=bx.top,bot=bx.bot;
+  if(top<0||bot>130)h=h.replace('viewBox="0 0 340 130"','viewBox="0 '+top+' 340 '+(bot-top)+'"');
+  return h;
+}
+
+/* ═════ Fortschritt ═════ */
+function recordRun(){
+  var p=getP(),id=curId(),e=p[id]||{n:0,b:0,d:null};
+  e.n++;e.d=MK.day();if(D.mode!=='slow'&&D.mode!=='arps')e.b=Math.max(e.b||0,D.bpm);
+  p[id]=e;setP(p);return e;
+}
+function nextItem(){
+  var id=curId(),cur=-1;
+  ALL.forEach(function(a,i){if(pid(a.k,a.t,a.o)===id&&(a.m==='arp')===(D.mode==='arp'||D.mode==='arps'))cur=i});
+  if(cur<0)ALL.forEach(function(a,i){if(cur<0&&pid(a.k,a.t,a.o)===id)cur=i});
+  return cur>=0&&cur+1<ALL.length?ALL[cur+1]:null;
+}
+function loadItem(a){
+  D.key=a.k;D.type=a.t;D.oct=a.o;D.mode=a.m;D.bpm=mode().bpm;D.tab='ueben';save();rebuild();render();window.scrollTo(0,0);
+}
+
+/* ═════ Mikrofon und Intonation ═════ */
+function pcEq(a,b){return ((a%12)+12)%12===((b%12)+12)%12}
+function f2m(f){return 69+12*Math.log2(f/D.a4)}
+function setMeter(c,txt,ok){
+  var m=document.getElementById('mtr');if(!m)return;
+  var mk=m.querySelector('i'),lb=m.querySelector('b');
+  if(c==null){mk.style.opacity=.15;lb.textContent=txt||'–';lb.style.color='var(--muted)';return}
+  c=Math.max(-50,Math.min(50,c));mk.style.opacity=1;mk.style.left=(50+c)+'%';
+  var a=Math.abs(c),col=a<=12?'#2e9c78':a<=25?'#e8a13a':'#d24a4a';
+  mk.style.background=col;lb.style.color=col;lb.textContent=txt;
+}
+function onPitch(f0){
+  if(tuner.on||D.tab==='stimmen')return tunerPitch(f0);
+  if(!document.body.contains(app))return;
+  if(!f0){setMeter(null,'Spiele einen Ton');return}
+  var d=f2m(f0)-seq[idx].m;d-=12*Math.round(d/12);var c=d*100;
+  setMeter(c,Math.abs(c)>100?'Anderer Ton als gezeigt':(c>0?'+':'')+Math.round(c)+' ct · '+(Math.abs(c)<=12?'sauber':c>0?'zu hoch':'zu tief'));
+  if((run||D.wait)&&performance.now()-noteT>220&&Math.abs(c)<=100)stat[idx].push(c);
+}
+function startMic(){
+  if(PF.Mic.on){PF.Mic.start({note:micHit,pitch:onPitch});micMsg='';return}
+  PF.Mic.start({},function(ok,err){
+    if(ok){PF.Mic.start({note:micHit,pitch:onPitch});micMsg=''}
+    else{D.mic=false;D.wait=false;msg=err||'Mikrofon nicht verfügbar. Bitte Zugriff erlauben.';render()}
+  });
+}
+function micHit(p){
+  if(run||!D.wait||D.tab!=='ueben'||!document.body.contains(app))return;
+  if(pcEq(p,seq[idx].m)){
+    if(!t0)t0=performance.now();
+    noteT=performance.now();
+    if(idx+1>=seq.length){finish(true);return}
+    idx++;micMsg='';msg='';updateLive();
+  }else{micMsg='Gehört: '+PF.nm(PF.mkNote(Math.round(p)))+' (gesucht: '+PF.nm(seq[idx])+')';var m=document.getElementById('mmsg');if(m)m.textContent=micMsg}
+}
+
+/* ═════ Abspielen ═════ */
+function clearT(){timers.forEach(clearTimeout);timers=[]}
+function beatsOf(i){
+  if(D.type==='piece')return seq[i].b||1;
+  if(D.type==='schw')return 2;
+  if(D.mode==='slow'||D.mode==='arps')return 2;
+  if(D.mode==='long'){return ((seq[i].m-seq[0].m)%12===0)?2:1}
+  return 1;
+}
+function stop(silent){
+  clearT();
+  if(run){var el=(performance.now()-run.t)/1000;if(el>20&&PF.logSecs)PF.logSecs('Tonleiter-Lab',el)}
+  run=null;msg='';
+  if(!silent)render();
+}
+function median(a){if(!a.length)return null;a=a.slice().sort(function(x,y){return x-y});var m=a.length>>1;return a.length%2?a[m]:(a[m-1]+a[m])/2}
+function finish(wait){
+  var el=((performance.now()-(wait?t0:run.t))/1000);
+  run=null;t0=0;clearT();
+  if(el>10&&PF.logSecs)PF.logSecs('Tonleiter-Lab',el);
+  var e=recordRun(),meds0=null,meds=stat.map(function(x){return x.length>=3?median(x):null}),have=meds.filter(function(x){return x!=null});
+  updateWeak(meds,seq);
+  report={n:e.n,b:e.b,tempo:D.bpm,meds:meds,avg:have.length?have.reduce(function(s,x){return s+Math.abs(x)},0)/have.length:null,wait:!!wait};
+  idx=0;msg='';render();
+  window.scrollTo({top:document.getElementById('rep')?document.getElementById('rep').offsetTop-10:0,behavior:'smooth'});
+}
+function start(){
+  if(run){stop();return}
+  idx=0;msg='';report=null;stat=seq.map(function(){return []});
+  var spb=60/D.bpm;
+  run={t:performance.now()};
+  render();
+  var t=0,i;
+  for(i=0;i<4;i++){(function(k){timers.push(setTimeout(function(){PF.click(k===0);setMsg('Vorzähler: '+(k+1))},t*1000))})(i);t+=spb}
+  for(i=0;i<seq.length;i++){
+    (function(k){
+      var b=beatsOf(k),dur=b*spb;
+      if(seq[k].r)t+=seq[k].r*spb;
+      timers.push(setTimeout(function(){
+        idx=k;noteT=performance.now();
+        if(D.hear){PF.tone(seq[k].m,Math.max(.4,dur*.95),0,.28);if(PF.Mic.on)PF.Mic.ign=performance.now()+dur*1000}
+        PF.click(false);
+        for(var j=1;j<Math.floor(b);j++)(function(jj){timers.push(setTimeout(function(){PF.click(false)},jj*spb*1000))})(j);
+        msg='';updateLive();
+      },t*1000));
+      t+=dur;
+    })(i);
+  }
+  timers.push(setTimeout(function(){finish(false)},t*1000+150));
+}
+function setMsg(s){msg=s;var m=document.getElementById('msg');if(m)m.textContent=s}
+
+/* ═════ Stimmgerät ═════ */
+function tunerPitch(f0){
+  var box=document.getElementById('tun');if(!box)return;
+  var nm=box.querySelector('#tn'),ct=box.querySelector('#tc'),hint=box.querySelector('#th'),mk=box.querySelector('#tm i');
+  if(!f0){nm.textContent='–';ct.textContent='Spiele eine leere Saite';hint.textContent='';mk.style.opacity=.15;return}
+  var m=f2m(f0),bs=0,bd=1e9;
+  OPEN.forEach(function(o,i){var d=Math.abs(m-o);if(d<bd){bd=d;bs=i}});
+  var c=(m-OPEN[bs])*100;
+  if(Math.abs(c)>150){nm.textContent='?';ct.textContent='Zu weit weg von einer Saite';hint.textContent='';mk.style.opacity=.15;return}
+  var a=Math.abs(c),col=a<=5?'#2e9c78':a<=15?'#e8a13a':'#d24a4a';
+  nm.textContent=SN[bs]+'-Saite';nm.style.color=col;
+  ct.textContent=(c>0?'+':'')+Math.round(c)+' Cent';
+  hint.textContent=a<=5?'Gestimmt ✓':c<0?'Zu tief: Saite vorsichtig anspannen':'Zu hoch: Saite etwas lockern';
+  mk.style.opacity=1;mk.style.left=(50+Math.max(-50,Math.min(50,c)))+'%';mk.style.background=col;
+}
+
+/* ═════ Anzeige ═════ */
+function shiftInfo(){
+  if(idx+1>=fg.length)return '';
+  var a=fg[idx],b=fg[idx+1];
+  if(a.P!==b.P&&a.f&&b.f)return b.P>a.P?'Gleich: Lagenwechsel nach oben zur '+lageName(b.P)+'.':'Gleich: Lagenwechsel nach unten zur '+lageName(b.P)+'.';
+  return '';
+}
+function chipsHtml(){
+  var N=bowN();
+  return seq.map(function(nn,i){
+    var g=fg[i],c=i===idx?' on':'',p=i<idx?' past':'',gs=N>1&&i%N===0?' gs':'',ge=N>1&&(i%N===N-1||i===seq.length-1)?' ge':'',sl=N>1?' sl':'';
+    var bw=(i%N===0)?'<em>'+(bowDown(i)?'⊓':'V')+'</em>':'<em>&nbsp;</em>';
+    return '<button class="chip'+c+p+gs+ge+sl+'" data-i="'+i+'" type="button" aria-label="Ton '+(i+1)+': '+esc(PF.nm(nn))+', Finger '+g.f+'"><b>'+esc(PF.nm(nn))+'</b><small style="color:'+FCOL[g.f]+'">'+(g.f===0?'leer':g.f)+'</small>'+bw+'</button>';
+  }).join('');
+}
+function reportHtml(){
+  if(!report)return '';
+  var nx=nextItem();
+  var chips=seq.map(function(n,i){
+    var m=report.meds[i],txt=m==null?'–':(m>0?'+':'')+Math.round(m),col=m==null?'var(--muted)':Math.abs(m)<=12?'#2e9c78':Math.abs(m)<=25?'#e8a13a':'#d24a4a';
+    return '<span class="rc"><b>'+esc(PF.nm(n))+'</b><small style="color:'+col+'">'+txt+'</small></span>';
+  }).join('');
+  var have=report.meds.some(function(x){return x!=null});
+  var worst=report.meds.map(function(m,i){return {i:i,a:m==null?-1:Math.abs(m)}}).filter(function(x){return x.a>=0}).sort(function(a,b){return b.a-a.a}).slice(0,3).filter(function(x){return x.a>12});
+  var wtxt=worst.length?'Am meisten daneben: '+worst.map(function(x){var m=Math.round(report.meds[x.i]);return 'Ton '+(x.i+1)+' ('+PF.nm(seq[x.i])+', '+(m>0?'+':'')+m+' ct)'}).join(', ')+'.':'Alle gemessenen Töne lagen nah an der Tonhöhe.';
+  return '<section class="card" id="rep"><h2 style="margin:0">🎉 Geschafft</h2>'+
+   '<p style="margin:0">Durchlauf Nr. '+report.n+' für diese Tonleiter'+(report.b?', bestes Tempo bisher ♩ = '+report.b:'')+'.</p>'+
+   (have?'<p class="small" style="margin:0"><b>Intonation:</b> im Schnitt '+Math.round(report.avg)+' Cent daneben. '+esc(wtxt)+'</p><div class="rcs">'+chips+'</div><p class="small muted" style="margin:0">Zahlen in Cent: plus ist zu hoch, minus zu tief. Bis etwa ±12 Cent klingt es sauber. Die Messung ist eine Schätzung und ersetzt kein Gehör.</p>':'<p class="small muted" style="margin:0">Mit eingeschaltetem Mikrofon bekommst du hier zusätzlich eine Auswertung deiner Intonation.</p>')+
+   '<div class="row"><button class="btn primary" id="again" type="button">Nochmal ♩ = '+Math.min(160,D.bpm+3)+'</button>'+
+   (nx?'<button class="btn" id="nexti" type="button">Weiter: '+esc(keyLabel(nx.k,nx.t))+(nx.m==='arp'?' Arpeggio':'')+' →</button>':'')+
+   '<button class="btn" id="stfb" type="button">Zur Stufenübersicht</button></div></section>';
+}
+function tabsHtml(){
+  return '<nav class="tabs" role="tablist">'+[['ueben','🎻 Üben'],['stufen','🪜 Stufen'],['stuecke','🎼 Stücke'],['stimmen','🎚 Stimmen']].map(function(t){return '<button type="button" role="tab" data-tab="'+t[0]+'" aria-selected="'+(D.tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</nav>';
+}
+function optHtml(){
+  return '<details><summary class="small">Mehr Optionen: Fingersatz und Bogen</summary>'+
+    '<div class="row" style="gap:10px;margin-top:8px"><label class="small">Fingersatz<br><select class="btn" id="fing">'+Object.keys(FINGS).map(function(k){return '<option value="'+k+'"'+(D.fing===k?' selected':'')+'>'+FINGS[k].n+'</option>'}).join('')+'</select></label>'+
+    '<label class="small">Bogenstrich<br><select class="btn" id="bow">'+BOWS.map(function(b){return '<option value="'+b[0]+'"'+(D.bow===b[0]?' selected':'')+'>'+b[1]+'</option>'}).join('')+'</select></label></div>'+
+    '<p class="small muted" style="margin:6px 0 0">'+esc(FINGS[D.fing].d)+' Der Fingersatz ist berechnet. Dein Lehrer oder deine Noten haben Vorrang.</p>'+
+   '</details>';
+}
+function specialCard(){
+  if(D.type==='schw'){
+    var wl=weakList();
+    return '<section class="card"><b>1 · Schwächen-Training</b><p class="small muted" style="margin:0">Deine Töne mit der größten Abweichung. Jeder Ton kommt zweimal hintereinander. Spiele ihn und achte auf die Anzeige.</p><div class="rcs">'+wl.map(function(w){return '<span class="rc"><b>'+esc(PF.nm(chromNote(w.m,true)))+'</b><small>'+(w.c>0?'+':'')+Math.round(w.c)+'</small></span>'}).join('')+'</div><button class="btn" id="chg" type="button">Zurück zu den Tonleitern</button></section>';
+  }
+  var p=curPiece(),mn=1e9,mx=-1;
+  seq.forEach(function(n){mn=Math.min(mn,n.m);mx=Math.max(mx,n.m)});
+  var opts='';for(var t=-12;t<=12;t++)opts+='<option value="'+t+'"'+(D.tr===t?' selected':'')+'>'+(t>0?'+':t<0?'−':'')+Math.abs(t)+(Math.abs(t)===1?' Halbton':' Halbtöne')+'</option>';
+  return '<section class="card"><b>1 · Stück: '+esc(p.name)+'</b><div class="row" style="gap:10px"><label class="small">Transponieren<br><select class="btn" id="tr">'+opts+'</select></label><button class="btn" id="chg" type="button">Anderes Stück wählen</button></div>'+
+   '<p class="small muted" style="margin:0">'+seq.length+' Töne, Tempo-Vorschlag ♩ = '+p.bpm+'.'+(mn<55||mx>103?' <b>Ein Teil liegt außerhalb des Geigenumfangs.</b> Transponiere das Stück.':'')+' Pausen und Tonlängen werden übernommen.</p></section>';
+}
+function tabStuecke(){
+  var list=pieceList();
+  var h='<section class="card"><b>Stücke üben</b><p class="small muted" style="margin:0">Wähle ein Stück oder lade eigene. Du bekommst Noten, Fingersatz, Bogen, Tempo mit Vorzähler und die Intonations-Messung.</p></section>';
+  h+='<section class="card"><b>Deine Stücke</b>'+list.map(function(p){
+    return '<div class="prow"><div style="min-width:0"><b>'+esc(p.name)+'</b><div class="small muted">'+p.notes.length+' Töne'+(p.own?' · eigenes Stück':' · Beispiel')+(getP()['piece|'+p.id+'|0']?' · '+getP()['piece|'+p.id+'|0'].n+' Durchläufe':'')+'</div></div><span class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn primary" data-pu="'+esc(p.id)+'" type="button">Üben</button>'+(p.own?'<button class="btn" data-pd="'+esc(p.id)+'" type="button" aria-label="Stück löschen">🗑</button>':'')+'</span></div>';
+  }).join('')+'</section>';
+  h+='<section class="card"><b>Eigenes Stück hinzufügen</b>'+
+   '<p class="small muted" style="margin:0">Aus dem Noten-Koje oder einem anderen Notenprogramm: als <b>MusicXML</b> (.musicxml oder .xml) oder <b>MIDI</b> (.mid) exportieren und hier laden. Es wird nur die erste Stimme gelesen. Komprimierte .mxl-Dateien bitte als unkomprimiertes MusicXML exportieren.</p>'+
+   '<label class="small">Datei laden<br><input type="file" id="pf" accept=".musicxml,.xml,.mid,.midi,.txt" class="btn"></label>'+
+   '<label class="small">oder Töne eintippen<br><textarea id="ptxt" rows="4" style="width:100%;font:inherit;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px" placeholder="D4 E4 Fis4 G4:2 R:1 A4 …"></textarea></label>'+
+   '<p class="small muted" style="margin:0">Schreibweise: Tonname mit Oktave (C4 ist das eingestrichene C), nach dem Doppelpunkt die Länge in Schlägen (:2 ist eine halbe Note, :.5 eine Achtel), R für Pause. Deutsche Namen: H, B, Fis, Es, As.</p>'+
+   '<label class="small">Name<br><input type="text" id="pname" class="btn" style="width:100%" placeholder="Mein Stück"></label>'+
+   '<div class="row"><button class="btn primary" id="padd" type="button">Hinzufügen</button></div><div class="small" id="pmsg" aria-live="polite"></div></section>';
+  return h;
+}
+function nowHtml(){
+  var c=fg[idx],n=seq[idx],total=seq.length,sh=shiftInfo(),bi=bowInfo(idx);
+  var bowTxt=bi.N>1?(bi.down?'Abstrich ⊓':'Aufstrich V')+' · Ton '+bi.pos+' von '+bi.N+' in diesem Bogen':(bi.down?'Abstrich ⊓':'Aufstrich V');
+  return '<div class="tl-now"><div class="tl-f" style="background:'+(c.f?FCOL[c.f]:'transparent')+';border:3px solid '+(c.f?'transparent':'var(--acc)')+';color:'+(c.f?'#fff':'var(--acc)')+'">'+(c.f||'0')+'</div>'+
+    '<div style="min-width:0"><div class="tl-n">'+esc(PF.nm(n))+'</div><div class="small muted">'+(c.f?c.f+'. Finger':'leere Saite')+' · '+SN[c.s]+'-Saite · '+lageName(c.P)+' · Ton '+(idx+1)+' von '+total+'</div>'+
+    '<div class="small">'+bowTxt+'</div><div class="small" style="min-height:1.35em;color:var(--acc);font-weight:600">'+(sh?'⇅ '+esc(sh):'')+'</div></div></div>';
+}
+function liveHtml(){
+  return nowHtml()+'<div class="small" id="msg" style="text-align:center;min-height:1.4em">'+esc(msg)+'</div>'+staff()+board();
+}
+function dockInfo(){
+  var c=fg[idx],n=seq[idx];
+  return '<span class="dk-f" style="background:'+(c.f?FCOL[c.f]:'transparent')+';border:2px solid '+(c.f?'transparent':'var(--acc)')+';color:'+(c.f?'#fff':'var(--acc)')+'">'+(c.f||'0')+'</span><b class="dk-n">'+esc(PF.nm(n))+'</b>';
+}
+function dockHtml(){
+  return '<div class="dock" id="dock" role="toolbar" aria-label="Steuerung"><a class="btn" href="index.html" aria-label="Zur Startseite" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">🏠</a><span id="dockinfo" class="dk-i">'+dockInfo()+'</span>'+
+    (D.wait?'':'<button class="btn primary" id="go" type="button">'+(run?'■ Stopp':'▶ Start')+'</button>')+
+    '<button class="btn" id="ref" type="button" aria-label="Ton hören">🔊</button>'+
+    '<button class="btn" id="prv" type="button" aria-label="Vorheriger Ton">←</button><button class="btn" id="nxt" type="button" aria-label="Nächster Ton">→</button></div>';
+}
+/* Nur den bewegten Teil aktualisieren, damit nichts springt und Knöpfe nicht neu entstehen */
+function updateLive(){
+  if(D.tab!=='ueben')return;
+  var l=document.getElementById('live');if(!l){render();return}
+  l.innerHTML=liveHtml();
+  var di=document.getElementById('dockinfo');if(di)di.innerHTML=dockInfo();
+  document.querySelectorAll('.chip').forEach(function(c){var i=+c.dataset.i;c.classList.toggle('on',i===idx);c.classList.toggle('past',i<idx)});
+}
+function tabUeben(){
+  var c=fg[idx],n=seq[idx],m=mode(),total=seq.length,sh=shiftInfo(),bi=bowInfo(idx),pr=getP()[curId()];
+  var typeSel=TYPES.map(function(t){return '<option value="'+t[0]+'"'+(D.type===t[0]?' selected':'')+'>'+t[1]+'</option>'}).join('');
+  var keySel=KEYS.map(function(k){return '<option value="'+k+'"'+(D.key===k?' selected':'')+'>'+esc(nmR(k))+'</option>'}).join('');
+  var bowTxt=bi.N>1?(bi.down?'Abstrich ⊓':'Aufstrich V')+' · Ton '+bi.pos+' von '+bi.N+' in diesem Bogen':(bi.down?'Abstrich ⊓':'Aufstrich V');
+  var droneHtml='<div><b class="small">Bordun</b> <span class="small muted">Dauerton zum Mitspielen</span></div><div class="seg s4" role="group" aria-label="Bordun">'+[['off','Aus'],['t','Grundton'],['f','Quinte'],['b','Beide']].map(function(x){return '<button type="button" data-dr="'+x[0]+'" aria-pressed="'+(DR===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+    (DR!=='off'?'<label class="small" style="display:block">Lautstärke <input type="range" id="dvol" min="0.05" max="0.5" step="0.01" value="'+D.dv+'" style="width:60%;vertical-align:middle"></label><p class="small muted" style="margin:0">Spiele die Tonleiter über dem Dauerton und höre, ob jeder Ton dazu passt. Reine Töne klingen ruhig, unreine schweben. Bei Intonations-Messung mit Mikrofon besser Kopfhörer nutzen.</p>':'');
+  var wl=weakList(),weakCard=wl.length>=3?'<section class="card"><b>🎯 Schwächen-Training</b><p class="small muted" style="margin:0">Diese Töne waren bei dir zuletzt am unsaubersten: '+wl.slice(0,5).map(function(w){return '<b>'+esc(PF.nm(chromNote(w.m,true)))+'</b> ('+(w.c>0?'+':'')+Math.round(w.c)+' ct)'}).join(', ')+'.</p><button class="btn primary" id="weak" type="button">Diese Töne üben</button></section>':'';
+  var scaleHtml='<section class="card"><b>1 · Was möchtest du üben?</b><div class="row" style="gap:10px">'+
+    '<label class="small">Tonart<br><select class="btn" id="key">'+keySel+'</select></label>'+
+    '<label class="small">Art<br><select class="btn" id="type">'+typeSel+'</select></label>'+
+    '<label class="small">Oktaven<br><select class="btn" id="oct"><option value="1"'+(D.oct===1?' selected':'')+'>1</option><option value="2"'+(D.oct===2?' selected':'')+'>2</option><option value="3"'+(D.oct===3?' selected':'')+'>3</option></select></label>'+
+   '</div>'+
+   '<div class="row" role="group" aria-label="Übungsart">'+MODES.map(function(x){return '<button class="btn" data-m="'+x.id+'" aria-pressed="'+(D.mode===x.id)+'" type="button">'+x.t+'</button>'}).join('')+'</div>'+
+   '<p class="small muted" style="margin:0">'+esc(m.d)+(noShiftWarn?' Diese Tonleiter geht nicht ganz ohne Lagenwechsel, deshalb wurde einer eingebaut.':'')+(octWarn?' Drei Oktaven gehen nur für G, As, A, B und H. Es wurden zwei Oktaven eingestellt.':'')+'</p>'+
+   droneHtml+optHtml()+'</section>';
+  var pickCard=(D.type==='piece'||D.type==='schw')?specialCard()+'<section class="card">'+optHtml()+'</section>':weakCard+scaleHtml;
+  return pickCard+
+'<section class="card"><b>2 · Spielen</b>'+
+    '<div class="seg" role="group" aria-label="Ablauf"><button type="button" id="wm0" aria-pressed="'+(!D.wait)+'">Mit Tempo</button><button type="button" id="wm1" aria-pressed="'+D.wait+'">Warte auf mich (Mikrofon)</button></div>'+
+    '<div id="live" aria-live="off">'+liveHtml()+'</div>'+
+    '<div class="row" style="justify-content:center">'+
+      '<span class="small">Tempo</span><button class="btn" id="bm" type="button" aria-label="Langsamer">−</button><b id="bpm" style="min-width:3.2em;text-align:center">♩ = '+D.bpm+'</b><button class="btn" id="bp" type="button" aria-label="Schneller">+</button>'+
+      '<button class="btn" id="hr" type="button" aria-pressed="'+D.hear+'">🔊 Begleit-Ton '+(D.hear?'an':'aus')+'</button>'+
+      '<button class="btn" id="mc" type="button" aria-pressed="'+D.mic+'">🎤 Intonation messen '+(D.mic?'an':'aus')+'</button>'+
+    '</div>'+
+    (D.mic?'<div class="mtr" id="mtr" aria-live="off"><div class="trk"><span></span><i></i></div><b>Spiele einen Ton</b></div><p class="small muted" id="mmsg" style="margin:0;text-align:center">'+esc(micMsg||(D.wait?'Spiele den gezeigten Ton. Die App geht weiter, sobald sie ihn hört. Die Oktave ist egal.':'Die Anzeige zeigt, wie sauber der gespielte Ton zum gezeigten Ton passt.'))+'</p>':'')+
+    '<p class="small muted" style="margin:0;text-align:center">'+(pr?'Bisher '+pr.n+' Durchläufe'+(pr.b?', bestes Tempo ♩ = '+pr.b:'')+(pr.n>=3?' ✓':''):'Noch nicht geübt. Nach drei Durchläufen bekommt die Tonleiter einen Haken.')+'</p>'+
+   '</section>'+
+   reportHtml()+
+   '<section class="card"><b>Alle Töne</b><div class="tl-chips">'+chipsHtml()+'</div><p class="small muted" style="margin:0">Tippe einen Ton an, um dorthin zu springen. Zahl = Finger. ⊓ ist Abstrich, V ist Aufstrich. Gebundene Töne teilen sich einen Bogen.</p></section>'+
+   dockHtml()+
+   '<details class="card"><summary><b>So geht es</b></summary><ol class="small" style="margin:8px 0 0 18px"><li>Wähle Tonart und Art, zum Beispiel D-Dur Tonleiter.</li><li>Drücke Start. Vier Klicks zählen vor, dann kommt jeder Ton mit dem Finger auf dem Griffbrett.</li><li>Spiele mit. Stimme vorher kurz im Reiter „Stimmen“.</li><li>Mit dem Mikrofon siehst du live, ob du zu hoch oder zu tief bist, und bekommst am Ende eine Auswertung.</li><li>Steigere das Tempo erst, wenn alles ruhig und sauber läuft.</li></ol></details>';
+}
+function tabStufen(){
+  var p=getP(),tot=ALL.length,ok=0;
+  ALL.forEach(function(a){var e=p[pid(a.k,a.t,a.o)];if(e&&e.n>=3)ok++});
+  var h='<section class="card"><b>Deine Stufen</b><p class="small muted" style="margin:0">Eigene Reihenfolge von leicht nach schwer, ungefähr wie in Prüfungsstufen, aber nicht die offizielle Liste. Gleiche sie mit deinem Lehrplan ab. Ein Haken heißt: mindestens drei Durchläufe.</p>'+
+   '<div class="pbar" role="progressbar" aria-valuenow="'+ok+'" aria-valuemin="0" aria-valuemax="'+tot+'"><span style="width:'+Math.round(ok/tot*100)+'%"></span></div><div class="small">'+ok+' von '+tot+' Übungen mit Haken</div></section>';
+  STUFEN.forEach(function(s,si){
+    var d=0;s.items.forEach(function(it){var e=p[pid(it[0],it[1],it[2])];if(e&&e.n>=3)d++});
+    h+='<section class="card"><b>'+esc(s.t)+'</b> <span class="small muted">'+d+' von '+s.items.length+'</span><p class="small muted" style="margin:0">'+esc(s.d)+'</p><div class="sgrid">'+
+     s.items.map(function(it,ii){
+      var e=p[pid(it[0],it[1],it[2])],arp=it[3]==='arp';
+      return '<button class="sit'+(e&&e.n>=3?' ok':'')+'" type="button" data-si="'+si+'" data-ii="'+ii+'"><b>'+esc(keyLabel(it[0],it[1]))+(arp?' Arpeggio':'')+'</b><small>'+it[2]+' Okt'+(e?' · '+e.n+'×'+(e.b?' · ♩'+e.b:''):'')+'</small>'+(e&&e.n>=3?'<span class="ck">✓</span>':'')+'</button>';
+     }).join('')+'</div></section>';
+  });
+  return h;
+}
+function tabStimmen(){
+  return '<section class="card" id="tun"><b>Geige stimmen</b><p class="small muted" style="margin:0">Tippe eine Saite, um den Referenzton zu hören. Mit dem Mikrofon erkennt die App, welche leere Saite du spielst, und zeigt, ob sie stimmt.</p>'+
+   '<div class="row" style="justify-content:center">'+SN.map(function(s,i){return '<button class="btn" data-ts="'+i+'" type="button" style="min-width:64px;min-height:56px;font-size:1.3rem;font-weight:800">'+s+'</button>'}).join('')+'</div>'+
+   '<div class="row" style="justify-content:center"><label class="small">Kammerton a’ <select class="btn" id="a4">'+[415,438,440,441,442,443].map(function(a){return '<option value="'+a+'"'+(D.a4===a?' selected':'')+'>'+a+' Hz</option>'}).join('')+'</select></label>'+
+   '<button class="btn primary" id="tmic" type="button">'+(PF.Mic.on&&tuner.on?'🎤 Mikrofon aus':'🎤 Mikrofon an')+'</button></div>'+
+   '<div style="text-align:center"><div class="tl-n" id="tn" style="font-size:2.4rem">–</div><div id="tc" class="small muted">'+(tuner.on?'Spiele eine leere Saite':'Mikrofon ist aus')+'</div></div>'+
+   '<div class="mtr big" id="tm"><div class="trk"><span></span><i style="opacity:.15"></i></div></div>'+
+   '<div id="th" style="text-align:center;font-weight:700;min-height:1.4em"></div>'+
+   '<div><b class="small">Bordun</b> <span class="small muted">Dauerton auf einer leeren Saite. Tippe mehrere für Zweiklang.</span></div><div class="row" style="justify-content:center">'+SN.map(function(s,i){return '<button class="btn" data-td="'+i+'" aria-pressed="'+(DS.indexOf(i)>=0)+'" type="button" style="min-width:56px">'+s+'</button>'}).join('')+'<button class="btn" id="tdoff" type="button">Aus</button></div>'+
+   '<label class="small" style="display:block;text-align:center">Lautstärke <input type="range" id="dvol" min="0.05" max="0.5" step="0.01" value="'+D.dv+'" style="width:50%;vertical-align:middle"></label>'+
+   '<p class="small muted" style="margin:0">Stimme zuerst die A-Saite, dann die anderen in Quinten (D, G, E). Feinstimmer für kleine, Wirbel nur für größere Korrekturen. Drehe den Wirbel ganz vorsichtig.</p></section>';
+}
+function render(){
+  var body=D.tab==='stufen'?tabStufen():D.tab==='stimmen'?tabStimmen():D.tab==='stuecke'?tabStuecke():tabUeben();
+  var y=window.scrollY;app.style.minHeight=app.offsetHeight+'px';
+  app.innerHTML='<h1 style="margin:0">🎻 Tonleiter-Lab</h1>'+
+   '<p class="muted" style="margin:0">Tonleitern, Arpeggien und Stücke mit Fingersatz, Lagenwechsel, Bogen, Noten und Tempo. Mit Bordun. Das Mikrofon misst deine Intonation.</p>'+
+   tabsHtml()+body;
+  app.style.paddingBottom=D.tab==='ueben'?'88px':'';
+  bind();
+  window.scrollTo(0,y);app.style.minHeight='';
+}
+function st(){
+  if(document.getElementById('tl-css'))return;
+  var s=document.createElement('style');s.id='tl-css';
+  s.textContent='.tl-now{display:flex;gap:14px;align-items:center}.tl-f{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:2rem;font-weight:800;flex:0 0 auto}.tl-n{font-size:2.2rem;font-weight:800;line-height:1.1}'+
+  '.tl-chips{display:flex;flex-wrap:wrap;gap:6px}.chip{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:4px 8px;min-width:44px;min-height:56px;display:grid;justify-items:center;cursor:pointer}.chip small{font-weight:700}.chip em{font-style:normal;font-size:.7rem;color:var(--muted);height:1em}.chip.on{border:2px solid var(--acc);box-shadow:0 2px 8px rgba(0,0,0,.15)}.chip.past{opacity:.55}'+
+  '.chip.sl{border-bottom:3px solid var(--acc);border-radius:12px 12px 4px 4px}.chip.gs{margin-left:8px}'+
+  'label.small{display:inline-block}#app{overflow-anchor:none}#mkhome{display:none!important}.dock{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;gap:8px;align-items:center;justify-content:center;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 14px rgba(0,0,0,.14)}.dock .btn{min-height:48px;min-width:48px;padding-left:12px;padding-right:12px}.dk-i{display:flex;align-items:center;gap:6px;min-width:60px}.dk-f{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1.1rem;flex:0 0 auto}.dk-n{font-size:1.25rem}details>summary{cursor:pointer}'+
+  '.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;position:sticky;top:0;z-index:4;background:var(--bg);padding:6px 0}.tabs button{font:inherit;font-weight:700;font-size:.82rem;padding:12px 2px;min-height:48px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}.tabs button[aria-selected=true]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card))}'+
+  '.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px}.seg.s4{grid-template-columns:repeat(4,1fr)}.prow{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}.prow:first-of-type{border-top:0}.seg button{font:inherit;font-weight:600;padding:10px 6px;min-height:46px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}.seg button[aria-pressed=true]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,var(--card))}'+
+  '.mtr{display:grid;gap:4px;justify-items:center}.mtr .trk{position:relative;width:100%;max-width:340px;height:14px;border-radius:8px;background:linear-gradient(90deg,#d24a4a33,#e8a13a33 30%,#2e9c7855 46%,#2e9c7855 54%,#e8a13a33 70%,#d24a4a33)}.mtr .trk span{position:absolute;left:50%;top:-3px;width:2px;height:20px;background:var(--ink);opacity:.5}.mtr .trk i{position:absolute;top:-4px;width:8px;height:22px;border-radius:4px;background:var(--muted);transform:translateX(-50%);left:50%;opacity:.15;transition:left .08s}.mtr b{font-size:.95rem}.mtr.big .trk{height:20px}.mtr.big .trk i{height:30px;top:-5px;width:10px}'+
+  '.rcs{display:flex;flex-wrap:wrap;gap:6px}.rc{display:grid;justify-items:center;min-width:44px;border:1px solid var(--line);border-radius:10px;padding:3px 6px;background:var(--card)}.rc small{font-weight:700}'+
+  '.pbar{height:10px;border-radius:6px;background:var(--line);overflow:hidden}.pbar span{display:block;height:100%;background:var(--acc)}'+
+  '.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.sit{font:inherit;position:relative;text-align:left;display:grid;gap:2px;padding:10px 12px;min-height:58px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}.sit small{color:var(--muted)}.sit.ok{border-color:#2e9c78}.sit .ck{position:absolute;right:10px;top:8px;color:#2e9c78;font-weight:800}.sit:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.12)}';
+  document.head.appendChild(s);
+}
+
+/* ═════ Ereignisse ═════ */
+function bind(){
+  var q=function(s){return app.querySelector(s)},qa=function(s){return app.querySelectorAll(s)};
+  qa('[data-tab]').forEach(function(b){b.onclick=function(){
+    if(run)stop(true);D.tab=b.dataset.tab;save();
+    if(D.tab==='stimmen'){tuner.on=false;if(PF.Mic.on){PF.Mic.start({note:function(){},pitch:onPitch});tuner.on=true}}
+    else{tuner.on=false;if(PF.Mic.on){if(D.mic&&D.tab==='ueben')PF.Mic.start({note:micHit,pitch:onPitch});else PF.Mic.stop()}}
+    render();window.scrollTo(0,0);
+  }});
+  if(D.tab==='stuecke'){
+    qa('[data-pu]').forEach(function(b){b.onclick=function(){
+      var id=b.dataset.pu,l=pieceList().filter(function(x){return x.id===id})[0];if(!l)return;
+      var mn=1e9,mx=-1;l.notes.forEach(function(n){mn=Math.min(mn,n.m);mx=Math.max(mx,n.m)});
+      var tr=0;while(mn+tr<55&&tr<24)tr+=12;while(mx+tr>103&&tr>-24)tr-=12;
+      D.type='piece';D.piece=id;D.tr=tr;D.mode='even';D.bpm=l.bpm;D.tab='ueben';save();rebuild();render();window.scrollTo(0,0);
+    }});
+    qa('[data-pd]').forEach(function(b){b.onclick=function(){if(!confirm('Dieses Stück löschen?'))return;setLib(getLib().filter(function(x){return x.id!==b.dataset.pd}));render()}});
+    var pm=function(t,ok){var m=document.getElementById('pmsg');if(m){m.textContent=t;m.style.color=ok?'#2e9c78':'#d24a4a'}};
+    var addPiece=function(r,name){
+      if(!r.notes.length){pm('Es wurden keine Noten gefunden.');return}
+      if(r.notes.length>400){r.notes=r.notes.slice(0,400)}
+      var l=getLib();l.push({id:'u'+Date.now(),name:name||'Mein Stück',notes:r.notes.map(function(n){return {m:n.m,l:n.l,a:n.a,s:n.s,b:n.b,r:n.r}}),ks:r.ks||0,bpm:r.bpm||80});
+      setLib(l);render();var m=document.getElementById('pmsg');if(m){m.textContent='Hinzugefügt: '+(name||'Mein Stück')+' mit '+r.notes.length+' Tönen.'+(r.bad&&r.bad.length?' Nicht gelesen: '+r.bad.slice(0,5).join(' ')+'.':'');m.style.color='#2e9c78'}
+    };
+    q('#padd').onclick=function(){
+      var tx=q('#ptxt').value.trim(),nm=q('#pname').value.trim();
+      if(!tx){pm('Bitte Töne eintippen oder eine Datei laden.');return}
+      addPiece(parseText(tx),nm);
+    };
+    q('#pf').onchange=function(){
+      var f=this.files&&this.files[0];if(!f)return;
+      var nm=(q('#pname').value.trim())||f.name.replace(/\.[^.]+$/,''),low=f.name.toLowerCase(),rd=new FileReader();
+      if(/\.mxl$/.test(low)){pm('Komprimierte .mxl-Dateien werden noch nicht gelesen. Bitte als unkomprimiertes MusicXML (.musicxml oder .xml) oder als MIDI exportieren.');return}
+      rd.onerror=function(){pm('Die Datei konnte nicht gelesen werden.')};
+      if(/\.midi?$/.test(low)){rd.onload=function(){try{addPiece(parseMidi(rd.result),nm)}catch(e){pm(e.message||'MIDI nicht lesbar.')}};rd.readAsArrayBuffer(f)}
+      else{rd.onload=function(){var t=String(rd.result);try{addPiece(/^\s*</.test(t)?parseXml(t):parseText(t),nm)}catch(e){pm(e.message||'Datei nicht lesbar.')}};rd.readAsText(f)}
+    };
+    return;
+  }
+  if(D.tab==='stufen'){
+    qa('.sit').forEach(function(b){b.onclick=function(){loadItem(STUFEN[+b.dataset.si].items.map(function(it){return {k:it[0],t:it[1],o:it[2],m:it[3]||'even'}})[+b.dataset.ii])}});
+    return;
+  }
+  if(D.tab==='stimmen'){
+    qa('[data-ts]').forEach(function(b){b.onclick=function(){var i=+b.dataset.ts;PF.tone(OPEN[i]+12*Math.log2(D.a4/440),3,0,.3);if(PF.Mic.on)PF.Mic.ign=performance.now()+3200}});
+    q('#a4').onchange=function(){D.a4=+this.value;save();if(DS.length)droneSet(DS.map(function(i){return OPEN[i]}))};
+    qa('[data-td]').forEach(function(b){b.onclick=function(){var i=+b.dataset.td,k=DS.indexOf(i);if(k>=0)DS.splice(k,1);else DS.push(i);droneSet(DS.map(function(x){return OPEN[x]}));render()}});
+    q('#tdoff').onclick=function(){DS=[];droneStop();render()};
+    q('#dvol').oninput=function(){D.dv=+this.value;save();if(drone.gain)drone.gain.gain.setTargetAtTime(D.dv,PF.ac().currentTime,.05)};
+    q('#tmic').onclick=function(){
+      if(PF.Mic.on&&tuner.on){PF.Mic.stop();tuner.on=false;render();return}
+      if(PF.Mic.on){tuner.on=true;PF.Mic.start({note:function(){},pitch:onPitch});render();return}
+      PF.Mic.start({},function(ok,err){if(ok){tuner.on=true;PF.Mic.start({note:function(){},pitch:onPitch});render()}else{var c=document.getElementById('tc');if(c)c.textContent=err||'Mikrofon nicht verfügbar.'}});
+    };
+    return;
+  }
+  var tr=q('#tr');if(tr)tr.onchange=function(){D.tr=+this.value;save();rebuild();render()};
+  var chg=q('#chg');if(chg)chg.onclick=function(){var wasPiece=D.type==='piece';D.type='dur';D.piece=null;D.tr=0;D.mode='even';D.bpm=69;if(wasPiece)D.tab='stuecke';save();rebuild();render();window.scrollTo(0,0)};
+  var wk=q('#weak');if(wk)wk.onclick=function(){D.type='schw';D.mode='even';D.bpm=60;save();rebuild();render();window.scrollTo(0,0)};
+  qa('[data-dr]').forEach(function(b){b.onclick=function(){DR=b.dataset.dr;droneSet(droneNotes());render()}});
+  var dv=q('#dvol');if(dv)dv.oninput=function(){D.dv=+this.value;save();if(drone.gain)drone.gain.gain.setTargetAtTime(D.dv,PF.ac().currentTime,.05)};
+  var ke=q('#key');if(ke)ke.onchange=function(){D.key=this.value;save();rebuild();render()};
+  var ty=q('#type');if(ty)ty.onchange=function(){D.type=this.value;save();rebuild();render()};
+  var oc=q('#oct');if(oc)oc.onchange=function(){D.oct=+this.value;save();rebuild();render()};
+  q('#fing').onchange=function(){D.fing=this.value;save();rebuild();render()};
+  q('#bow').onchange=function(){D.bow=this.value;save();render()};
+  qa('[data-m]').forEach(function(b){b.onclick=function(){D.mode=b.dataset.m;D.bpm=mode().bpm;save();rebuild();render()}});
+  var go=q('#go');if(go)go.onclick=start;
+  q('#ref').onclick=function(){PF.tone(seq[idx].m,1.4);if(PF.Mic.on)PF.Mic.ign=performance.now()+1800};
+  q('#prv').onclick=function(){if(run)stop(true);idx=Math.max(0,idx-1);render()};
+  q('#nxt').onclick=function(){if(run)stop(true);idx=Math.min(seq.length-1,idx+1);render()};
+  q('#bm').onclick=function(){D.bpm=Math.max(30,D.bpm-3);save();q('#bpm').textContent='♩ = '+D.bpm};
+  q('#bp').onclick=function(){D.bpm=Math.min(160,D.bpm+3);save();q('#bpm').textContent='♩ = '+D.bpm};
+  q('#hr').onclick=function(){D.hear=!D.hear;save();render()};
+  q('#wm0').onclick=function(){D.wait=false;render()};
+  q('#wm1').onclick=function(){
+    if(run)stop(true);D.wait=true;report=null;
+    if(!D.mic){D.mic=true;startMic()}
+    render();
+  };
+  q('#mc').onclick=function(){
+    D.mic=!D.mic;if(!D.mic)D.wait=false;
+    if(run&&!D.mic){}
+    if(D.mic)startMic();else if(PF.Mic.on)PF.Mic.stop();
+    render();
+  };
+  qa('.chip').forEach(function(c){c.onclick=function(){if(run)stop(true);idx=+c.dataset.i;if(D.hear&&!D.wait)PF.tone(seq[idx].m,.9);render()}});
+  var ag=q('#again');if(ag)ag.onclick=function(){D.bpm=Math.min(160,D.bpm+3);save();report=null;render();window.scrollTo(0,0)};
+  var nx=q('#nexti');if(nx)nx.onclick=function(){var n=nextItem();if(n)loadItem(n)};
+  var sb=q('#stfb');if(sb)sb.onclick=function(){D.tab='stufen';save();render();window.scrollTo(0,0)};
+}
+window.__tl={parseText:parseText,parseXml:parseXml,parseMidi:parseMidi,pieceList:pieceList,weakList:weakList,updateWeak:updateWeak,droneSet:droneSet,drone:function(){return drone},D:D,build:build,finger:finger,state:function(){return {seq:seq,fg:fg,idx:idx,report:report}},rebuild:rebuild,render:render,FINGS:FINGS,ALL:ALL,finish:finish,stat:function(){return stat},onPitch:onPitch,micHit:micHit};
+st();rebuild();render();
+window.addEventListener('pagehide',function(){droneStop();stop(true);try{if(PF.Mic.on)PF.Mic.stop()}catch(e){}});
+})();
+</script>
+</body>
+</html>
